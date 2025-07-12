@@ -1,40 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeScreen extends StatelessWidget {
+import '../providers/auth_provider.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_decorations.dart';
+import '../theme/app_text_styles.dart';
+import '../widgets/common_widgets.dart';
+
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Get current user from auth provider
+    final currentUser = ref.watch(currentUserProvider);
+    final isAuthLoading = ref.watch(isAuthLoadingProvider);
+
     return Scaffold(
-      // App bar with gradient
+      // App bar with gradient using centralized decoration
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Awakeia',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.appBarTitle,
         ),
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFB794F6), // Light purple
-                Color(0xFF805AD5), // Medium purple
-              ],
-            ),
-          ),
+          decoration: AppDecorations.headerGradient,
         ),
         elevation: 0,
         actions: [
-          // Settings/Profile button
+          // Profile button
           IconButton(
             icon: const Icon(
               Icons.person_outline,
-              color: Colors.white,
+              color: AppColors.primaryIcon,
             ),
             onPressed: () {
               // TODO: Navigate to profile screen
@@ -49,252 +48,114 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
 
-      // Main content
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF805AD5), // Medium purple
-              Color(0xFF553C9A), // Dark purple
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome message
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
+      // Main content with loading overlay
+      body: LoadingOverlay(
+        isLoading: isAuthLoading,
+        loadingText: 'Loading...',
+        child: GradientBackground(
+          colors: AppColors.primaryGradient,
+          child: SafeArea(
+            child: Padding(
+              padding: AppSpacing.screenPadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome message using custom widget
+                  WelcomeMessage(
+                    title: currentUser?.isGuest == true
+                        ? 'Welcome, Guest 👋'
+                        : 'Welcome, ${currentUser?.name ?? 'User'}! 👋',
+                    subtitle: 'Ready to track your habits?',
+                  ),
+
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Section title using centralized text style
+                  Text(
+                    'Today\'s Habits',
+                    style: AppTextStyles.headline5,
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  // Habits section - using EmptyState widget
+                  Expanded(
+                    child: PrimaryCard(
+                      child: EmptyState(
+                        icon: Icons.self_improvement,
+                        title: 'No Habits Yet',
+                        subtitle: 'Create your first habit to get started!',
+                        buttonText: 'Create Habit',
+                        onButtonPressed: () {
+                          // TODO: Navigate to add habit screen
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Creating habits will be added in future versions'),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  // Quick stats row using StatsCard widgets
+                  Row(
                     children: [
-                      Text(
-                        'Welcome! 👋',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      // Streak counter
+                      Expanded(
+                        child: StatsCard(
+                          icon: Icons.local_fire_department,
+                          value: '0',
+                          label: 'days streak',
+                          iconColor: AppColors.warning,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Ready to track your habits?',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 16,
+
+                      const SizedBox(width: AppSpacing.md),
+
+                      // Completed today
+                      Expanded(
+                        child: StatsCard(
+                          icon: Icons.check_circle,
+                          value: '0/0',
+                          label: 'completed today',
+                          iconColor: AppColors.success,
                         ),
                       ),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Today's habits section
-                Text(
-                  'Today\'s Habits',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Habits list placeholder
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.self_improvement,
-                          size: 64,
-                          color: Colors.white.withValues(alpha: 0.6),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'You have no habits for today',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Create your first habit to start tracking your progress!',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Navigate to add habit screen
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Creation of habits will be added in future versions'),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.add),
-                          label: const Text('Create Habit'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF553C9A),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Quick stats row
-                Row(
-                  children: [
-                    // Streak counter
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.local_fire_department,
-                              color: Colors.orange,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '0',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'days streak',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Completed today
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.check_circle,
-                              color: Colors.green,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '0/0',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'done today',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
 
-      // Floating action button for adding habits
+      // Floating action button with theme styling
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // TODO: Navigate to add habit screen
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content:
-                  Text('Creation of habits will be added in future versions'),
+              content: Text('Creating habits will be added in future versions'),
             ),
           );
         },
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF553C9A),
         child: const Icon(Icons.add),
       ),
 
-      // Bottom navigation bar placeholder
+      // Bottom navigation bar with theme styling
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFF553C9A),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white.withValues(alpha: 0.6),
+        backgroundColor: AppColors.darkPurple,
+        selectedItemColor: AppColors.primaryText,
+        unselectedItemColor: AppColors.secondaryIcon,
         currentIndex: 0,
+        selectedLabelStyle: AppTextStyles.tabBar,
+        unselectedLabelStyle: AppTextStyles.tabBar,
         onTap: (index) {
           // TODO: Implement bottom navigation
           final List<String> pages = [
@@ -306,8 +167,8 @@ class HomeScreen extends StatelessWidget {
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  '${pages[index]} screen will be added in future versions'),
+              content:
+                  Text('${pages[index]} page will be added in future versions'),
             ),
           );
         },

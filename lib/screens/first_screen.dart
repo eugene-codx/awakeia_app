@@ -1,76 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../theme/app_colors.dart';
+import '../theme/app_decorations.dart';
+import '../theme/app_text_styles.dart';
+
 class FirstScreen extends StatelessWidget {
   const FirstScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Creating gradient background similar to the design
+      // Using centralized gradient background
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFB794F6), // Light purple
-              Color(0xFF805AD5), // Medium purple
-              Color(0xFF553C9A), // Dark purple
-            ],
-          ),
-        ),
+        decoration: AppDecorations.primaryGradient,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: AppSpacing.screenPadding,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Spacer to push content to center
                 const Spacer(),
 
-                // App logo/icon placeholder
+                // App logo/icon placeholder using centralized styles
                 Container(
                   width: 120,
                   height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
+                  decoration: AppDecorations.logoContainer,
                   child: const Icon(
                     Icons.self_improvement,
                     size: 64,
-                    color: Colors.white,
+                    color: AppColors.primaryIcon,
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: AppSpacing.xl),
 
-                // App title
-                const Text(
+                // App title using centralized text style
+                Text(
                   'Awakeia',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.headline1,
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
 
-                // App subtitle
+                // App subtitle using centralized text style
                 Text(
                   'Your personal habit tracker',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 16,
-                  ),
+                  style: AppTextStyles.subtitle,
                   textAlign: TextAlign.center,
                 ),
 
                 const Spacer(),
 
-                // Login button
+                // Login button - now uses theme automatically
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -78,19 +62,16 @@ class FirstScreen extends StatelessWidget {
                       // Navigate to login screen using go_router
                       context.go('/login');
                     },
-                    child: const Text(
-                      'Enter',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: Text(
+                      'Login',
+                      style: AppTextStyles.buttonLarge,
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
-                // Register button
+                // Register button - now uses theme automatically
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -98,25 +79,16 @@ class FirstScreen extends StatelessWidget {
                       // Navigate to register screen using go_router
                       context.go('/register');
                     },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white),
-                      minimumSize: const Size(double.infinity, 56),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text(
-                      'Registration',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                    child: Text(
+                      'Register',
+                      style: AppTextStyles.buttonLarge.copyWith(
+                        color: AppColors.secondaryButtonText,
                       ),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
 
                 // Continue as guest button
                 TextButton(
@@ -125,11 +97,22 @@ class FirstScreen extends StatelessWidget {
                     context.go('/home');
                   },
                   child: Text(
-                    'Continue as guest',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 14,
-                    ),
+                    'Continue as Guest',
+                    style: AppTextStyles.linkSecondary,
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.lg),
+
+                // Continue as guest button
+                TextButton(
+                  onPressed: () {
+                    // Navigate directly to demo screen
+                    context.go('/demo');
+                  },
+                  child: Text(
+                    'Demo Widgets',
+                    style: AppTextStyles.linkSecondary,
                   ),
                 ),
               ],
