@@ -1,4 +1,3 @@
-import 'package:awakeia/utils/localization_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_decorations.dart';
 import '../theme/app_text_styles.dart';
+import '../utils/localization_helper.dart';
 import '../widgets/common_widgets.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {

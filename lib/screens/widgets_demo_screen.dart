@@ -98,7 +98,7 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                   style: AppTextStyles.headline5,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Row(
+                const Row(
                   children: [
                     Expanded(
                       child: StatsCard(
@@ -108,7 +108,7 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                         iconColor: AppColors.warning,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
+                    SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: StatsCard(
                         icon: Icons.check_circle,
@@ -117,7 +117,7 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                         iconColor: AppColors.success,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
+                    SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: StatsCard(
                         icon: Icons.analytics,
@@ -153,8 +153,10 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                   prefixIcon: Icons.lock_outline,
                   obscureText: true,
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.visibility_off,
-                        color: AppColors.secondaryIcon),
+                    icon: const Icon(
+                      Icons.visibility_off,
+                      color: AppColors.secondaryIcon,
+                    ),
                     onPressed: () {},
                   ),
                 ),
@@ -176,7 +178,8 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Google button pressed')),
+                              content: Text('Google button pressed'),
+                            ),
                           );
                         },
                       ),
@@ -189,7 +192,8 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Facebook button pressed')),
+                              content: Text('Facebook button pressed'),
+                            ),
                           );
                         },
                       ),
@@ -225,7 +229,8 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                     onButtonPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text('Button EmptyState pressed')),
+                          content: Text('Button EmptyState pressed'),
+                        ),
                       );
                     },
                   ),

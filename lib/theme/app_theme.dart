@@ -24,12 +24,10 @@ class AppTheme {
         primary: AppColors.mediumPurple,
         secondary: AppColors.lightPurple,
         surface: AppColors.darkPurple,
-        background: AppColors.scaffoldBackground,
         error: AppColors.error,
         onPrimary: AppColors.primaryText,
         onSecondary: AppColors.primaryText,
         onSurface: AppColors.primaryText,
-        onBackground: AppColors.primaryText,
         onError: AppColors.primaryText,
       ),
 
@@ -187,9 +185,9 @@ class AppTheme {
       ),
 
       // Bottom sheet theme
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.darkPurple,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(AppDecorations.radiusXLarge),
             topRight: Radius.circular(AppDecorations.radiusXLarge),

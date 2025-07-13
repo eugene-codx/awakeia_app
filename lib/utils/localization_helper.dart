@@ -20,7 +20,8 @@ class LocalizationHelper {
   static AppLocalizations get current {
     if (_context == null) {
       throw Exception(
-          'LocalizationHelper not initialized. Call LocalizationHelper.init(context) first.');
+        'LocalizationHelper not initialized. Call LocalizationHelper.init(context) first.',
+      );
     }
     return AppLocalizations.of(_context!)!;
   }

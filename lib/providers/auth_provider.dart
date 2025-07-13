@@ -16,7 +16,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
 
     // Simulate checking stored authentication
     // In real app, this would check SharedPreferences, Secure Storage, etc.
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
 
     // For now, assume user is not authenticated
     state = AuthStatus.unauthenticated();
@@ -28,7 +28,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
 
     try {
       // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       // Simple validation for demo purposes
       if (email.isEmpty || password.isEmpty) {
@@ -44,7 +44,8 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
 
       if (password.length < 6) {
         state = AuthStatus.unauthenticated(
-            'Password must be at least 6 characters long');
+          'Password must be at least 6 characters long',
+        );
         return;
       }
 
@@ -68,7 +69,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
 
     try {
       // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       // Simple validation for demo purposes
       if (email.isEmpty || password.isEmpty) {
@@ -84,7 +85,8 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
 
       if (password.length < 6) {
         state = AuthStatus.unauthenticated(
-            'Password must be at least 6 characters long');
+          'Password must be at least 6 characters long',
+        );
         return;
       }
 
@@ -99,7 +101,8 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
       state = AuthStatus.authenticated(user);
     } catch (e) {
       state = AuthStatus.unauthenticated(
-          'An error occurred during registration: $e');
+        'An error occurred during registration: $e',
+      );
     }
   }
 
@@ -114,7 +117,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.loading();
 
     // Simulate logout process
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
 
     state = AuthStatus.unauthenticated();
   }

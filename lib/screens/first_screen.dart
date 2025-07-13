@@ -16,7 +16,7 @@ class FirstScreen extends StatelessWidget {
 
     return Scaffold(
       // Using centralized gradient background
-      body: Container(
+      body: DecoratedBox(
         decoration: AppDecorations.primaryGradient,
         child: SafeArea(
           child: Padding(

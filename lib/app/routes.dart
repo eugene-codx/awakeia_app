@@ -1,4 +1,3 @@
-import 'package:awakeia/screens/widgets_demo_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +6,7 @@ import '../screens/first_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
+import '../screens/widgets_demo_screen.dart';
 
 // Provider for router configuration
 // This file defines the routes for the application using GoRouter.

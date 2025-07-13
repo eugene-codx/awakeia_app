@@ -1,12 +1,6 @@
 // Model class for User
 // This class represents a user in the Awakeia app
 class User {
-  final String id;
-  final String email;
-  final String? name;
-  final DateTime createdAt;
-  final bool isGuest;
-
   const User({
     required this.id,
     required this.email,
@@ -36,6 +30,11 @@ class User {
       isGuest: json['isGuest'] as bool? ?? false,
     );
   }
+  final String id;
+  final String email;
+  final String? name;
+  final DateTime createdAt;
+  final bool isGuest;
 
   // Convert user to JSON
   Map<String, dynamic> toJson() {
@@ -104,10 +103,6 @@ enum AuthState {
 
 // Authentication status class
 class AuthStatus {
-  final AuthState state;
-  final User? user;
-  final String? error;
-
   const AuthStatus({
     required this.state,
     this.user,
@@ -136,6 +131,9 @@ class AuthStatus {
       error: error,
     );
   }
+  final AuthState state;
+  final User? user;
+  final String? error;
 
   // Convenience getters
   bool get isInitial => state == AuthState.initial;

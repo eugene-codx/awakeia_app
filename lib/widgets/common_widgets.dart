@@ -7,14 +7,13 @@ import '../theme/app_text_styles.dart';
 
 // Custom back button widget for reuse across screens
 class CustomBackButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final String? tooltip;
-
   const CustomBackButton({
     super.key,
     this.onPressed,
     this.tooltip = 'Back',
   });
+  final VoidCallback? onPressed;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -44,18 +43,17 @@ class CustomBackButton extends StatelessWidget {
 // Gradient background widget
 // Use this for screens with gradient background
 class GradientBackground extends StatelessWidget {
-  final Widget child;
-  final List<Color>? colors;
-
   const GradientBackground({
     super.key,
     required this.child,
     this.colors,
   });
+  final Widget child;
+  final List<Color>? colors;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -70,16 +68,15 @@ class GradientBackground extends StatelessWidget {
 
 // Primary card widget with consistent styling
 class PrimaryCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets? padding;
-  final VoidCallback? onTap;
-
   const PrimaryCard({
     super.key,
     required this.child,
     this.padding,
     this.onTap,
   });
+  final Widget child;
+  final EdgeInsets? padding;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -97,11 +94,6 @@ class PrimaryCard extends StatelessWidget {
 
 // Stats card widget for displaying numbers and labels
 class StatsCard extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color iconColor;
-
   const StatsCard({
     super.key,
     required this.icon,
@@ -109,6 +101,10 @@ class StatsCard extends StatelessWidget {
     required this.label,
     this.iconColor = AppColors.accentIcon,
   });
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -139,14 +135,13 @@ class StatsCard extends StatelessWidget {
 
 // Welcome message widget
 class WelcomeMessage extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
   const WelcomeMessage({
     super.key,
     required this.title,
     required this.subtitle,
   });
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -174,15 +169,6 @@ class WelcomeMessage extends StatelessWidget {
 
 // Custom input field with consistent styling
 class CustomTextField extends StatelessWidget {
-  final String hintText;
-  final IconData? prefixIcon;
-  final Widget? suffixIcon;
-  final bool obscureText;
-  final TextEditingController? controller;
-  final TextInputType? keyboardType;
-  final String? Function(String?)? validator;
-  final ValueChanged<String>? onChanged;
-
   const CustomTextField({
     super.key,
     required this.hintText,
@@ -194,6 +180,14 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.onChanged,
   });
+  final String hintText;
+  final IconData? prefixIcon;
+  final Widget? suffixIcon;
+  final bool obscureText;
+  final TextEditingController? controller;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -220,16 +214,15 @@ class CustomTextField extends StatelessWidget {
 
 // Social login button widget
 class SocialLoginButton extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final VoidCallback onPressed;
-
   const SocialLoginButton({
     super.key,
     required this.icon,
     required this.text,
     required this.onPressed,
   });
+  final IconData icon;
+  final String text;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -255,16 +248,15 @@ class SocialLoginButton extends StatelessWidget {
 
 // Loading overlay widget
 class LoadingOverlay extends StatelessWidget {
-  final bool isLoading;
-  final Widget child;
-  final String? loadingText;
-
   const LoadingOverlay({
     super.key,
     required this.isLoading,
     required this.child,
     this.loadingText,
   });
+  final bool isLoading;
+  final Widget child;
+  final String? loadingText;
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +264,7 @@ class LoadingOverlay extends StatelessWidget {
       children: [
         child,
         if (isLoading)
-          Container(
+          ColoredBox(
             color: AppColors.overlay,
             child: Center(
               child: Column(
@@ -301,14 +293,13 @@ class LoadingOverlay extends StatelessWidget {
 
 // Error message widget
 class ErrorMessage extends StatelessWidget {
-  final String message;
-  final VoidCallback? onRetry;
-
   const ErrorMessage({
     super.key,
     required this.message,
     this.onRetry,
   });
+  final String message;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -344,12 +335,6 @@ class ErrorMessage extends StatelessWidget {
 
 // Empty state widget
 class EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final String? buttonText;
-  final VoidCallback? onButtonPressed;
-
   const EmptyState({
     super.key,
     required this.icon,
@@ -358,6 +343,11 @@ class EmptyState extends StatelessWidget {
     this.buttonText,
     this.onButtonPressed,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String? buttonText;
+  final VoidCallback? onButtonPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -396,12 +386,11 @@ class EmptyState extends StatelessWidget {
 
 // Section divider with title
 class SectionDivider extends StatelessWidget {
-  final String title;
-
   const SectionDivider({
     super.key,
     required this.title,
   });
+  final String title;
 
   @override
   Widget build(BuildContext context) {
