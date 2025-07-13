@@ -101,229 +101,246 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authStatus = ref.watch(authProvider);
     final isLoading = authStatus.isLoading;
 
-    return Scaffold(
-      // Using GradientBackground widget
-      body: GradientBackground(
-        child: LoadingOverlay(
-          isLoading: isLoading,
-          loadingText: 'Creating account...',
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: AppSpacing.screenPadding,
-              child: Column(
-                children: [
-                  const SizedBox(height: AppSpacing.xxl),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) context.go('/first');
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Register',
+            style: AppTextStyles.appBarTitle,
+          ),
+          centerTitle: true,
+          flexibleSpace: Container(
+            decoration: AppDecorations.headerGradient,
+          ),
+          elevation: 0,
+          leading: const CustomBackButton(),
+        ),
+        // Using GradientBackground widget
+        body: GradientBackground(
+          child: LoadingOverlay(
+            isLoading: isLoading,
+            loadingText: 'Creating account...',
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: AppSpacing.screenPadding,
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.xxl),
 
-                  // Title using centralized text styles
-                  Text(
-                    'Create Account',
-                    style: AppTextStyles.headline2,
-                  ),
+                    // Title using centralized text styles
+                    Text(
+                      'Create Account',
+                      style: AppTextStyles.headline2,
+                    ),
 
-                  const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm),
 
-                  // Subtitle
-                  Text(
-                    'Start your journey to a better version of yourself!',
-                    style: AppTextStyles.subtitle,
-                    textAlign: TextAlign.center,
-                  ),
+                    // Subtitle
+                    Text(
+                      'Start your journey to a better version of yourself!',
+                      style: AppTextStyles.subtitle,
+                      textAlign: TextAlign.center,
+                    ),
 
-                  const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.xxl),
 
-                  // Registration form
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        // Email field using CustomTextField widget
-                        CustomTextField(
-                          controller: _emailController,
-                          hintText: 'Email address',
-                          prefixIcon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: _validateEmail,
-                        ),
-
-                        const SizedBox(height: AppSpacing.md),
-
-                        // Password field using CustomTextField widget
-                        CustomTextField(
-                          controller: _passwordController,
-                          hintText: 'Password',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: _isPasswordHidden,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordHidden
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: AppColors.secondaryIcon,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordHidden = !_isPasswordHidden;
-                              });
-                            },
+                    // Registration form
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          // Email field using CustomTextField widget
+                          CustomTextField(
+                            controller: _emailController,
+                            hintText: 'Email address',
+                            prefixIcon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: _validateEmail,
                           ),
-                          validator: _validatePassword,
-                        ),
 
-                        const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.md),
 
-                        // Confirm password field using CustomTextField widget
-                        CustomTextField(
-                          controller: _confirmPasswordController,
-                          hintText: 'Confirm password',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: _isConfirmPasswordHidden,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isConfirmPasswordHidden
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: AppColors.secondaryIcon,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isConfirmPasswordHidden =
-                                    !_isConfirmPasswordHidden;
-                              });
-                            },
-                          ),
-                          validator: _validateConfirmPassword,
-                        ),
-
-                        const SizedBox(height: AppSpacing.lg),
-
-                        // Terms and conditions info
-                        PrimaryCard(
-                          padding: AppSpacing.paddingMD,
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                color: AppColors.info,
-                                size: 20,
+                          // Password field using CustomTextField widget
+                          CustomTextField(
+                            controller: _passwordController,
+                            hintText: 'Password',
+                            prefixIcon: Icons.lock_outline,
+                            obscureText: _isPasswordHidden,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.secondaryIcon,
                               ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                child: Text(
-                                  'By registering, you agree to the terms of use and privacy policy',
-                                  style: AppTextStyles.caption,
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordHidden = !_isPasswordHidden;
+                                });
+                              },
+                            ),
+                            validator: _validatePassword,
+                          ),
+
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Confirm password field using CustomTextField widget
+                          CustomTextField(
+                            controller: _confirmPasswordController,
+                            hintText: 'Confirm password',
+                            prefixIcon: Icons.lock_outline,
+                            obscureText: _isConfirmPasswordHidden,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isConfirmPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.secondaryIcon,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isConfirmPasswordHidden =
+                                      !_isConfirmPasswordHidden;
+                                });
+                              },
+                            ),
+                            validator: _validateConfirmPassword,
+                          ),
+
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // Terms and conditions info
+                          PrimaryCard(
+                            padding: AppSpacing.paddingMD,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: AppColors.info,
+                                  size: 20,
                                 ),
+                                const SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: Text(
+                                    'By registering, you agree to the terms of use and privacy policy',
+                                    style: AppTextStyles.caption,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // Register button - uses theme automatically
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: isLoading ? null : _handleRegister,
+                              child: Text(
+                                'Register',
+                                style: AppTextStyles.buttonLarge,
                               ),
-                            ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Section divider using custom widget
+                    const SectionDivider(title: 'Or register with'),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Social registration buttons using SocialLoginButton widget
+                    Row(
+                      children: [
+                        // Google registration
+                        Expanded(
+                          child: SocialLoginButton(
+                            icon: Icons.g_mobiledata,
+                            text: 'Google',
+                            onPressed: () {
+                              // TODO: Implement Google registration
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Google registration will be added later'),
+                                ),
+                              );
+                            },
                           ),
                         ),
 
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(width: AppSpacing.md),
 
-                        // Register button - uses theme automatically
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : _handleRegister,
-                            child: Text(
-                              'Register',
-                              style: AppTextStyles.buttonLarge,
-                            ),
+                        // Facebook registration
+                        Expanded(
+                          child: SocialLoginButton(
+                            icon: Icons.facebook,
+                            text: 'Facebook',
+                            onPressed: () {
+                              // TODO: Implement Facebook registration
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Facebook registration will be added later'),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ],
                     ),
-                  ),
 
-                  const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.md),
 
-                  // Section divider using custom widget
-                  const SectionDivider(
-                      title: 'Or register with'),
+                    // Additional social options (example of extending functionality)
+                    SocialLoginButton(
+                      icon: Icons.apple,
+                      text: 'Continue with Apple',
+                      onPressed: () {
+                        // TODO: Implement Apple registration
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Apple registration will be added later'),
+                          ),
+                        );
+                      },
+                    ),
 
-                  const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.xl),
 
-                  // Social registration buttons using SocialLoginButton widget
-                  Row(
-                    children: [
-                      // Google registration
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.g_mobiledata,
-                          text: 'Google',
+                    // Login prompt
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Already have an account? ',
+                          style: AppTextStyles.linkSecondary,
+                        ),
+                        TextButton(
                           onPressed: () {
-                            // TODO: Implement Google registration
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Google registration will be added later'),
-                              ),
-                            );
+                            context.go('/login');
                           },
+                          child: Text(
+                            'Login',
+                            style: AppTextStyles.link,
+                          ),
                         ),
-                      ),
+                      ],
+                    ),
 
-                      const SizedBox(width: AppSpacing.md),
-
-                      // Facebook registration
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.facebook,
-                          text: 'Facebook',
-                          onPressed: () {
-                            // TODO: Implement Facebook registration
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Facebook registration will be added later'),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  // Additional social options (example of extending functionality)
-                  SocialLoginButton(
-                    icon: Icons.apple,
-                    text: 'Continue with Apple',
-                    onPressed: () {
-                      // TODO: Implement Apple registration
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Apple registration will be added later'),
-                        ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Login prompt
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Already have an account? ',
-                        style: AppTextStyles.linkSecondary,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          context.go('/login');
-                        },
-                        child: Text(
-                          'Login',
-                          style: AppTextStyles.link,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-                ],
+                    const SizedBox(height: AppSpacing.lg),
+                  ],
+                ),
               ),
             ),
           ),

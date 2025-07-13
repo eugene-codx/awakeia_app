@@ -1,8 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_decorations.dart';
 import '../theme/app_text_styles.dart';
+
+// Custom back button widget for reuse across screens
+class CustomBackButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final String? tooltip;
+
+  const CustomBackButton({
+    super.key,
+    this.onPressed,
+    this.tooltip = 'Back',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
+          border: Border.all(
+            color: AppColors.primaryBorder,
+            width: 1,
+          ),
+        ),
+        child: const Icon(
+          Icons.arrow_back_ios,
+          color: AppColors.primaryIcon,
+          size: 16,
+        ),
+      ),
+      onPressed: onPressed ?? () => context.go('/first'),
+      tooltip: tooltip,
+    );
+  }
+}
 
 // Gradient background widget
 // Use this for screens with gradient background
@@ -296,7 +333,7 @@ class ErrorMessage extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             ElevatedButton(
               onPressed: onRetry,
-              child: const Text('Retry'),
+              child: const Text('Try Again'),
             ),
           ],
         ],

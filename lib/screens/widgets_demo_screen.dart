@@ -43,6 +43,7 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
         flexibleSpace: Container(
           decoration: AppDecorations.headerGradient,
         ),
+        leading: const CustomBackButton(),
       ),
       body: LoadingOverlay(
         isLoading: _isLoading,

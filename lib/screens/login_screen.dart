@@ -65,198 +65,216 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authStatus = ref.watch(authProvider);
     final isLoading = authStatus.isLoading;
 
-    return Scaffold(
-      // Using GradientBackground widget
-      body: GradientBackground(
-        child: LoadingOverlay(
-          isLoading: isLoading,
-          loadingText: 'Entering your account...',
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: AppSpacing.screenPadding,
-              child: Column(
-                children: [
-                  const SizedBox(height: AppSpacing.xxl),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) context.go('/first');
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Login',
+            style: AppTextStyles.appBarTitle,
+          ),
+          centerTitle: true,
+          flexibleSpace: Container(
+            decoration: AppDecorations.headerGradient,
+          ),
+          elevation: 0,
+          leading: const CustomBackButton(),
+        ),
+        // Using GradientBackground widget
+        body: GradientBackground(
+          child: LoadingOverlay(
+            isLoading: isLoading,
+            loadingText: 'Entering your account...',
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: AppSpacing.screenPadding,
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.xxl),
 
-                  // Welcome title using centralized text styles
-                  Text(
-                    'Welcome Back',
-                    style: AppTextStyles.headline2,
-                  ),
+                    // Welcome title using centralized text styles
+                    Text(
+                      'Welcome Back',
+                      style: AppTextStyles.headline2,
+                    ),
 
-                  const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm),
 
-                  // Subtitle
-                  Text(
-                    'Great to see you again!',
-                    style: AppTextStyles.subtitle,
-                  ),
+                    // Subtitle
+                    Text(
+                      'Great to see you again!',
+                      style: AppTextStyles.subtitle,
+                    ),
 
-                  const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.xxl),
 
-                  // Login form
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        // Email field using CustomTextField widget
-                        CustomTextField(
-                          controller: _emailController,
-                          hintText: 'Email address',
-                          prefixIcon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Enter your email';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Enter a valid email address';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: AppSpacing.md),
-
-                        // Password field using CustomTextField widget
-                        CustomTextField(
-                          controller: _passwordController,
-                          hintText: 'Password',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: _isPasswordHidden,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordHidden
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: AppColors.secondaryIcon,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordHidden = !_isPasswordHidden;
-                              });
+                    // Login form
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          // Email field using CustomTextField widget
+                          CustomTextField(
+                            controller: _emailController,
+                            hintText: 'Email address',
+                            prefixIcon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Enter your email';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Enter a valid email address';
+                              }
+                              return null;
                             },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Enter your password';
-                            }
-                            if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                        ),
 
-                        const SizedBox(height: AppSpacing.sm),
+                          const SizedBox(height: AppSpacing.md),
 
-                        // Forgot password link
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
+                          // Password field using CustomTextField widget
+                          CustomTextField(
+                            controller: _passwordController,
+                            hintText: 'Password',
+                            prefixIcon: Icons.lock_outline,
+                            obscureText: _isPasswordHidden,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.secondaryIcon,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordHidden = !_isPasswordHidden;
+                                });
+                              },
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Enter your password';
+                              }
+                              if (value.length < 6) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: AppSpacing.sm),
+
+                          // Forgot password link
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                // TODO: Implement forgot password
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Functionality to reset password will be added later'),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'Forgot password?',
+                                style: AppTextStyles.linkSecondary,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: AppSpacing.lg),
+
+                          // Login button - uses theme automatically
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: isLoading ? null : _handleLogin,
+                              child: Text(
+                                'Sign In',
+                                style: AppTextStyles.buttonLarge,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Section divider using custom widget
+                    const SectionDivider(title: 'Or continue with'),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Social login buttons using SocialLoginButton widget
+                    Row(
+                      children: [
+                        // Google login
+                        Expanded(
+                          child: SocialLoginButton(
+                            icon: Icons.g_mobiledata,
+                            text: 'Google',
                             onPressed: () {
-                              // TODO: Implement forgot password
+                              // TODO: Implement Google login
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                      'Functionality to reset password will be added later'),
+                                      'Entering via Google will be added later'),
                                 ),
                               );
                             },
-                            child: Text(
-                              'Forgot password?',
-                              style: AppTextStyles.linkSecondary,
-                            ),
                           ),
                         ),
 
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(width: AppSpacing.md),
 
-                        // Login button - uses theme automatically
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : _handleLogin,
-                            child: Text(
-                              'Sign In',
-                              style: AppTextStyles.buttonLarge,
-                            ),
+                        // Facebook login
+                        Expanded(
+                          child: SocialLoginButton(
+                            icon: Icons.facebook,
+                            text: 'Facebook',
+                            onPressed: () {
+                              // TODO: Implement Facebook login
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Entering via Facebook will be added later'),
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ],
                     ),
-                  ),
 
-                  const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.xl),
 
-                  // Section divider using custom widget
-                  const SectionDivider(title: 'Or continue with'),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Social login buttons using SocialLoginButton widget
-                  Row(
-                    children: [
-                      // Google login
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.g_mobiledata,
-                          text: 'Google',
+                    // Sign up prompt
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Don\'t have an account?',
+                          style: AppTextStyles.linkSecondary,
+                        ),
+                        TextButton(
                           onPressed: () {
-                            // TODO: Implement Google login
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Entering via Google will be added later'),
-                              ),
-                            );
+                            context.go('/register');
                           },
+                          child: Text(
+                            'Sign up',
+                            style: AppTextStyles.link,
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.md),
-
-                      // Facebook login
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.facebook,
-                          text: 'Facebook',
-                          onPressed: () {
-                            // TODO: Implement Facebook login
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Entering via Facebook will be added later'),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Sign up prompt
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Don\'t have an account?',
-                        style: AppTextStyles.linkSecondary,
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          context.go('/register');
-                        },
-                        child: Text(
-                          'Sign up',
-                          style: AppTextStyles.link,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
