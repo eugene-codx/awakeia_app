@@ -1,7 +1,9 @@
+import 'package:awakeia/utils/localization_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_decorations.dart';
@@ -62,41 +64,49 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
+  // Handle back navigation
+  void _handleBack() {
+    // Navigate back to first screen
+    context.go('/first');
+  }
+
   // Email validation
-  String? _validateEmail(String? value) {
+  String? _validateEmail(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
-      return 'Enter email';
+      return l10n.emailRequired;
     }
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-      return 'Enter valid email';
+      return l10n.emailRequired;
     }
     return null;
   }
 
   // Password validation
-  String? _validatePassword(String? value) {
+  String? _validatePassword(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
-      return 'Enter password';
+      return l10n.passwordRequired;
     }
     if (value.length < 6) {
-      return 'Password must contain at least 6 characters';
+      return l10n.passwordTooShort;
     }
     return null;
   }
 
   // Confirm password validation
-  String? _validateConfirmPassword(String? value) {
+  String? _validateConfirmPassword(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
-      return 'Confirm password';
+      return l10n.confirmPasswordRequired;
     }
     if (value != _passwordController.text) {
-      return 'Passwords do not match';
+      return l10n.passwordsDoNotMatch;
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get localization instance
+    final l10n = context.l10n;
     // Watch auth state for loading and error handling
     final authStatus = ref.watch(authProvider);
     final isLoading = authStatus.isLoading;
@@ -117,13 +127,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             decoration: AppDecorations.headerGradient,
           ),
           elevation: 0,
-          leading: const CustomBackButton(),
+          leading: CustomBackButton(
+            onPressed: _handleBack,
+            tooltip: l10n.back,
+          ),
         ),
         // Using GradientBackground widget
         body: GradientBackground(
           child: LoadingOverlay(
             isLoading: isLoading,
-            loadingText: 'Creating account...',
+            loadingText: l10n.creatingAccount,
             child: SafeArea(
               child: SingleChildScrollView(
                 padding: AppSpacing.screenPadding,
@@ -133,7 +146,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                     // Title using centralized text styles
                     Text(
-                      'Create Account',
+                      l10n.createAccount,
                       style: AppTextStyles.headline2,
                     ),
 
@@ -141,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                     // Subtitle
                     Text(
-                      'Start your journey to a better version of yourself!',
+                      l10n.startYourJourney,
                       style: AppTextStyles.subtitle,
                       textAlign: TextAlign.center,
                     ),
@@ -156,10 +169,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           // Email field using CustomTextField widget
                           CustomTextField(
                             controller: _emailController,
-                            hintText: 'Email address',
+                            hintText: l10n.emailAddress,
                             prefixIcon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
-                            validator: _validateEmail,
+                            validator: (value) => _validateEmail(value, l10n),
                           ),
 
                           const SizedBox(height: AppSpacing.md),
@@ -167,7 +180,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           // Password field using CustomTextField widget
                           CustomTextField(
                             controller: _passwordController,
-                            hintText: 'Password',
+                            hintText: l10n.password,
                             prefixIcon: Icons.lock_outline,
                             obscureText: _isPasswordHidden,
                             suffixIcon: IconButton(
@@ -183,7 +196,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 });
                               },
                             ),
-                            validator: _validatePassword,
+                            validator: (value) =>
+                                _validatePassword(value, l10n),
                           ),
 
                           const SizedBox(height: AppSpacing.md),
@@ -191,7 +205,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           // Confirm password field using CustomTextField widget
                           CustomTextField(
                             controller: _confirmPasswordController,
-                            hintText: 'Confirm password',
+                            hintText: l10n.confirmPassword,
                             prefixIcon: Icons.lock_outline,
                             obscureText: _isConfirmPasswordHidden,
                             suffixIcon: IconButton(
@@ -208,7 +222,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 });
                               },
                             ),
-                            validator: _validateConfirmPassword,
+                            validator: (value) =>
+                                _validateConfirmPassword(value, l10n),
                           ),
 
                           const SizedBox(height: AppSpacing.lg),
@@ -226,7 +241,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 const SizedBox(width: AppSpacing.sm),
                                 Expanded(
                                   child: Text(
-                                    'By registering, you agree to the terms of use and privacy policy',
+                                    l10n.termsAndConditions,
                                     style: AppTextStyles.caption,
                                   ),
                                 ),
@@ -242,7 +257,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             child: ElevatedButton(
                               onPressed: isLoading ? null : _handleRegister,
                               child: Text(
-                                'Register',
+                                l10n.register,
                                 style: AppTextStyles.buttonLarge,
                               ),
                             ),
@@ -254,7 +269,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     const SizedBox(height: AppSpacing.xl),
 
                     // Section divider using custom widget
-                    const SectionDivider(title: 'Or register with'),
+                    SectionDivider(title: l10n.orSignUpWith),
 
                     const SizedBox(height: AppSpacing.lg),
 
@@ -265,13 +280,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         Expanded(
                           child: SocialLoginButton(
                             icon: Icons.g_mobiledata,
-                            text: 'Google',
+                            text: l10n.google,
                             onPressed: () {
                               // TODO: Implement Google registration
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Google registration will be added later'),
+                                SnackBar(
+                                  content: Text(l10n.googleSignInComingSoon),
                                 ),
                               );
                             },
@@ -284,13 +298,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         Expanded(
                           child: SocialLoginButton(
                             icon: Icons.facebook,
-                            text: 'Facebook',
+                            text: l10n.facebook,
                             onPressed: () {
                               // TODO: Implement Facebook registration
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Facebook registration will be added later'),
+                                SnackBar(
+                                  content: Text(l10n.facebookSignInComingSoon),
                                 ),
                               );
                             },
@@ -304,13 +317,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     // Additional social options (example of extending functionality)
                     SocialLoginButton(
                       icon: Icons.apple,
-                      text: 'Continue with Apple',
+                      text: l10n.apple,
                       onPressed: () {
                         // TODO: Implement Apple registration
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Apple registration will be added later'),
+                          SnackBar(
+                            content: Text(l10n.appleSignInComingSoon),
                           ),
                         );
                       },
@@ -323,7 +335,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Already have an account? ',
+                          l10n.haveAccount,
                           style: AppTextStyles.linkSecondary,
                         ),
                         TextButton(
@@ -331,7 +343,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             context.go('/login');
                           },
                           child: Text(
-                            'Login',
+                            l10n.login,
                             style: AppTextStyles.link,
                           ),
                         ),

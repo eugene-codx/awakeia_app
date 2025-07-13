@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'routes.dart';
 
@@ -14,6 +16,18 @@ class AwakeiaApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Awakeia - Habit Tracker',
+
+      // Localization setup
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('ru'), // Russian
+      ],
 
       // Setting the application icon
       theme: AppTheme.theme,

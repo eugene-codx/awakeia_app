@@ -1,0 +1,32 @@
+# Configuration file for Flutter localization
+# This file defines how the localization system should work
+
+# The directory where the template and translated arb files are located
+arb-dir: lib/l10n
+
+# The template arb file that contains the base translations (usually English)
+template-arb-file: app_en.arb
+
+# The output directory for generated localization files
+output-dir: lib/generated
+
+# Class name for the generated localization delegate
+output-localization-file: app_localizations.dart
+
+# Class name for the generated localization class
+output-class: AppLocalizations
+
+# Preferred supported locales (first one is the default)
+preferred-supported-locales: [ en, ru ]
+
+# Whether to use escaping for messages
+use-escaping: false
+
+# Whether to suppress warnings
+suppress-warnings: false
+
+# Header file is commented out as it's optional
+# header-file: lib/l10n/header.txt
+
+# Whether to use deferred loading (recommended for large apps)
+use-deferred-loading: false

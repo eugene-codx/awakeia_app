@@ -1,0 +1,276 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2025-07-13T10:00:00.000Z",
+
+  "appTitle": "Awakeia - Habit Tracker",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+
+  "appName": "Awakeia",
+  "@appName": {
+    "description": "Short app name"
+  },
+
+  "appSubtitle": "Your personal habit tracker",
+  "@appSubtitle": {
+    "description": "App subtitle shown on first screen"
+  },
+
+  "back": "Back",
+  "@back": {
+    "description": "Back button text"
+  },
+
+  "home": "Home",
+  "@home": {
+    "description": "Home navigation item"
+  },
+
+  "habits": "Habits",
+  "@habits": {
+    "description": "Habits navigation item"
+  },
+
+  "statistics": "Statistics",
+  "@statistics": {
+    "description": "Statistics navigation item"
+  },
+
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile navigation item"
+  },
+
+  "welcome": "Welcome!",
+  "@welcome": {
+    "description": "Welcome message"
+  },
+
+  "niceToSeeYou": "Nice to see you!",
+  "@niceToSeeYou": {
+    "description": "Subtitle on login screen"
+  },
+
+  "createAccount": "Create Account",
+  "@createAccount": {
+    "description": "Create account title"
+  },
+
+  "startYourJourney": "Start your journey to a better version of yourself!",
+  "@startYourJourney": {
+    "description": "Subtitle on register screen"
+  },
+
+  "login": "Sign In",
+  "@login": {
+    "description": "Login button text"
+  },
+
+  "register": "Sign Up",
+  "@register": {
+    "description": "Register button text"
+  },
+
+  "continueAsGuest": "Continue as guest",
+  "@continueAsGuest": {
+    "description": "Continue as guest button"
+  },
+
+  "emailAddress": "Email address",
+  "@emailAddress": {
+    "description": "Email field placeholder"
+  },
+
+  "password": "Password",
+  "@password": {
+    "description": "Password field placeholder"
+  },
+
+  "confirmPassword": "Confirm password",
+  "@confirmPassword": {
+    "description": "Confirm password field placeholder"
+  },
+
+  "forgotPassword": "Forgot password?",
+  "@forgotPassword": {
+    "description": "Forgot password link"
+  },
+
+  "emailRequired": "Please enter your email",
+  "@emailRequired": {
+    "description": "Email required validation message"
+  },
+
+  "emailInvalid": "Please enter a valid email",
+  "@emailInvalid": {
+    "description": "Invalid email validation message"
+  },
+
+  "passwordRequired": "Please enter your password",
+  "@passwordRequired": {
+    "description": "Password required validation message"
+  },
+
+  "passwordTooShort": "Password must contain at least 6 characters",
+  "@passwordTooShort": {
+    "description": "Password too short validation message"
+  },
+
+  "confirmPasswordRequired": "Please confirm your password",
+  "@confirmPasswordRequired": {
+    "description": "Confirm password required validation message"
+  },
+
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Passwords don't match validation message"
+  },
+
+  "orSignInWith": "Or sign in with",
+  "@orSignInWith": {
+    "description": "Social login section divider"
+  },
+
+  "orSignUpWith": "Or sign up with",
+  "@orSignUpWith": {
+    "description": "Social register section divider"
+  },
+
+  "google": "Google",
+  "@google": {
+    "description": "Google login button"
+  },
+
+  "facebook": "Facebook",
+  "@facebook": {
+    "description": "Facebook login button"
+  },
+
+  "apple": "Continue with Apple",
+  "@apple": {
+    "description": "Apple login button"
+  },
+
+  "noAccount": "Don't have an account? ",
+  "@noAccount": {
+    "description": "No account prompt"
+  },
+
+  "haveAccount": "Already have an account? ",
+  "@haveAccount": {
+    "description": "Have account prompt"
+  },
+
+  "welcomeUser": "Welcome, {userName}! 👋",
+  "@welcomeUser": {
+    "description": "Welcome message with user name",
+    "placeholders": {
+      "userName": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+
+  "welcomeGuest": "Welcome, Guest! 👋",
+  "@welcomeGuest": {
+    "description": "Welcome message for guest user"
+  },
+
+  "readyToCreateHabits": "Ready to create useful habits?",
+  "@readyToCreateHabits": {
+    "description": "Subtitle on home screen"
+  },
+
+  "todaysHabits": "Today's Habits",
+  "@todaysHabits": {
+    "description": "Today's habits section title"
+  },
+
+  "noHabitsYet": "No habits yet",
+  "@noHabitsYet": {
+    "description": "Empty state title"
+  },
+
+  "createFirstHabit": "Create your first habit and start your journey to a better version of yourself!",
+  "@createFirstHabit": {
+    "description": "Empty state subtitle"
+  },
+
+  "createHabit": "Create Habit",
+  "@createHabit": {
+    "description": "Create habit button"
+  },
+
+  "daysInARow": "days in a row",
+  "@daysInARow": {
+    "description": "Streak counter label"
+  },
+
+  "completed": "completed",
+  "@completed": {
+    "description": "Completed habits label"
+  },
+
+  "signingIn": "Signing in...",
+  "@signingIn": {
+    "description": "Loading message for login"
+  },
+
+  "creatingAccount": "Creating account...",
+  "@creatingAccount": {
+    "description": "Loading message for registration"
+  },
+
+  "loadingData": "Loading data...",
+  "@loadingData": {
+    "description": "General loading message"
+  },
+
+  "profileComingSoon": "Profile will be added in the next versions",
+  "@profileComingSoon": {
+    "description": "Profile feature coming soon message"
+  },
+
+  "habitsComingSoon": "Habit creation will be added in the next versions",
+  "@habitsComingSoon": {
+    "description": "Habits feature coming soon message"
+  },
+
+  "googleSignInComingSoon": "Google sign-in will be added later",
+  "@googleSignInComingSoon": {
+    "description": "Google sign-in coming soon message"
+  },
+
+  "facebookSignInComingSoon": "Facebook sign-in will be added later",
+  "@facebookSignInComingSoon": {
+    "description": "Facebook sign-in coming soon message"
+  },
+
+  "appleSignInComingSoon": "Apple sign-in will be added later",
+  "@appleSignInComingSoon": {
+    "description": "Apple sign-in coming soon message"
+  },
+
+  "forgotPasswordComingSoon": "Password recovery will be added later",
+  "@forgotPasswordComingSoon": {
+    "description": "Password recovery coming soon message"
+  },
+
+  "termsAndConditions": "By registering, you agree to the terms of use and privacy policy",
+  "@termsAndConditions": {
+    "description": "Terms and conditions text"
+  },
+
+  "mainWillBeAdded": "{pageName} will be added in the next versions",
+  "@mainWillBeAdded": {
+    "description": "Generic coming soon message for navigation",
+    "placeholders": {
+      "pageName": {
+        "type": "String",
+        "example": "Statistics"
+      }
+    }
+  }
+}

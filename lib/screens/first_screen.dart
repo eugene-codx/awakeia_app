@@ -4,12 +4,16 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_decorations.dart';
 import '../theme/app_text_styles.dart';
+import '../utils/localization_helper.dart';
 
 class FirstScreen extends StatelessWidget {
   const FirstScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get localization instance using extension
+    final l10n = context.l10n;
+
     return Scaffold(
       // Using centralized gradient background
       body: Container(
@@ -37,24 +41,24 @@ class FirstScreen extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.xl),
 
-                // App title using centralized text style
+                // App title using localized text
                 Text(
-                  'Awakeia',
+                  l10n.appName,
                   style: AppTextStyles.headline1,
                 ),
 
                 const SizedBox(height: AppSpacing.sm),
 
-                // App subtitle using centralized text style
+                // App subtitle using localized text
                 Text(
-                  'Your personal habit tracker',
+                  l10n.appSubtitle,
                   style: AppTextStyles.subtitle,
                   textAlign: TextAlign.center,
                 ),
 
                 const Spacer(),
 
-                // Login button - now uses theme automatically
+                // Login button with localized text
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -63,7 +67,7 @@ class FirstScreen extends StatelessWidget {
                       context.go('/login');
                     },
                     child: Text(
-                      'Login',
+                      l10n.login,
                       style: AppTextStyles.buttonLarge,
                     ),
                   ),
@@ -71,7 +75,7 @@ class FirstScreen extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.md),
 
-                // Register button - now uses theme automatically
+                // Register button with localized text
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -80,7 +84,7 @@ class FirstScreen extends StatelessWidget {
                       context.go('/register');
                     },
                     child: Text(
-                      'Register',
+                      l10n.register,
                       style: AppTextStyles.buttonLarge.copyWith(
                         color: AppColors.secondaryButtonText,
                       ),
@@ -90,14 +94,14 @@ class FirstScreen extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.lg),
 
-                // Continue as guest button
+                // Continue as guest button with localized text
                 TextButton(
                   onPressed: () {
                     // Navigate directly to home screen
                     context.go('/home');
                   },
                   child: Text(
-                    'Continue as Guest',
+                    l10n.continueAsGuest,
                     style: AppTextStyles.linkSecondary,
                   ),
                 ),

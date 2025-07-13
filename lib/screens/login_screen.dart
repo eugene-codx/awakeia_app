@@ -1,3 +1,4 @@
+import 'package:awakeia/utils/localization_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -59,8 +60,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  // Handle back navigation
+  void _handleBack() {
+    // Navigate back to first screen
+    context.go('/first');
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Get localization instance
+    final l10n = context.l10n;
     // Watch auth state for loading and error handling
     final authStatus = ref.watch(authProvider);
     final isLoading = authStatus.isLoading;
@@ -68,7 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) {
-        if (!didPop) context.go('/first');
+        if (!didPop) _handleBack();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -81,13 +90,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             decoration: AppDecorations.headerGradient,
           ),
           elevation: 0,
-          leading: const CustomBackButton(),
+          leading: CustomBackButton(
+            onPressed: _handleBack,
+            tooltip: l10n.back,
+          ),
         ),
         // Using GradientBackground widget
         body: GradientBackground(
           child: LoadingOverlay(
             isLoading: isLoading,
-            loadingText: 'Entering your account...',
+            loadingText: l10n.signingIn,
             child: SafeArea(
               child: SingleChildScrollView(
                 padding: AppSpacing.screenPadding,
@@ -97,7 +109,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     // Welcome title using centralized text styles
                     Text(
-                      'Welcome Back',
+                      l10n.welcome,
                       style: AppTextStyles.headline2,
                     ),
 
@@ -105,7 +117,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     // Subtitle
                     Text(
-                      'Great to see you again!',
+                      l10n.niceToSeeYou,
                       style: AppTextStyles.subtitle,
                     ),
 
@@ -119,15 +131,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // Email field using CustomTextField widget
                           CustomTextField(
                             controller: _emailController,
-                            hintText: 'Email address',
+                            hintText: l10n.emailAddress,
                             prefixIcon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Enter your email';
+                                return l10n.emailRequired;
                               }
                               if (!value.contains('@')) {
-                                return 'Enter a valid email address';
+                                return l10n.emailInvalid;
                               }
                               return null;
                             },
@@ -138,7 +150,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // Password field using CustomTextField widget
                           CustomTextField(
                             controller: _passwordController,
-                            hintText: 'Password',
+                            hintText: l10n.password,
                             prefixIcon: Icons.lock_outline,
                             obscureText: _isPasswordHidden,
                             suffixIcon: IconButton(
@@ -156,10 +168,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Enter your password';
+                                return l10n.passwordRequired;
                               }
                               if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
+                                return l10n.passwordTooShort;
                               }
                               return null;
                             },
@@ -174,14 +186,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               onPressed: () {
                                 // TODO: Implement forgot password
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Functionality to reset password will be added later'),
+                                  SnackBar(
+                                    content:
+                                        Text(l10n.forgotPasswordComingSoon),
                                   ),
                                 );
                               },
                               child: Text(
-                                'Forgot password?',
+                                l10n.forgotPassword,
                                 style: AppTextStyles.linkSecondary,
                               ),
                             ),
@@ -195,7 +207,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: ElevatedButton(
                               onPressed: isLoading ? null : _handleLogin,
                               child: Text(
-                                'Sign In',
+                                l10n.login,
                                 style: AppTextStyles.buttonLarge,
                               ),
                             ),
@@ -207,7 +219,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppSpacing.xl),
 
                     // Section divider using custom widget
-                    const SectionDivider(title: 'Or continue with'),
+                    SectionDivider(title: l10n.orSignInWith),
 
                     const SizedBox(height: AppSpacing.lg),
 
@@ -218,13 +230,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Expanded(
                           child: SocialLoginButton(
                             icon: Icons.g_mobiledata,
-                            text: 'Google',
+                            text: l10n.google,
                             onPressed: () {
                               // TODO: Implement Google login
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Entering via Google will be added later'),
+                                SnackBar(
+                                  content: Text(l10n.googleSignInComingSoon),
                                 ),
                               );
                             },
@@ -237,13 +248,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Expanded(
                           child: SocialLoginButton(
                             icon: Icons.facebook,
-                            text: 'Facebook',
+                            text: l10n.facebook,
                             onPressed: () {
                               // TODO: Implement Facebook login
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Entering via Facebook will be added later'),
+                                SnackBar(
+                                  content: Text(l10n.facebookSignInComingSoon),
                                 ),
                               );
                             },
@@ -259,7 +269,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Don\'t have an account?',
+                          l10n.noAccount,
                           style: AppTextStyles.linkSecondary,
                         ),
                         TextButton(
@@ -267,7 +277,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             context.go('/register');
                           },
                           child: Text(
-                            'Sign up',
+                            l10n.register,
                             style: AppTextStyles.link,
                           ),
                         ),

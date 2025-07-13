@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_decorations.dart';
 import '../theme/app_text_styles.dart';
+import '../utils/localization_helper.dart';
 import '../widgets/common_widgets.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -12,6 +13,9 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Get localization instance
+    final l10n = context.l10n;
+
     // Get current user from auth provider
     final currentUser = ref.watch(currentUserProvider);
     final isAuthLoading = ref.watch(isAuthLoadingProvider);
@@ -20,7 +24,7 @@ class HomeScreen extends ConsumerWidget {
       // App bar with gradient using centralized decoration
       appBar: AppBar(
         title: Text(
-          'Awakeia',
+          l10n.appName,
           style: AppTextStyles.appBarTitle,
         ),
         centerTitle: true,
@@ -38,9 +42,8 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () {
               // TODO: Navigate to profile screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'The profile screen will be added in future versions'),
+                SnackBar(
+                  content: Text(l10n.profileComingSoon),
                 ),
               );
             },
@@ -51,7 +54,7 @@ class HomeScreen extends ConsumerWidget {
       // Main content with loading overlay
       body: LoadingOverlay(
         isLoading: isAuthLoading,
-        loadingText: 'Loading...',
+        loadingText: l10n.loadingData,
         child: GradientBackground(
           colors: AppColors.primaryGradient,
           child: SafeArea(
@@ -60,38 +63,37 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Welcome message using custom widget
+                  // Welcome message using localized text with user name
                   WelcomeMessage(
                     title: currentUser?.isGuest == true
-                        ? 'Welcome, Guest 👋'
-                        : 'Welcome, ${currentUser?.name ?? 'User'}! 👋',
-                    subtitle: 'Ready to track your habits?',
+                        ? l10n.welcomeGuest
+                        : l10n.welcomeUser(currentUser?.name ?? 'User'),
+                    subtitle: l10n.readyToCreateHabits,
                   ),
 
                   const SizedBox(height: AppSpacing.lg),
 
-                  // Section title using centralized text style
+                  // Section title using localized text
                   Text(
-                    'Today\'s Habits',
+                    l10n.todaysHabits,
                     style: AppTextStyles.headline5,
                   ),
 
                   const SizedBox(height: AppSpacing.md),
 
-                  // Habits section - using EmptyState widget
+                  // Habits section - using EmptyState widget with localized text
                   Expanded(
                     child: PrimaryCard(
                       child: EmptyState(
                         icon: Icons.self_improvement,
-                        title: 'No Habits Yet',
-                        subtitle: 'Create your first habit to get started!',
-                        buttonText: 'Create Habit',
+                        title: l10n.noHabitsYet,
+                        subtitle: l10n.createFirstHabit,
+                        buttonText: l10n.createHabit,
                         onButtonPressed: () {
                           // TODO: Navigate to add habit screen
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Creating habits will be added in future versions'),
+                            SnackBar(
+                              content: Text(l10n.habitsComingSoon),
                             ),
                           );
                         },
@@ -101,7 +103,7 @@ class HomeScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSpacing.md),
 
-                  // Quick stats row using StatsCard widgets
+                  // Quick stats row using StatsCard widgets with localized text
                   Row(
                     children: [
                       // Streak counter
@@ -109,7 +111,7 @@ class HomeScreen extends ConsumerWidget {
                         child: StatsCard(
                           icon: Icons.local_fire_department,
                           value: '0',
-                          label: 'days streak',
+                          label: l10n.daysInARow,
                           iconColor: AppColors.warning,
                         ),
                       ),
@@ -121,7 +123,7 @@ class HomeScreen extends ConsumerWidget {
                         child: StatsCard(
                           icon: Icons.check_circle,
                           value: '0/0',
-                          label: 'completed today',
+                          label: l10n.completed,
                           iconColor: AppColors.success,
                         ),
                       ),
@@ -139,15 +141,15 @@ class HomeScreen extends ConsumerWidget {
         onPressed: () {
           // TODO: Navigate to add habit screen
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Creating habits will be added in future versions'),
+            SnackBar(
+              content: Text(l10n.habitsComingSoon),
             ),
           );
         },
         child: const Icon(Icons.add),
       ),
 
-      // Bottom navigation bar with theme styling
+      // Bottom navigation bar with localized text
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: AppColors.darkPurple,
@@ -159,35 +161,34 @@ class HomeScreen extends ConsumerWidget {
         onTap: (index) {
           // TODO: Implement bottom navigation
           final List<String> pages = [
-            'Main',
-            'Habits',
-            'Statistics',
-            'Profile',
+            l10n.home,
+            l10n.habits,
+            l10n.statistics,
+            l10n.profile,
           ];
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text('${pages[index]} page will be added in future versions'),
+              content: Text(l10n.mainWillBeAdded(pages[index])),
             ),
           );
         },
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Main',
+            icon: const Icon(Icons.home),
+            label: l10n.home,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: 'Habits',
+            icon: const Icon(Icons.list_alt),
+            label: l10n.habits,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: 'Statistics',
+            icon: const Icon(Icons.analytics),
+            label: l10n.statistics,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person),
+            label: l10n.profile,
           ),
         ],
       ),

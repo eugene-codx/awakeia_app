@@ -1,0 +1,5 @@
+// Copyright (c) 2025 Awakeia Team. All rights reserved.
+// Generated file. Do not edit manually.
+//
+// This file contains auto-generated localization classes.
+// To regenerate, run: flutter gen-l10n
