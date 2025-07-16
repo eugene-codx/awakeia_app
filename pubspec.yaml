@@ -25,10 +25,38 @@ dependencies:
   # UI
   cupertino_icons: ^1.0.8
 
+  # Serialization and models
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+
+  # HTTP и API
+  dio: ^5.8.0+1
+  retrofit: ^4.6.0
+  pretty_dio_logger: ^1.4.0
+
+  # Storage
+  flutter_secure_storage: ^9.2.4
+  drift: ^2.28.0
+  sqlcipher_flutter_libs: ^0.6.7
+
+  # Functional programming
+  fpdart: ^1.1.1
+
+  # Logging
+  talker: ^4.9.2
+  talker_flutter: ^4.9.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+
+  # Code generation
+  build_runner: ^2.5.4
+  freezed: ^3.1.0
+  json_serializable: ^6.9.5
+  retrofit_generator: ^9.7.0
+  drift_dev: ^2.28.0
 
 flutter:
   uses-material-design: true
