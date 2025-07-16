@@ -3,7 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../generated/app_localizations.dart';
-import '../theme/app_theme.dart';
+import '../shared/shared.dart';
 import 'routes.dart';
 
 class AwakeiaApp extends ConsumerWidget {

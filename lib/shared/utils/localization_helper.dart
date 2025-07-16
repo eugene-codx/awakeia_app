@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../generated/app_localizations.dart';
+import '../../generated/app_localizations.dart';
 
 // Helper class for easy access to localizations throughout the app
 // This provides a convenient way to access translations without context
