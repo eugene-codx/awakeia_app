@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_decorations.dart';
-import '../theme/app_text_styles.dart';
-import '../utils/localization_helper.dart';
+import '../shared/shared.dart';
 
 class FirstScreen extends StatelessWidget {
   const FirstScreen({super.key});

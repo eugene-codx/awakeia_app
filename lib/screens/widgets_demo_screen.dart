@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_decorations.dart';
-import '../theme/app_text_styles.dart';
-import '../widgets/common_widgets.dart';
+import '../shared/shared.dart';
 
 // Demo screen to showcase all custom widgets
 // This screen demonstrates how to use each widget from common_widgets.dart

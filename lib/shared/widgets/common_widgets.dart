@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_decorations.dart';
-import '../theme/app_text_styles.dart';
+import '../../shared/shared.dart';
 
 // Custom back button widget for reuse across screens
 class CustomBackButton extends StatelessWidget {
@@ -12,6 +10,7 @@ class CustomBackButton extends StatelessWidget {
     this.onPressed,
     this.tooltip = 'Back',
   });
+
   final VoidCallback? onPressed;
   final String? tooltip;
 
@@ -48,6 +47,7 @@ class GradientBackground extends StatelessWidget {
     required this.child,
     this.colors,
   });
+
   final Widget child;
   final List<Color>? colors;
 
@@ -74,6 +74,7 @@ class PrimaryCard extends StatelessWidget {
     this.padding,
     this.onTap,
   });
+
   final Widget child;
   final EdgeInsets? padding;
   final VoidCallback? onTap;
@@ -101,6 +102,7 @@ class StatsCard extends StatelessWidget {
     required this.label,
     this.iconColor = AppColors.accentIcon,
   });
+
   final IconData icon;
   final String value;
   final String label;
@@ -140,6 +142,7 @@ class WelcomeMessage extends StatelessWidget {
     required this.title,
     required this.subtitle,
   });
+
   final String title;
   final String subtitle;
 
@@ -180,6 +183,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.onChanged,
   });
+
   final String hintText;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
@@ -220,6 +224,7 @@ class SocialLoginButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
   });
+
   final IconData icon;
   final String text;
   final VoidCallback onPressed;
@@ -254,6 +259,7 @@ class LoadingOverlay extends StatelessWidget {
     required this.child,
     this.loadingText,
   });
+
   final bool isLoading;
   final Widget child;
   final String? loadingText;
@@ -298,6 +304,7 @@ class ErrorMessage extends StatelessWidget {
     required this.message,
     this.onRetry,
   });
+
   final String message;
   final VoidCallback? onRetry;
 
@@ -343,6 +350,7 @@ class EmptyState extends StatelessWidget {
     this.buttonText,
     this.onButtonPressed,
   });
+
   final IconData icon;
   final String title;
   final String subtitle;
@@ -390,6 +398,7 @@ class SectionDivider extends StatelessWidget {
     super.key,
     required this.title,
   });
+
   final String title;
 
   @override
