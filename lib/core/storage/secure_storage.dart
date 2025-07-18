@@ -6,7 +6,6 @@ import '../logging/app_logger.dart';
 /// Secure storage wrapper using flutter_secure_storage 9.2.4
 /// Provides encrypted key-value storage for sensitive data
 class SecureStorage {
-
   /// Private constructor
   SecureStorage._internal() {
     _storage = const FlutterSecureStorage(
@@ -25,6 +24,7 @@ class SecureStorage {
       ),
     );
   }
+
   static SecureStorage? _instance;
   late final FlutterSecureStorage _storage;
 
@@ -32,7 +32,9 @@ class SecureStorage {
   static SecureStorage get instance => _instance ??= SecureStorage._internal();
 
   /// Read a value from secure storage
-  Future<String?> read(String key) async {
+  Future<String?> read({
+    required String key,
+  }) async {
     try {
       final value = await _storage.read(key: key);
       if (value != null) {
@@ -41,31 +43,45 @@ class SecureStorage {
       return value;
     } catch (e, stackTrace) {
       AppLogger.error(
-          'SecureStorage: Failed to read key [$key]', e, stackTrace,);
+        'SecureStorage: Failed to read key [$key]',
+        e,
+        stackTrace,
+      );
       return null;
     }
   }
 
   /// Write a value to secure storage
-  Future<void> write(String key, String value) async {
+  Future<void> write({
+    required String key,
+    required String value,
+  }) async {
     try {
       await _storage.write(key: key, value: value);
       AppLogger.debug('SecureStorage: Written key [$key] successfully');
     } catch (e, stackTrace) {
       AppLogger.error(
-          'SecureStorage: Failed to write key [$key]', e, stackTrace,);
+        'SecureStorage: Failed to write key [$key]',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }
 
   /// Delete a value from secure storage
-  Future<void> delete(String key) async {
+  Future<void> delete({
+    required String key,
+  }) async {
     try {
       await _storage.delete(key: key);
       AppLogger.debug('SecureStorage: Deleted key [$key] successfully');
     } catch (e, stackTrace) {
       AppLogger.error(
-          'SecureStorage: Failed to delete key [$key]', e, stackTrace,);
+        'SecureStorage: Failed to delete key [$key]',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }
@@ -77,7 +93,10 @@ class SecureStorage {
       AppLogger.debug('SecureStorage: Deleted all keys successfully');
     } catch (e, stackTrace) {
       AppLogger.error(
-          'SecureStorage: Failed to delete all keys', e, stackTrace,);
+        'SecureStorage: Failed to delete all keys',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }
@@ -87,7 +106,8 @@ class SecureStorage {
     try {
       final values = await _storage.readAll();
       AppLogger.debug(
-          'SecureStorage: Read all keys successfully (${values.length} items)',);
+        'SecureStorage: Read all keys successfully (${values.length} items)',
+      );
       return values;
     } catch (e, stackTrace) {
       AppLogger.error('SecureStorage: Failed to read all keys', e, stackTrace);
@@ -96,13 +116,18 @@ class SecureStorage {
   }
 
   /// Check if a key exists in secure storage
-  Future<bool> containsKey(String key) async {
+  Future<bool> containsKey({
+    required String key,
+  }) async {
     try {
       final value = await _storage.read(key: key);
       return value != null;
     } catch (e, stackTrace) {
       AppLogger.error(
-          'SecureStorage: Failed to check key [$key]', e, stackTrace,);
+        'SecureStorage: Failed to check key [$key]',
+        e,
+        stackTrace,
+      );
       return false;
     }
   }
@@ -112,10 +137,12 @@ class SecureStorage {
     try {
       final allKeys = await _storage.readAll();
       final authKeys = allKeys.keys
-          .where((key) =>
-              key.startsWith('auth_') ||
-              key.startsWith('user_') ||
-              key.startsWith('token_'),)
+          .where(
+            (key) =>
+                key.startsWith('auth_') ||
+                key.startsWith('user_') ||
+                key.startsWith('token_'),
+          )
           .toList();
 
       for (final key in authKeys) {
@@ -125,7 +152,10 @@ class SecureStorage {
       AppLogger.debug('SecureStorage: Cleared ${authKeys.length} auth keys');
     } catch (e, stackTrace) {
       AppLogger.error(
-          'SecureStorage: Failed to clear auth data', e, stackTrace,);
+        'SecureStorage: Failed to clear auth data',
+        e,
+        stackTrace,
+      );
       rethrow;
     }
   }
@@ -149,7 +179,10 @@ class SecureStorage {
       return stats;
     } catch (e, stackTrace) {
       AppLogger.error(
-          'SecureStorage: Failed to get storage stats', e, stackTrace,);
+        'SecureStorage: Failed to get storage stats',
+        e,
+        stackTrace,
+      );
       return {};
     }
   }
