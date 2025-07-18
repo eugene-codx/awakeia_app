@@ -13,16 +13,37 @@ import 'auth_state.dart';
 /// Notifier for managing authentication state
 /// Uses AsyncNotifier for better async operation handling
 class AuthNotifier extends AsyncNotifier<AuthState> {
-  late final AuthRepository _repository;
-  late final LoginUseCase _loginUseCase;
-  late final RegisterUseCase _registerUseCase;
-  late final Talker _talker;
+  AuthRepository? _repository;
+  LoginUseCase? _loginUseCase;
+  RegisterUseCase? _registerUseCase;
+  Talker? _talker;
 
   StreamSubscription<UserEntity?>? _authStateSubscription;
 
+  // Getters that ensure initialization
+  AuthRepository get repository {
+    _repository ??= ref.read(authRepositoryProvider);
+    return _repository!;
+  }
+
+  LoginUseCase get loginUseCase {
+    _loginUseCase ??= ref.read(loginUseCaseProvider);
+    return _loginUseCase!;
+  }
+
+  RegisterUseCase get registerUseCase {
+    _registerUseCase ??= ref.read(registerUseCaseProvider);
+    return _registerUseCase!;
+  }
+
+  Talker get talker {
+    _talker ??= ref.read(talkerProvider);
+    return _talker!;
+  }
+
   @override
   Future<AuthState> build() async {
-    // Get dependencies from ref
+    // Initialize dependencies
     _repository = ref.watch(authRepositoryProvider);
     _loginUseCase = ref.watch(loginUseCaseProvider);
     _registerUseCase = ref.watch(registerUseCaseProvider);
@@ -30,7 +51,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     // Listen to auth state changes
     _authStateSubscription?.cancel();
-    _authStateSubscription = _repository.authStateChanges.listen((user) {
+    _authStateSubscription = repository.authStateChanges.listen((user) {
       if (user != null) {
         state = AsyncData(AuthState.authenticated(user));
       } else {
@@ -49,21 +70,21 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   /// Check current authentication status
   Future<AuthState> _checkAuthStatus() async {
-    _talker.info('Checking authentication status');
+    talker.info('Checking authentication status');
 
-    final result = await _repository.getCurrentUser();
+    final result = await repository.getCurrentUser();
 
     return result.fold(
       (failure) {
-        _talker.error('Failed to get current user: ${failure.toMessage()}');
+        talker.error('Failed to get current user: ${failure.toMessage()}');
         return AuthState.unauthenticated(failure);
       },
       (user) {
         if (user != null) {
-          _talker.info('User authenticated: ${user.id}');
+          talker.info('User authenticated: ${user.id}');
           return AuthState.authenticated(user);
         } else {
-          _talker.info('User not authenticated');
+          talker.info('User not authenticated');
           return const AuthState.unauthenticated();
         }
       },
@@ -75,15 +96,15 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     state = const AsyncLoading();
 
     final params = LoginParams(email: email, password: password);
-    final result = await _loginUseCase.call(params);
+    final result = await loginUseCase.call(params);
 
     result.fold(
       (failure) {
-        _talker.error('Login failed: ${failure.toMessage()}');
+        talker.error('Login failed: ${failure.toMessage()}');
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        _talker.info('Login successful: ${user.id}');
+        talker.info('Login successful: ${user.id}');
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -94,15 +115,15 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     state = const AsyncLoading();
 
     final params = RegisterParams(email: email, password: password);
-    final result = await _registerUseCase.call(params);
+    final result = await registerUseCase.call(params);
 
     result.fold(
       (failure) {
-        _talker.error('Registration failed: ${failure.toMessage()}');
+        talker.error('Registration failed: ${failure.toMessage()}');
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        _talker.info('Registration successful: ${user.id}');
+        talker.info('Registration successful: ${user.id}');
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -112,15 +133,15 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> signInAsGuest() async {
     state = const AsyncLoading();
 
-    final result = await _repository.signInAsGuest();
+    final result = await repository.signInAsGuest();
 
     result.fold(
       (failure) {
-        _talker.error('Guest sign in failed: ${failure.toMessage()}');
+        talker.error('Guest sign in failed: ${failure.toMessage()}');
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        _talker.info('Guest sign in successful: ${user.id}');
+        talker.info('Guest sign in successful: ${user.id}');
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -130,16 +151,16 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> signOut() async {
     state = const AsyncLoading();
 
-    final result = await _repository.signOut();
+    final result = await repository.signOut();
 
     result.fold(
       (failure) {
-        _talker.error('Sign out failed: ${failure.toMessage()}');
+        talker.error('Sign out failed: ${failure.toMessage()}');
         // Even if sign out fails, we should unauthenticate locally
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (_) {
-        _talker.info('Sign out successful');
+        talker.info('Sign out successful');
         state = const AsyncData(AuthState.unauthenticated());
       },
     );
@@ -149,25 +170,25 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> updateProfile({String? name}) async {
     final currentUser = state.valueOrNull?.user;
     if (currentUser == null) {
-      _talker.error('Cannot update profile: no authenticated user');
+      talker.error('Cannot update profile: no authenticated user');
       return;
     }
 
     state = const AsyncLoading();
 
-    final result = await _repository.updateUserProfile(
+    final result = await repository.updateUserProfile(
       userId: currentUser.id,
       name: name,
     );
 
     result.fold(
       (failure) {
-        _talker.error('Profile update failed: ${failure.toMessage()}');
+        talker.error('Profile update failed: ${failure.toMessage()}');
         // Restore previous state with error
         state = AsyncData(AuthState.authenticated(currentUser));
       },
       (updatedUser) {
-        _talker.info('Profile updated successfully');
+        talker.info('Profile updated successfully');
         state = AsyncData(AuthState.authenticated(updatedUser));
       },
     );

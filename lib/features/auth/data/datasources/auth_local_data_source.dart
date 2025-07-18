@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../../../core/storage/secure_storage.dart';
 import '../models/user_model.dart';
 
@@ -41,9 +43,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> cacheUser(UserModel user) async {
     final userJson = user.toJson();
+    // Convert Map to JSON string before saving
+    final jsonString = jsonEncode(userJson);
     await _secureStorage.write(
       key: _userKey,
-      value: userJson as String,
+      value: jsonString,
     );
 
     // Also cache if user is guest
@@ -55,9 +59,11 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<UserModel?> getCachedUser() async {
-    final userJson = await _secureStorage.read(key: _userKey);
-    if (userJson != null) {
-      return UserModel.fromJson(userJson as Map<String, dynamic>);
+    final jsonString = await _secureStorage.read(key: _userKey);
+    if (jsonString != null) {
+      // Parse JSON string to Map
+      final userJson = jsonDecode(jsonString) as Map<String, dynamic>;
+      return UserModel.fromJson(userJson);
     }
     return null;
   }

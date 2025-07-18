@@ -88,14 +88,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
       _talker.info('Sign in successful for user: ${userEntity.id}');
       return Right(userEntity);
-    } on ServerException catch (e) {
-      _talker.error('Server error during sign in', e);
+    } on ServerException catch (e, stackTrace) {
+      _talker.error('Server error during sign in', e, stackTrace);
       return Left(AuthFailure.serverError(e.message));
-    } on NetworkException {
-      _talker.error('Network error during sign in');
+    } on NetworkException catch (e, stackTrace) {
+      _talker.error('Network error during sign in', e, stackTrace);
       return const Left(AuthFailure.networkError());
-    } catch (e) {
-      _talker.error('Unexpected error during sign in', e);
+    } catch (e, stackTrace) {
+      _talker.error('Unexpected error during sign in', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -138,8 +138,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       _talker.info('Registration successful for user: ${userEntity.id}');
       return Right(userEntity);
-    } on ServerException catch (e) {
-      _talker.error('Server error during registration', e);
+    } on ServerException catch (e, stackTrace) {
+      _talker.error('Server error during registration', e, stackTrace);
 
       // Handle specific registration errors
       if (e.message.contains('already exists')) {
@@ -147,11 +147,11 @@ class AuthRepositoryImpl implements AuthRepository {
       }
 
       return Left(AuthFailure.serverError(e.message));
-    } on NetworkException {
-      _talker.error('Network error during registration');
+    } on NetworkException catch (e, stackTrace) {
+      _talker.error('Network error during registration', e, stackTrace);
       return const Left(AuthFailure.networkError());
-    } catch (e) {
-      _talker.error('Unexpected error during registration', e);
+    } catch (e, stackTrace) {
+      _talker.error('Unexpected error during registration', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -181,8 +181,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       _talker.info('Guest sign in successful');
       return Right(userEntity);
-    } catch (e) {
-      _talker.error('Error during guest sign in', e);
+    } catch (e, stackTrace) {
+      _talker.error('Error during guest sign in', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -209,8 +209,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
       _talker.info('Sign out successful');
       return const Right(unit);
-    } catch (e) {
-      _talker.error('Error during sign out', e);
+    } catch (e, stackTrace) {
+      _talker.error('Error during sign out', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -248,8 +248,8 @@ class AuthRepositoryImpl implements AuthRepository {
       // No cached user and no remote user
       _talker.info('No current user found');
       return const Right(null);
-    } catch (e) {
-      _talker.error('Error getting current user', e);
+    } catch (e, stackTrace) {
+      _talker.error('Error getting current user', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -259,8 +259,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final cachedUser = await _localDataSource.getCachedUser();
       return cachedUser != null;
-    } catch (e) {
-      _talker.error('Error checking authentication status', e);
+    } catch (e, stackTrace) {
+      _talker.error('Error checking authentication status', e, stackTrace);
       return false;
     }
   }
@@ -308,14 +308,14 @@ class AuthRepositoryImpl implements AuthRepository {
 
       _talker.info('Profile update successful');
       return Right(userEntity);
-    } on ServerException catch (e) {
-      _talker.error('Server error during profile update', e);
+    } on ServerException catch (e, stackTrace) {
+      _talker.error('Server error during profile update', e, stackTrace);
       return Left(AuthFailure.serverError(e.message));
     } on NetworkException {
       _talker.error('Network error during profile update');
       return const Left(AuthFailure.networkError());
-    } catch (e) {
-      _talker.error('Error updating profile', e);
+    } catch (e, stackTrace) {
+      _talker.error('Error updating profile', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
