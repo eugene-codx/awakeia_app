@@ -1,164 +1,103 @@
+// THIS IS A COMPATIBILITY ADAPTER
+// This file provides backward compatibility with the old auth system
+// It will be removed when screens are migrated to the new architecture
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/auth/auth.dart';
+import '../features/auth/presentation/providers/auth_providers.dart';
 import '../models/user.dart';
 
-// AuthNotifier class that extends StateNotifier
-// This class manages the authentication state of the application
+/// Legacy AuthNotifier for backward compatibility
+/// This wraps the new auth system to work with old screens
 class AuthNotifier extends StateNotifier<AuthStatus> {
-  AuthNotifier() : super(AuthStatus.initial()) {
-    // Check if user is already logged in when app starts
-    _checkAuthStatus();
+  AuthNotifier(this._ref) : super(AuthStatus.initial()) {
+    // Listen to new auth state and convert to old format
+    _ref.listen(authNotifierProvider, (previous, next) {
+      next.when(
+        data: (authState) {
+          authState.when(
+            initial: () => state = AuthStatus.initial(),
+            loading: () => state = AuthStatus.loading(),
+            authenticated: (user) {
+              // Convert new UserEntity to old User model
+              final oldUser = User(
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                createdAt: user.createdAt,
+                isGuest: user.isGuest,
+              );
+              state = AuthStatus.authenticated(oldUser);
+            },
+            unauthenticated: (failure) {
+              state = AuthStatus.unauthenticated(failure?.toMessage());
+            },
+          );
+        },
+        loading: () => state = AuthStatus.loading(),
+        error: (error, _) =>
+            state = AuthStatus.unauthenticated(error.toString()),
+      );
+    });
   }
+  final Ref _ref;
 
-  // Private method to check authentication status on app start
-  Future<void> _checkAuthStatus() async {
-    state = AuthStatus.loading();
-
-    // Simulate checking stored authentication
-    // In real app, this would check SharedPreferences, Secure Storage, etc.
-    await Future<void>.delayed(const Duration(seconds: 1));
-
-    // For now, assume user is not authenticated
-    state = AuthStatus.unauthenticated();
-  }
-
-  // Login method
+  /// Login method - delegates to new system
   Future<void> login(String email, String password) async {
     state = AuthStatus.loading();
-
-    try {
-      // Simulate API call delay
-      await Future<void>.delayed(const Duration(seconds: 2));
-
-      // Simple validation for demo purposes
-      if (email.isEmpty || password.isEmpty) {
-        state =
-            AuthStatus.unauthenticated('Email and password cannot be empty');
-        return;
-      }
-
-      if (!email.contains('@')) {
-        state = AuthStatus.unauthenticated('Enter a valid email');
-        return;
-      }
-
-      if (password.length < 6) {
-        state = AuthStatus.unauthenticated(
-          'Password must be at least 6 characters long',
-        );
-        return;
-      }
-
-      // Create user object (in real app, this would come from API)
-      final user = User(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-        email: email,
-        name: email.split('@')[0], // Use part before @ as name
-        createdAt: DateTime.now(),
-      );
-
-      state = AuthStatus.authenticated(user);
-    } catch (e) {
-      state = AuthStatus.unauthenticated('An error occurred during login: $e');
-    }
+    final signIn = _ref.read(signInActionProvider);
+    await signIn(email, password);
   }
 
-  // Register method
+  /// Register method - delegates to new system
   Future<void> register(String email, String password) async {
     state = AuthStatus.loading();
-
-    try {
-      // Simulate API call delay
-      await Future<void>.delayed(const Duration(seconds: 2));
-
-      // Simple validation for demo purposes
-      if (email.isEmpty || password.isEmpty) {
-        state =
-            AuthStatus.unauthenticated('Email and password cannot be empty');
-        return;
-      }
-
-      if (!email.contains('@')) {
-        state = AuthStatus.unauthenticated('Enter a valid email');
-        return;
-      }
-
-      if (password.length < 6) {
-        state = AuthStatus.unauthenticated(
-          'Password must be at least 6 characters long',
-        );
-        return;
-      }
-
-      // Create new user object (in real app, this would come from API)
-      final user = User(
-        id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-        email: email,
-        name: email.split('@')[0], // Use part before @ as name
-        createdAt: DateTime.now(),
-      );
-
-      state = AuthStatus.authenticated(user);
-    } catch (e) {
-      state = AuthStatus.unauthenticated(
-        'An error occurred during registration: $e',
-      );
-    }
+    final register = _ref.read(registerActionProvider);
+    await register(email, password);
   }
 
-  // Login as guest method
+  /// Login as guest - delegates to new system
   void loginAsGuest() {
-    final guestUser = User.guest();
-    state = AuthStatus.authenticated(guestUser);
+    final signInAsGuest = _ref.read(signInAsGuestActionProvider);
+    signInAsGuest();
   }
 
-  // Logout method
+  /// Logout method - delegates to new system
   Future<void> logout() async {
     state = AuthStatus.loading();
-
-    // Simulate logout process
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-
-    state = AuthStatus.unauthenticated();
+    final signOut = _ref.read(signOutActionProvider);
+    await signOut();
   }
 
-  // Update user profile method
+  /// Update user profile - delegates to new system
   void updateUserProfile({String? name}) {
-    final currentUser = state.user;
-    if (currentUser != null) {
-      final updatedUser = currentUser.copyWith(name: name);
-      state = AuthStatus.authenticated(updatedUser);
-    }
+    final updateProfile = _ref.read(updateProfileActionProvider);
+    updateProfile(name: name);
   }
 }
 
-// Provider for AuthNotifier
-// This is the main provider that other parts of the app will use
+/// Legacy auth provider for backward compatibility
 final authProvider = StateNotifierProvider<AuthNotifier, AuthStatus>((ref) {
-  return AuthNotifier();
+  return AuthNotifier(ref);
 });
 
-// Convenience providers for common use cases
-
-// Provider that returns only the current user
+/// Legacy convenience providers
 final currentUserProvider = Provider<User?>((ref) {
   final authStatus = ref.watch(authProvider);
   return authStatus.user;
 });
 
-// Provider that returns whether user is authenticated
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final authStatus = ref.watch(authProvider);
   return authStatus.isAuthenticated;
 });
 
-// Provider that returns whether authentication is loading
 final isAuthLoadingProvider = Provider<bool>((ref) {
   final authStatus = ref.watch(authProvider);
   return authStatus.isLoading;
 });
 
-// Provider that returns current authentication error
 final authErrorProvider = Provider<String?>((ref) {
   final authStatus = ref.watch(authProvider);
   return authStatus.error;

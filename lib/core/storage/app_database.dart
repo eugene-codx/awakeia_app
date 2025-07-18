@@ -106,7 +106,7 @@ class AppDatabase extends _$AppDatabase {
     try {
       // Try to read existing password
       final existingPassword =
-          await SecureStorage.instance.read(StorageKeys.databasePassword);
+          await SecureStorage.instance.read(key: StorageKeys.databasePassword);
 
       if (existingPassword != null && existingPassword.isNotEmpty) {
         AppLogger.debug('Using existing database password');
@@ -116,7 +116,7 @@ class AppDatabase extends _$AppDatabase {
       // Generate new password
       final newPassword = _generateSecurePassword();
       await SecureStorage.instance
-          .write(StorageKeys.databasePassword, newPassword);
+          .write(key: StorageKeys.databasePassword, value: newPassword);
 
       AppLogger.debug('Generated new database password');
       return newPassword;
@@ -221,7 +221,7 @@ class AppDatabase extends _$AppDatabase {
 
       // Mark database as initialized
       await SecureStorage.instance
-          .write(StorageKeys.databaseInitialized, 'true');
+          .write(key: StorageKeys.databaseInitialized, value: 'true');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to initialize database', e, stackTrace);
       rethrow;
@@ -274,7 +274,8 @@ class AppDatabase extends _$AppDatabase {
       final isEncrypted = result.isNotEmpty;
 
       AppLogger.debug(
-          'Database encryption test: ${isEncrypted ? 'PASS' : 'FAIL'}',);
+        'Database encryption test: ${isEncrypted ? 'PASS' : 'FAIL'}',
+      );
       return isEncrypted;
     } catch (e, stackTrace) {
       AppLogger.error('Database encryption test failed', e, stackTrace);

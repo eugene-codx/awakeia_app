@@ -10,7 +10,6 @@ import 'api_endpoints.dart';
 /// Dio HTTP client configuration and setup
 /// Provides a centralized way to configure network requests
 class DioClient {
-
   /// Private constructor
   DioClient._internal() {
     _dio = Dio();
@@ -87,7 +86,8 @@ class DioClient {
       final requiresAuth = options.extra['requiresAuth'] as bool? ?? false;
 
       if (requiresAuth) {
-        final token = await SecureStorage.instance.read(StorageKeys.authToken);
+        final token =
+            await SecureStorage.instance.read(key: StorageKeys.authToken);
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -166,15 +166,15 @@ class DioClient {
   void _handleUnauthorized() {
     AppLogger.warning('Unauthorized access - token may be expired');
     // Clear stored token
-    SecureStorage.instance.delete(StorageKeys.authToken);
+    SecureStorage.instance.delete(key: StorageKeys.authToken);
     // Note: In a real app, you might want to navigate to login screen
     // This would typically be handled by a navigation service
   }
 
   /// Clear all stored authentication data
   Future<void> clearAuthData() async {
-    await SecureStorage.instance.delete(StorageKeys.authToken);
-    await SecureStorage.instance.delete(StorageKeys.refreshToken);
+    await SecureStorage.instance.delete(key: StorageKeys.authToken);
+    await SecureStorage.instance.delete(key: StorageKeys.refreshToken);
   }
 
   /// Update base URL (useful for environment switching)

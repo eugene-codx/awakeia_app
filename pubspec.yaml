@@ -46,6 +46,11 @@ dependencies:
   talker: ^4.9.2
   talker_flutter: ^4.9.2
 
+  # Dartz for functional programming
+  dartz: ^0.10.1
+
+  equatable: ^2.0.5
+
   path: any
   path_provider: any
   sqlite3: any
