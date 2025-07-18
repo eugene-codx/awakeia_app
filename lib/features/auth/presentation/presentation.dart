@@ -3,7 +3,6 @@
 
 // Providers
 export 'providers/auth_notifier.dart';
-export 'providers/auth_providers.dart';
 export 'providers/auth_state.dart';
 
 // Screens

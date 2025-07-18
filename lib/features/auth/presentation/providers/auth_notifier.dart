@@ -7,6 +7,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_use_case.dart';
 import '../../domain/usecases/register_use_case.dart';
+import 'auth_providers.dart';
 import 'auth_state.dart';
 
 /// Notifier for managing authentication state
@@ -171,7 +172,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       },
     );
   }
-
 }
 
 // Placeholder providers - will be defined in next step
@@ -179,14 +179,4 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   throw UnimplementedError('authRepositoryProvider not implemented');
 });
 
-final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
-  throw UnimplementedError('loginUseCaseProvider not implemented');
-});
-
-final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
-  throw UnimplementedError('registerUseCaseProvider not implemented');
-});
-
-final talkerProvider = Provider<Talker>((ref) {
-  throw UnimplementedError('talkerProvider not implemented');
-});
+// Providers are imported from auth_providers.dart
