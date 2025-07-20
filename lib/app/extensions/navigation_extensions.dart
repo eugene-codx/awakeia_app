@@ -21,6 +21,38 @@ extension NavigationExtensions on BuildContext {
     }
   }
 
+  /// Show coming soon message
+  void showComingSoon(String feature) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text('$feature coming soon!'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Show error message
+  void showError(String message) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  /// Show success message
+  void showSuccess(String message) {
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   /// Navigate to home
   void goToHome() => go('/home');
 
