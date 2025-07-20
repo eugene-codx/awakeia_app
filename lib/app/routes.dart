@@ -2,27 +2,89 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/logging/app_logger.dart';
+import '../features/auth/auth.dart';
+import '../features/auth/presentation/providers/auth_providers.dart';
+import '../screens/auth_loading_screen.dart';
 import '../screens/first_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/register_screen.dart';
-import '../screens/widgets_demo_screen.dart';
+import '../screens/route_error_screen.dart';
+import 'guards/auth_guards.dart';
 
-// Provider for router configuration
-// This file defines the routes for the application using GoRouter.
+// Provider for router configuration with auth state listening
 final routerProvider = Provider<GoRouter>((ref) {
-  return GoRouter(
-    // First route - the first screen
-    initialLocation: '/first',
+  // Watch auth state to rebuild router when auth changes
+  final authState = ref.watch(authNotifierProvider);
 
-    //
-    // Determination of all application routes
+  return GoRouter(
+    // Initial location depends on auth state
+    initialLocation: authState.when(
+      data: (state) => state.when(
+        initial: () => '/',
+        loading: () => '/',
+        authenticated: (_) => '/home',
+        unauthenticated: (_) => '/first',
+      ),
+      loading: () => '/',
+      error: (_, __) => '/first',
+    ),
+
+    // Refresh listener for auth state changes
+    refreshListenable: _RouterRefreshStream(ref),
+
+    // Global redirect for auth state changes
+    redirect: (context, state) {
+      final isLoading = authState.isLoading;
+      final authStateValue = authState.valueOrNull;
+
+      // Show loading screen while checking auth
+      if (isLoading || authStateValue == null) {
+        return '/';
+      }
+
+      final isAuthenticated = authStateValue.isAuthenticated;
+      final isOnLoadingPage = state.matchedLocation == '/';
+
+      // Redirect from loading page once auth state is determined
+      if (isOnLoadingPage && !isLoading) {
+        return isAuthenticated ? '/home' : '/first';
+      }
+
+      // Apply route-specific guards
+      final location = state.matchedLocation;
+
+      // Check if trying to access protected route without auth
+      if (!isAuthenticated && isProtectedRoute(location)) {
+        AppLogger.info('Redirecting to login from protected route: $location');
+        return '/login?redirect=$location';
+      }
+
+      // Check if authenticated user trying to access guest-only route
+      if (isAuthenticated && isGuestOnlyRoute(location)) {
+        AppLogger.info('Redirecting to home from guest route: $location');
+        return '/home';
+      }
+
+      return null;
+    },
+
+    // Route definitions
     routes: [
-      // First Screen - splash/onboarding
+      // Loading route - shown while checking auth
+      GoRoute(
+        path: '/',
+        name: 'loading',
+        builder: (context, state) => const AuthLoadingScreen(),
+      ),
+
+      // First Screen - welcome/onboarding
       GoRoute(
         path: '/first',
         name: 'first',
         builder: (context, state) => const FirstScreen(),
+        redirect: optionalAuthGuard,
       ),
 
       // Login Screen
@@ -30,6 +92,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+        redirect: guestGuard,
       ),
 
       // Register Screen
@@ -37,52 +100,109 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterScreen(),
+        redirect: guestGuard,
       ),
 
-      // Home Screen
+      // Home Screen - requires authentication
       GoRoute(
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+        redirect: authGuard,
       ),
 
-      // Home Screen
+      // Profile Screen (placeholder for future)
       GoRoute(
-        path: '/demo',
-        name: 'demo',
-        builder: (context, state) => const WidgetsDemoScreen(),
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('Profile Screen - Coming Soon'),
+          ),
+        ),
+        redirect: authGuard,
+      ),
+
+      // Habits Screen (placeholder for future)
+      GoRoute(
+        path: '/habits',
+        name: 'habits',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('Habits Screen - Coming Soon'),
+          ),
+        ),
+        redirect: authGuard,
+      ),
+
+      // Statistics Screen (placeholder for future)
+      GoRoute(
+        path: '/statistics',
+        name: 'statistics',
+        builder: (context, state) => const Scaffold(
+          body: Center(
+            child: Text('Statistics Screen - Coming Soon'),
+          ),
+        ),
+        redirect: authGuard,
       ),
     ],
 
-    // Processing redirects errors
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Page not found',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Path: ${state.uri}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => context.go('/first'),
-              child: const Text('To main page'),
-            ),
-          ],
-        ),
-      ),
+    // Error page builder
+    errorBuilder: (context, state) => RouteErrorScreen(
+      error: state.error?.toString(),
     ),
+
+    // Debug logging
+    debugLogDiagnostics: true,
+
+    // Navigation observers
+    observers: [
+      _LoggingNavigatorObserver(),
+    ],
   );
 });
+
+/// Custom refresh listenable for router
+class _RouterRefreshStream extends ChangeNotifier {
+  _RouterRefreshStream(this._ref) {
+    // Listen to auth state changes
+    _ref.listen(
+      authNotifierProvider,
+      (_, __) => notifyListeners(),
+    );
+  }
+
+  final Ref _ref;
+}
+
+/// Navigator observer for logging navigation events
+class _LoggingNavigatorObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    AppLogger.navigation(
+      'Pushed: ${route.settings.name} (from: ${previousRoute?.settings.name})',
+    );
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    AppLogger.navigation(
+      'Popped: ${route.settings.name} (to: ${previousRoute?.settings.name})',
+    );
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    AppLogger.navigation(
+      'Removed: ${route.settings.name} (previous: ${previousRoute?.settings.name})',
+    );
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    AppLogger.navigation(
+      'Replaced: ${oldRoute?.settings.name} with ${newRoute?.settings.name}',
+    );
+  }
+}

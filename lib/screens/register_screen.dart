@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../app/extensions/navigation_extensions.dart';
+import '../core/logging/app_logger.dart';
+import '../features/auth/presentation/providers/auth_providers.dart';
 import '../generated/app_localizations.dart';
-import '../providers/auth_provider.dart';
 import '../shared/shared.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -26,44 +28,61 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
 
+  // Track if we're currently registering
+  bool _isRegistering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    AppLogger.info('RegisterScreen initialized');
+  }
+
   @override
   void dispose() {
     // Clean up controllers
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    AppLogger.info('RegisterScreen disposed');
     super.dispose();
   }
 
   // Handle registration action
   Future<void> _handleRegister() async {
-    if (_formKey.currentState!.validate()) {
-      // Call auth provider register method
-      await ref.read(authProvider.notifier).register(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      // Check if registration was successful
-      final authStatus = ref.read(authProvider);
-      if (authStatus.isAuthenticated && mounted) {
-        context.go('/home');
-      } else if (authStatus.error != null && mounted) {
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authStatus.error!),
-            backgroundColor: AppColors.error,
-          ),
-        );
+    // Prevent multiple registration attempts
+    if (_isRegistering) return;
+
+    setState(() => _isRegistering = true);
+
+    try {
+      // Get register action from provider
+      final register = ref.read(registerActionProvider);
+
+      // Perform registration
+      await register(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+
+      // Check if we have a redirect URL
+      if (mounted) {
+        final redirect = context.queryParam('redirect');
+        if (redirect != null && redirect.isNotEmpty) {
+          AppLogger.info('Redirecting to: $redirect after registration');
+          context.go(redirect);
+        } else {
+          context.goToHome();
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isRegistering = false);
       }
     }
-  }
-
-  // Handle back navigation
-  void _handleBack() {
-    // Navigate back to first screen
-    context.go('/first');
   }
 
   // Email validation
@@ -72,7 +91,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return l10n.emailRequired;
     }
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-      return l10n.emailRequired;
+      return l10n.emailInvalid;
     }
     return null;
   }
@@ -103,15 +122,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     // Get localization instance
     final l10n = context.l10n;
-    // Watch auth state for loading and error handling
-    final authStatus = ref.watch(authProvider);
-    final isLoading = authStatus.isLoading;
+
+    // Watch auth state for error handling
+    ref.listen(authNotifierProvider, (previous, next) {
+      next.whenOrNull(
+        data: (authState) {
+          // Show error message if registration failed
+          if (authState.isUnauthenticated && authState.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(authState.errorMessage!),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
+      );
+    });
+
+    // Get loading state from auth
+    final isLoading = ref.watch(isAuthLoadingProvider) || _isRegistering;
 
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) {
-        if (!didPop) context.go('/first');
-      },
+      canPop: true,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -124,231 +157,251 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           elevation: 0,
           leading: CustomBackButton(
-            onPressed: _handleBack,
+            onPressed: () => context.goToFirst(),
             tooltip: l10n.back,
           ),
         ),
-        // Using GradientBackground widget
         body: GradientBackground(
-          child: LoadingOverlay(
-            isLoading: isLoading,
-            loadingText: l10n.creatingAccount,
-            child: SafeArea(
-              child: SingleChildScrollView(
-                padding: AppSpacing.screenPadding,
-                child: Column(
-                  children: [
-                    const SizedBox(height: AppSpacing.xxl),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: AppSpacing.screenPadding,
+              child: Column(
+                children: [
+                  const SizedBox(height: AppSpacing.xxl),
 
-                    // Title using centralized text styles
-                    Text(
-                      l10n.createAccount,
-                      style: AppTextStyles.headline2,
-                    ),
+                  // Title
+                  Text(
+                    l10n.createAccount,
+                    style: AppTextStyles.headline2,
+                  ),
 
-                    const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.sm),
 
-                    // Subtitle
-                    Text(
-                      l10n.startYourJourney,
-                      style: AppTextStyles.subtitle,
-                      textAlign: TextAlign.center,
-                    ),
+                  // Subtitle
+                  Text(
+                    l10n.startYourJourney,
+                    style: AppTextStyles.subtitle,
+                    textAlign: TextAlign.center,
+                  ),
 
-                    const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.xxl),
 
-                    // Registration form
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          // Email field using CustomTextField widget
-                          CustomTextField(
-                            controller: _emailController,
-                            hintText: l10n.emailAddress,
-                            prefixIcon: Icons.email_outlined,
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (value) => _validateEmail(value, l10n),
-                          ),
+                  // Registration form
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // Email field
+                        CustomTextField(
+                          controller: _emailController,
+                          hintText: l10n.emailAddress,
+                          prefixIcon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          enabled: !isLoading,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) => _validateEmail(value, l10n),
+                        ),
 
-                          const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.md),
 
-                          // Password field using CustomTextField widget
-                          CustomTextField(
-                            controller: _passwordController,
-                            hintText: l10n.password,
-                            prefixIcon: Icons.lock_outline,
-                            obscureText: _isPasswordHidden,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordHidden
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: AppColors.secondaryIcon,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordHidden = !_isPasswordHidden;
-                                });
-                              },
+                        // Password field
+                        CustomTextField(
+                          controller: _passwordController,
+                          hintText: l10n.password,
+                          prefixIcon: Icons.lock_outline,
+                          obscureText: _isPasswordHidden,
+                          enabled: !isLoading,
+                          textInputAction: TextInputAction.next,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: AppColors.secondaryIcon,
                             ),
-                            validator: (value) =>
-                                _validatePassword(value, l10n),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordHidden = !_isPasswordHidden;
+                              });
+                            },
                           ),
+                          validator: (value) => _validatePassword(value, l10n),
+                        ),
 
-                          const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.md),
 
-                          // Confirm password field using CustomTextField widget
-                          CustomTextField(
-                            controller: _confirmPasswordController,
-                            hintText: l10n.confirmPassword,
-                            prefixIcon: Icons.lock_outline,
-                            obscureText: _isConfirmPasswordHidden,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isConfirmPasswordHidden
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: AppColors.secondaryIcon,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isConfirmPasswordHidden =
-                                      !_isConfirmPasswordHidden;
-                                });
-                              },
+                        // Confirm password field
+                        CustomTextField(
+                          controller: _confirmPasswordController,
+                          hintText: l10n.confirmPassword,
+                          prefixIcon: Icons.lock_outline,
+                          obscureText: _isConfirmPasswordHidden,
+                          enabled: !isLoading,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _handleRegister(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isConfirmPasswordHidden
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: AppColors.secondaryIcon,
                             ),
-                            validator: (value) =>
-                                _validateConfirmPassword(value, l10n),
+                            onPressed: () {
+                              setState(() {
+                                _isConfirmPasswordHidden =
+                                    !_isConfirmPasswordHidden;
+                              });
+                            },
                           ),
+                          validator: (value) =>
+                              _validateConfirmPassword(value, l10n),
+                        ),
 
-                          const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: AppSpacing.lg),
 
-                          // Terms and conditions info
-                          PrimaryCard(
-                            padding: AppSpacing.paddingMD,
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.info_outline,
-                                  color: AppColors.info,
-                                  size: 20,
+                        // Terms and conditions info
+                        PrimaryCard(
+                          padding: AppSpacing.paddingMD,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: AppColors.info.withValues(alpha: 0.8),
+                                size: 20,
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  l10n.termsAndConditions,
+                                  style: AppTextStyles.caption,
                                 ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Expanded(
-                                  child: Text(
-                                    l10n.termsAndConditions,
-                                    style: AppTextStyles.caption,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: AppSpacing.lg),
+
+                        // Register button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: isLoading ? null : _handleRegister,
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.primaryButtonText,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    l10n.register,
+                                    style: AppTextStyles.buttonLarge,
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: AppSpacing.lg),
-
-                          // Register button - uses theme automatically
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _handleRegister,
-                              child: Text(
-                                l10n.register,
-                                style: AppTextStyles.buttonLarge,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.xl),
-
-                    // Section divider using custom widget
-                    SectionDivider(title: l10n.orSignUpWith),
-
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Social registration buttons using SocialLoginButton widget
-                    Row(
-                      children: [
-                        // Google registration
-                        Expanded(
-                          child: SocialLoginButton(
-                            icon: Icons.g_mobiledata,
-                            text: l10n.google,
-                            onPressed: () {
-                              // TODO: Implement Google registration
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.googleSignInComingSoon),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        const SizedBox(width: AppSpacing.md),
-
-                        // Facebook registration
-                        Expanded(
-                          child: SocialLoginButton(
-                            icon: Icons.facebook,
-                            text: l10n.facebook,
-                            onPressed: () {
-                              // TODO: Implement Facebook registration
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.facebookSignInComingSoon),
-                                ),
-                              );
-                            },
                           ),
                         ),
                       ],
                     ),
+                  ),
 
-                    const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.xl),
 
-                    // Additional social options (example of extending functionality)
-                    SocialLoginButton(
-                      icon: Icons.apple,
-                      text: l10n.apple,
-                      onPressed: () {
-                        // TODO: Implement Apple registration
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.appleSignInComingSoon),
-                          ),
-                        );
-                      },
-                    ),
+                  // Section divider
+                  SectionDivider(title: l10n.orSignUpWith),
 
-                    const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.lg),
 
-                    // Login prompt
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          l10n.haveAccount,
-                          style: AppTextStyles.linkSecondary,
-                        ),
-                        TextButton(
+                  // Social registration buttons
+                  Row(
+                    children: [
+                      // Google registration
+                      Expanded(
+                        child: SocialLoginButton(
+                          icon: Icons.g_mobiledata,
+                          text: l10n.google,
+                          enabled: !isLoading,
                           onPressed: () {
-                            context.go('/login');
+                            // TODO: Implement Google registration
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.googleSignInComingSoon),
+                              ),
+                            );
                           },
-                          child: Text(
-                            l10n.login,
-                            style: AppTextStyles.link,
-                          ),
                         ),
-                      ],
-                    ),
+                      ),
 
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-                ),
+                      const SizedBox(width: AppSpacing.md),
+
+                      // Facebook registration
+                      Expanded(
+                        child: SocialLoginButton(
+                          icon: Icons.facebook,
+                          text: l10n.facebook,
+                          enabled: !isLoading,
+                          onPressed: () {
+                            // TODO: Implement Facebook registration
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(l10n.facebookSignInComingSoon),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  // Apple registration
+                  SocialLoginButton(
+                    icon: Icons.apple,
+                    text: l10n.apple,
+                    enabled: !isLoading,
+                    onPressed: () {
+                      // TODO: Implement Apple registration
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.appleSignInComingSoon),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // Login prompt
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        l10n.haveAccount,
+                        style: AppTextStyles.linkSecondary,
+                      ),
+                      TextButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                // Preserve redirect parameter
+                                final redirect = context.queryParam('redirect');
+                                context.goToLogin(redirect: redirect);
+                              },
+                        child: Text(
+                          l10n.login,
+                          style: AppTextStyles.link,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: AppSpacing.lg),
+                ],
               ),
             ),
           ),

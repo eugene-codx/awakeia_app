@@ -182,6 +182,9 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.validator,
     this.onChanged,
+    this.enabled = true,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   final String hintText;
@@ -192,6 +195,9 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
+  final bool enabled;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +208,9 @@ class CustomTextField extends StatelessWidget {
       style: AppTextStyles.inputText,
       validator: validator,
       onChanged: onChanged,
+      enabled: enabled,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted,
       decoration: AppDecorations.primaryInput.copyWith(
         hintText: hintText,
         prefixIcon: prefixIcon != null
@@ -222,17 +231,19 @@ class SocialLoginButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.text,
+    this.enabled = true,
     required this.onPressed,
   });
 
   final IconData icon;
   final String text;
+  final bool enabled;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
-      onPressed: onPressed,
+      onPressed: enabled ? onPressed : null,
       style: OutlinedButton.styleFrom(
         padding: AppSpacing.verticalMD,
         shape: RoundedRectangleBorder(
