@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/base/base_view_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../auth/domain/failures/auth_failure.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../auth/presentation/providers/auth_state.dart';
 
 /// Состояние экрана onboarding/welcome
 class OnboardingState {
@@ -66,15 +68,15 @@ class OnboardingViewModel extends BaseViewModelWithState<OnboardingState> {
   void _checkInitialAuthState() {
     final authState = _ref.read(authNotifierProvider);
     authState.whenOrNull(
-      data: (state) {
-        final isAuthenticated = state.isAuthenticated;
-        setState(state.copyWith(showAuthenticatedView: isAuthenticated));
+      data: (authStateData) {
+        final isAuthenticated = authStateData.isAuthenticated;
+        setState(state?.copyWith(showAuthenticatedView: isAuthenticated));
       },
     );
   }
 
   /// Обработка изменения состояния аутентификации
-  void _onAuthStateChanged(authState) {
+  void _onAuthStateChanged(AuthState authState) {
     AppLogger.debug('Auth state changed in OnboardingViewModel');
 
     authState.when(
@@ -84,14 +86,14 @@ class OnboardingViewModel extends BaseViewModelWithState<OnboardingState> {
       loading: () {
         // Состояние loading обрабатывается отдельно
       },
-      authenticated: (user) {
+      authenticated: (UserEntity user) {
         setState(state?.copyWith(
           showAuthenticatedView: true,
           isSigningInAsGuest: false,
         ),);
         AppLogger.debug('User authenticated: ${user.id}');
       },
-      unauthenticated: (failure) {
+      unauthenticated: (AuthFailure? failure) {
         setState(state?.copyWith(
           showAuthenticatedView: false,
           isSigningInAsGuest: false,
