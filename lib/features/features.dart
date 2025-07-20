@@ -3,6 +3,8 @@
 
 // Auth feature
 export 'auth/auth.dart';
+export 'home/home.dart';
+export 'onboarding/onboarding.dart';
 
 // Future features can be added here:
 // export 'habits/habits.dart';
