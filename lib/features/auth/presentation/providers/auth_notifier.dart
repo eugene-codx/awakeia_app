@@ -195,9 +195,4 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 }
 
-// Placeholder providers - will be defined in next step
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  throw UnimplementedError('authRepositoryProvider not implemented');
-});
-
 // Providers are imported from auth_providers.dart

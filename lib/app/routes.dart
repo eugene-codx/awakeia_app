@@ -3,69 +3,84 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/logging/app_logger.dart';
-import '../features/auth/auth.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
 import '../features/auth/presentation/screens/auth_loading_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/onboarding/presentation/screens/first_screen.dart';
-import '../screens/widgets_demo_screen.dart'; // Временно оставляем для демо
 import '../shared/screens/route_error_screen.dart';
+import '../shared/screens/widgets_demo_screen.dart';
 import 'guards/auth_guards.dart';
+
+// First launch provider
+final isFirstLaunchProvider = FutureProvider<bool>((ref) async {
+  final secureStorage = ref.watch(secureStorageProvider);
+
+  try {
+    // Check if we have a flag indicating app has been launched before
+    final hasLaunched = await secureStorage.read(key: 'has_launched');
+
+    if (hasLaunched == null) {
+      // First launch - set the flag
+      await secureStorage.write(key: 'has_launched', value: 'true');
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    // On error, assume not first launch
+    AppLogger.error('Error checking first launch status', e);
+    return false;
+  }
+});
 
 // Provider for router configuration with auth state listening
 final routerProvider = Provider<GoRouter>((ref) {
-  // Watch auth state to rebuild router when auth changes
-  final authState = ref.watch(authNotifierProvider);
-
   return GoRouter(
-    // Initial location depends on auth state
-    initialLocation: authState.when(
-      data: (state) => state.when(
-        initial: () => '/',
-        loading: () => '/',
-        authenticated: (_) => '/home',
-        unauthenticated: (_) => '/first',
-      ),
-      loading: () => '/',
-      error: (_, __) => '/first',
-    ),
+    // Always start from loading screen
+    initialLocation: '/',
 
     // Refresh listener for auth state changes
     refreshListenable: _RouterRefreshStream(ref),
 
     // Global redirect for auth state changes
     redirect: (context, state) {
+      final authState = ref.read(authNotifierProvider);
+      final location = state.matchedLocation;
+
+      // If we're on the loading screen
+      if (location == '/') {
+        // Allow loading screen to handle navigation
+        return null;
+      }
+
+      // For other routes, check auth status
       final isLoading = authState.isLoading;
       final authStateValue = authState.valueOrNull;
 
-      // Show loading screen while checking auth
-      if (isLoading || authStateValue == null) {
+      // If auth is still loading and we're not on loading screen, redirect there
+      if ((isLoading || authStateValue == null) && location != '/') {
         return '/';
       }
 
-      final isAuthenticated = authStateValue.isAuthenticated;
-      final isOnLoadingPage = state.matchedLocation == '/';
+      // If auth state is determined, apply route guards
+      if (authStateValue != null) {
+        final isAuthenticated = authStateValue.isAuthenticated;
 
-      // Redirect from loading page once auth state is determined
-      if (isOnLoadingPage && !isLoading) {
-        return isAuthenticated ? '/home' : '/first';
-      }
+        // Check if trying to access protected route without auth
+        if (!isAuthenticated && isProtectedRoute(location)) {
+          AppLogger.info(
+            'Redirecting to login from protected route: $location',
+          );
+          return '/login?redirect=$location';
+        }
 
-      // Apply route-specific guards
-      final location = state.matchedLocation;
-
-      // Check if trying to access protected route without auth
-      if (!isAuthenticated && isProtectedRoute(location)) {
-        AppLogger.info('Redirecting to login from protected route: $location');
-        return '/login?redirect=$location';
-      }
-
-      // Check if authenticated user trying to access guest-only route
-      if (isAuthenticated && isGuestOnlyRoute(location)) {
-        AppLogger.info('Redirecting to home from guest route: $location');
-        return '/home';
+        // Check if authenticated user trying to access guest-only route
+        if (isAuthenticated && isGuestOnlyRoute(location)) {
+          AppLogger.info('Redirecting to home from guest route: $location');
+          return '/home';
+        }
       }
 
       return null;
@@ -112,7 +127,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: authGuard,
       ),
 
-      // Feature placeholder screens (для будущих feature модулей)
+      // Feature placeholder screens
       GoRoute(
         path: '/profile',
         name: 'profile',
@@ -143,7 +158,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: authGuard,
       ),
 
-      // Settings Screen (placeholder)
       GoRoute(
         path: '/settings',
         name: 'settings',
@@ -154,7 +168,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: authGuard,
       ),
 
-      // Demo Screen (только для разработки)
+      // Demo Screen (only for development)
       if (const bool.fromEnvironment('dart.vm.product') == false)
         GoRoute(
           path: '/demo',
@@ -162,7 +176,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (context, state) => const WidgetsDemoScreen(),
         ),
 
-      // Auth feature nested routes (для будущего расширения)
+      // Auth feature nested routes
       GoRoute(
         path: '/forgot-password',
         name: 'forgot-password',
@@ -182,7 +196,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
 
-      // Habit management routes (для будущего)
+      // Habit management routes
       GoRoute(
         path: '/habits/create',
         name: 'create-habit',
@@ -221,6 +235,27 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+/// Helper functions to check route types
+bool isProtectedRoute(String location) {
+  const protectedRoutes = [
+    '/home',
+    '/profile',
+    '/habits',
+    '/statistics',
+    '/settings',
+  ];
+  return protectedRoutes.any((route) => location.startsWith(route));
+}
+
+bool isGuestOnlyRoute(String location) {
+  const guestOnlyRoutes = [
+    '/login',
+    '/register',
+    '/forgot-password',
+  ];
+  return guestOnlyRoutes.any((route) => location.startsWith(route));
+}
 
 /// Custom refresh listenable for router
 class _RouterRefreshStream extends ChangeNotifier {
@@ -266,7 +301,7 @@ class _LoggingNavigatorObserver extends NavigatorObserver {
   }
 }
 
-/// Placeholder screen для будущих feature модулей
+/// Placeholder screen for features that are not yet implemented
 class _PlaceholderScreen extends StatelessWidget {
   const _PlaceholderScreen({
     required this.title,
@@ -281,46 +316,29 @@ class _PlaceholderScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
-        ),
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.construction,
-                size: 80,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 24),
-              Text(
-                '$title Screen',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '$featureName will be implemented in future versions.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () => context.go('/home'),
-                child: const Text('Back to Home'),
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.construction,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '$featureName coming soon!',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'This feature is under development',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey,
+                  ),
+            ),
+          ],
         ),
       ),
     );
