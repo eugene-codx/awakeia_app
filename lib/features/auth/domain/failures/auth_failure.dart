@@ -45,4 +45,26 @@ class AuthFailure with _$AuthFailure {
       noAuthToken: () => 'Authentication required. Please sign in.',
     );
   }
+
+  /// Debug representation of the failure
+  @override
+  String toString() {
+    return when(
+      serverError: (message) => 'AuthFailure.serverError($message)',
+      emailAlreadyInUse: () => 'AuthFailure.emailAlreadyInUse',
+      invalidEmailAndPasswordCombination: () =>
+          'AuthFailure.invalidEmailAndPasswordCombination',
+      invalidEmail: () => 'AuthFailure.invalidEmail',
+      weakPassword: () => 'AuthFailure.weakPassword',
+      userNotFound: () => 'AuthFailure.userNotFound',
+      userDisabled: () => 'AuthFailure.userDisabled',
+      tooManyRequests: () => 'AuthFailure.tooManyRequests',
+      operationNotAllowed: () => 'AuthFailure.operationNotAllowed',
+      networkError: () => 'AuthFailure.networkError',
+      unexpectedError: (message) => 'AuthFailure.unexpectedError($message)',
+      storageError: () => 'AuthFailure.storageError',
+      tokenExpired: () => 'AuthFailure.tokenExpired',
+      noAuthToken: () => 'AuthFailure.noAuthToken',
+    );
+  }
 }

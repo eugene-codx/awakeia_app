@@ -22,11 +22,6 @@ mixin _$AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure()';
-  }
 }
 
 /// @nodoc
@@ -456,11 +451,6 @@ class _ServerError extends AuthFailure {
 
   @override
   int get hashCode => Object.hash(runtimeType, message);
-
-  @override
-  String toString() {
-    return 'AuthFailure.serverError(message: $message)';
-  }
 }
 
 /// @nodoc
@@ -508,11 +498,6 @@ class _EmailAlreadyInUse extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.emailAlreadyInUse()';
-  }
 }
 
 /// @nodoc
@@ -529,11 +514,6 @@ class _InvalidEmailAndPasswordCombination extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.invalidEmailAndPasswordCombination()';
-  }
 }
 
 /// @nodoc
@@ -549,11 +529,6 @@ class _InvalidEmail extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.invalidEmail()';
-  }
 }
 
 /// @nodoc
@@ -569,11 +544,6 @@ class _WeakPassword extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.weakPassword()';
-  }
 }
 
 /// @nodoc
@@ -589,11 +559,6 @@ class _UserNotFound extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.userNotFound()';
-  }
 }
 
 /// @nodoc
@@ -609,11 +574,6 @@ class _UserDisabled extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.userDisabled()';
-  }
 }
 
 /// @nodoc
@@ -629,11 +589,6 @@ class _TooManyRequests extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.tooManyRequests()';
-  }
 }
 
 /// @nodoc
@@ -649,11 +604,6 @@ class _OperationNotAllowed extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.operationNotAllowed()';
-  }
 }
 
 /// @nodoc
@@ -669,11 +619,6 @@ class _NetworkError extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.networkError()';
-  }
 }
 
 /// @nodoc
@@ -700,11 +645,6 @@ class _UnexpectedError extends AuthFailure {
 
   @override
   int get hashCode => Object.hash(runtimeType, message);
-
-  @override
-  String toString() {
-    return 'AuthFailure.unexpectedError(message: $message)';
-  }
 }
 
 /// @nodoc
@@ -753,11 +693,6 @@ class _StorageError extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.storageError()';
-  }
 }
 
 /// @nodoc
@@ -773,11 +708,6 @@ class _TokenExpired extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.tokenExpired()';
-  }
 }
 
 /// @nodoc
@@ -793,11 +723,6 @@ class _NoAuthToken extends AuthFailure {
 
   @override
   int get hashCode => runtimeType.hashCode;
-
-  @override
-  String toString() {
-    return 'AuthFailure.noAuthToken()';
-  }
 }
 
 // dart format on

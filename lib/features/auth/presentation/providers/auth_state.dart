@@ -31,4 +31,16 @@ class AuthState with _$AuthState {
   String? get errorMessage => whenOrNull(
         unauthenticated: (failure) => failure?.toMessage(),
       );
+
+  /// Debug representation of the state
+  @override
+  String toString() {
+    return when(
+      initial: () => 'AuthState.initial()',
+      loading: () => 'AuthState.loading()',
+      authenticated: (user) => 'AuthState.authenticated(user: ${user.id})',
+      unauthenticated: (failure) =>
+          'AuthState.unauthenticated(failure: $failure)',
+    );
+  }
 }
