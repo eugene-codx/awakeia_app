@@ -49,9 +49,23 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     _registerUseCase = ref.watch(registerUseCaseProvider);
     _talker = ref.watch(talkerProvider);
 
-    // Listen to auth state changes
+    talker.info('AuthNotifier: Initializing');
+
+    // Clean up subscription when notifier is disposed
+    ref.onDispose(() {
+      talker.info('AuthNotifier: Disposing');
+      _authStateSubscription?.cancel();
+    });
+
+    // Check initial auth status first
+    final initialState = await _checkAuthStatus();
+
+    // Then setup listener for future changes
     _authStateSubscription?.cancel();
     _authStateSubscription = repository.authStateChanges.listen((user) {
+      talker.info(
+          'AuthNotifier: Auth state changed from stream - user: ${user?.id}',);
+
       if (user != null) {
         state = AsyncData(AuthState.authenticated(user));
       } else {
@@ -59,13 +73,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       }
     });
 
-    // Clean up subscription when notifier is disposed
-    ref.onDispose(() {
-      _authStateSubscription?.cancel();
-    });
-
-    // Check initial auth status
-    return await _checkAuthStatus();
+    return initialState;
   }
 
   /// Check current authentication status
