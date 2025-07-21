@@ -34,9 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final l10n = context.l10n;
 
     // Получаем состояние и действия из view model
-    final homeViewModel = ref.watch(homeViewModelProvider);
     final isLoading = ref.watch(homeLoadingProvider);
-    final error = ref.watch(homeErrorProvider);
     final selectedTabIndex = ref.watch(selectedTabIndexProvider);
 
     // Слушаем изменения состояния аутентификации
@@ -46,7 +44,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // Если пользователь стал неаутентифицированным, переходим на первый экран
           if (authState.isUnauthenticated && mounted) {
             AppLogger.info(
-                'User became unauthenticated, navigating to first screen',);
+              'User became unauthenticated, navigating to first screen',
+            );
             context.goToFirst();
           }
         },
