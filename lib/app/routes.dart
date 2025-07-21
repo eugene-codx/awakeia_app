@@ -44,43 +44,52 @@ final routerProvider = Provider<GoRouter>((ref) {
     // Refresh listener for auth state changes
     refreshListenable: _RouterRefreshStream(ref),
 
-    // Global redirect for auth state changes
+// Global redirect for auth state changes
     redirect: (context, state) {
-      final authState = ref.read(authNotifierProvider);
       final location = state.matchedLocation;
 
-      // If we're on the loading screen
+      // Always allow loading screen
       if (location == '/') {
-        // Allow loading screen to handle navigation
+        AppLogger.debug('Router: On loading screen, no redirect');
         return null;
       }
 
-      // For other routes, check auth status
-      final isLoading = authState.isLoading;
-      final authStateValue = authState.valueOrNull;
+      // Check auth state
+      final authAsyncValue = ref.read(authNotifierProvider);
 
-      // If auth is still loading and we're not on loading screen, redirect there
-      if ((isLoading || authStateValue == null) && location != '/') {
+      // If auth is still loading, redirect to loading screen
+      if (authAsyncValue.isLoading) {
+        AppLogger.debug(
+            'Router: Auth still loading, redirecting to loading screen',);
         return '/';
       }
 
-      // If auth state is determined, apply route guards
-      if (authStateValue != null) {
-        final isAuthenticated = authStateValue.isAuthenticated;
+      // Get the actual auth state
+      final authState = authAsyncValue.valueOrNull;
 
-        // Check if trying to access protected route without auth
-        if (!isAuthenticated && isProtectedRoute(location)) {
-          AppLogger.info(
-            'Redirecting to login from protected route: $location',
-          );
-          return '/login?redirect=$location';
-        }
+      // If we don't have auth state yet, go to loading screen
+      if (authState == null) {
+        AppLogger.debug('Router: No auth state, redirecting to loading screen');
+        return '/';
+      }
 
-        // Check if authenticated user trying to access guest-only route
-        if (isAuthenticated && isGuestOnlyRoute(location)) {
-          AppLogger.info('Redirecting to home from guest route: $location');
-          return '/home';
-        }
+      // Now check authentication status
+      final isAuthenticated = authState.isAuthenticated;
+      AppLogger.debug(
+          'Router: Auth state - isAuthenticated: $isAuthenticated, location: $location',);
+
+      // Check if trying to access protected route without auth
+      if (!isAuthenticated && isProtectedRoute(location)) {
+        AppLogger.info(
+            'Router: Redirecting to login from protected route: $location',);
+        return '/login?redirect=$location';
+      }
+
+      // Check if authenticated user trying to access guest-only route
+      if (isAuthenticated && isGuestOnlyRoute(location)) {
+        AppLogger.info(
+            'Router: Redirecting to home from guest route: $location',);
+        return '/home';
       }
 
       return null;

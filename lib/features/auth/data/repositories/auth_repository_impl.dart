@@ -32,13 +32,16 @@ class AuthRepositoryImpl implements AuthRepository {
   // Stream controller for auth state changes
   final _authStateController = StreamController<UserEntity?>.broadcast();
 
-  // Initialize auth state from local storage
+// Initialize auth state from local storage
   Future<void> _initializeAuthState() async {
     try {
+      _talker.info('Initializing auth state from local storage');
       final cachedUser = await _localDataSource.getCachedUser();
       if (cachedUser != null) {
+        _talker.info('Found cached user: ${cachedUser.id}');
         _authStateController.add(UserMapper.toEntity(cachedUser));
       } else {
+        _talker.info('No cached user found');
         _authStateController.add(null);
       }
     } catch (e) {
