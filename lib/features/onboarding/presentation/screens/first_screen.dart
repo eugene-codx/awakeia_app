@@ -31,7 +31,6 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isAuthenticated = ref.watch(onboardingIsAuthenticatedProvider);
     final showAuthenticatedView = ref.watch(showAuthenticatedViewProvider);
     final isLoading = ref.watch(onboardingOverallLoadingProvider);
 

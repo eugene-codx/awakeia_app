@@ -13,6 +13,7 @@ linter:
     - prefer_const_constructors
     - prefer_const_declarations
     - prefer_const_literals_to_create_immutables
+    - prefer_final_locals
     - sized_box_for_whitespace
     - use_key_in_widget_constructors
 
