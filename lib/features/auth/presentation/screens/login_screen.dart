@@ -8,8 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
+import '../controllers/login_controller.dart';
 import '../providers/auth_providers.dart';
-import '../view_models/auth_view_models.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,30 +22,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _isPasswordHidden = true;
 
   @override
   void initState() {
     super.initState();
     AppLogger.info('LoginScreen initialized');
-  }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    AppLogger.info('LoginScreen disposed');
-    super.dispose();
+    // Сбрасываем форму при инициализации
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(loginControllerProvider.notifier).resetForm();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isLoading = ref.watch(loginLoadingProvider);
-    final emailError = ref.watch(loginEmailErrorProvider);
-    final passwordError = ref.watch(loginPasswordErrorProvider);
 
-    // Listen for auth success
+    // Получаем данные из нового контроллера
+    final controller = ref.read(loginControllerProvider.notifier);
+    final state = ref.watch(loginControllerProvider);
+    final isLoading = state.isLoading;
+    final isPasswordHidden = state.isPasswordHidden;
+
+    // Слушаем изменения состояния аутентификации (без изменений)
     ref.listen(authNotifierProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
@@ -61,20 +60,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     });
 
-    // Listen for errors
-    ref.listen(loginErrorProvider, (previous, current) {
-      if (current != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(current),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    });
+    // Слушаем общие ошибки из контроллера
+    ref.listen(
+      loginControllerProvider.select((state) => state.generalError),
+      (previous, current) {
+        if (current != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(current),
+              backgroundColor: AppColors.error,
+              action: SnackBarAction(
+                label: 'Dismiss',
+                onPressed: controller.clearError,
+              ),
+            ),
+          );
+        }
+      },
+    );
 
     return PopScope(
-      canPop: true,
+      canPop: !isLoading, // Не позволяем вернуться во время загрузки
       child: Scaffold(
         appBar: AppBar(
           title: Text('Login', style: AppTextStyles.appBarTitle),
@@ -101,6 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        // Email поле с новой логикой
                         CustomTextField(
                           controller: _emailController,
                           hintText: l10n.emailAddress,
@@ -108,27 +115,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           keyboardType: TextInputType.emailAddress,
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
-                          validator: (_) => emailError,
+                          onChanged: controller.updateEmail,
+                          // Новый обработчик
+                          validator: (_) =>
+                              state.emailError, // Ошибка из состояния
                         ),
+
                         const SizedBox(height: AppSpacing.md),
+
+                        // Password поле с новой логикой
                         CustomTextField(
                           controller: _passwordController,
                           hintText: l10n.password,
                           prefixIcon: Icons.lock_outline,
-                          obscureText: _isPasswordHidden,
+                          obscureText: isPasswordHidden,
+                          // Из состояния
                           enabled: !isLoading,
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _handleLogin(),
-                          validator: (_) => passwordError,
+                          onChanged: controller.updatePassword,
+                          // Новый обработчик
+                          validator: (_) => state.passwordError,
+                          // Ошибка из состояния
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _isPasswordHidden
+                              isPasswordHidden
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                               color: AppColors.secondaryIcon,
                             ),
-                            onPressed: () => setState(
-                                () => _isPasswordHidden = !_isPasswordHidden,),
+                            onPressed: controller
+                                .togglePasswordVisibility, // Новый обработчик
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
@@ -139,8 +156,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ? null
                                 : () =>
                                     context.showComingSoon('Forgot Password'),
-                            child: Text(l10n.forgotPassword,
-                                style: AppTextStyles.linkSecondary,),
+                            child: Text(
+                              l10n.forgotPassword,
+                              style: AppTextStyles.linkSecondary,
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
@@ -156,11 +175,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                          AppColors.primaryButtonText,),
+                                        AppColors.primaryButtonText,
+                                      ),
                                     ),
                                   )
-                                : Text(l10n.login,
-                                    style: AppTextStyles.buttonLarge,),
+                                : Text(
+                                    l10n.login,
+                                    style: AppTextStyles.buttonLarge,
+                                  ),
                           ),
                         ),
                       ],
@@ -218,7 +240,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    final loginAction = ref.read(loginSignInActionProvider);
-    await loginAction(_emailController.text.trim(), _passwordController.text);
+    // Синхронизируем значения контроллеров с состоянием
+    final controller = ref.read(loginControllerProvider.notifier);
+    controller.updateEmail(_emailController.text);
+    controller.updatePassword(_passwordController.text);
+
+    // Вызываем вход
+    await controller.signIn();
   }
 }

@@ -8,8 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
+import '../controllers/register_controller.dart';
 import '../providers/auth_providers.dart';
-import '../view_models/auth_view_models.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -23,34 +23,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _isPasswordHidden = true;
-  bool _isConfirmPasswordHidden = true;
 
   @override
   void initState() {
     super.initState();
     AppLogger.info('RegisterScreen initialized');
-  }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    AppLogger.info('RegisterScreen disposed');
-    super.dispose();
+    // Сбрасываем форму при инициализации
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(registerControllerProvider.notifier).resetForm();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isLoading = ref.watch(registerLoadingProvider);
-    final emailError = ref.watch(registerEmailErrorProvider);
-    final passwordError = ref.watch(registerPasswordErrorProvider);
-    final confirmPasswordError =
-        ref.watch(registerConfirmPasswordErrorProvider);
 
-    // Listen for auth success
+    // Получаем данные из нового контроллера
+    final controller = ref.read(registerControllerProvider.notifier);
+    final state = ref.watch(registerControllerProvider);
+    final isLoading = state.isLoading;
+    final isPasswordHidden = state.isPasswordHidden;
+    final isConfirmPasswordHidden = state.isConfirmPasswordHidden;
+
+    // Слушатели без изменений...
     ref.listen(authNotifierProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
@@ -66,20 +62,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
     });
 
-    // Listen for errors
-    ref.listen(registerErrorProvider, (previous, current) {
-      if (current != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(current),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    });
+    // Слушаем общие ошибки из контроллера
+    ref.listen(
+      registerControllerProvider.select((state) => state.generalError),
+      (previous, current) {
+        if (current != null && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(current),
+              backgroundColor: AppColors.error,
+              action: SnackBarAction(
+                label: 'Dismiss',
+                onPressed: controller.clearError,
+              ),
+            ),
+          );
+        }
+      },
+    );
 
     return PopScope(
-      canPop: true,
+      canPop: !isLoading,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Register', style: AppTextStyles.appBarTitle),
@@ -100,14 +103,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   const SizedBox(height: AppSpacing.xxl),
                   Text(l10n.createAccount, style: AppTextStyles.headline2),
                   const SizedBox(height: AppSpacing.sm),
-                  Text(l10n.startYourJourney,
-                      style: AppTextStyles.subtitle,
-                      textAlign: TextAlign.center,),
+                  Text(
+                    l10n.startYourJourney,
+                    style: AppTextStyles.subtitle,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: AppSpacing.xxl),
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
+                        // Email поле
                         CustomTextField(
                           controller: _emailController,
                           hintText: l10n.emailAddress,
@@ -115,67 +121,81 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           keyboardType: TextInputType.emailAddress,
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
-                          validator: (_) => emailError,
+                          onChanged: controller.updateEmail,
+                          validator: (_) => state.emailError,
                         ),
                         const SizedBox(height: AppSpacing.md),
+                        // Password поле
                         CustomTextField(
                           controller: _passwordController,
                           hintText: l10n.password,
                           prefixIcon: Icons.lock_outline,
-                          obscureText: _isPasswordHidden,
+                          obscureText: isPasswordHidden,
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
-                          validator: (_) => passwordError,
+                          onChanged: controller.updatePassword,
+                          validator: (_) => state.passwordError,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _isPasswordHidden
+                              isPasswordHidden
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                               color: AppColors.secondaryIcon,
                             ),
-                            onPressed: () => setState(
-                                () => _isPasswordHidden = !_isPasswordHidden,),
+                            onPressed: controller.togglePasswordVisibility,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.md),
+
+                        // Confirm Password поле
                         CustomTextField(
                           controller: _confirmPasswordController,
                           hintText: l10n.confirmPassword,
                           prefixIcon: Icons.lock_outline,
-                          obscureText: _isConfirmPasswordHidden,
+                          obscureText: isConfirmPasswordHidden,
                           enabled: !isLoading,
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _handleRegister(),
-                          validator: (_) => confirmPasswordError,
+                          onChanged: controller.updateConfirmPassword,
+                          validator: (_) => state.confirmPasswordError,
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _isConfirmPasswordHidden
+                              isConfirmPasswordHidden
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                               color: AppColors.secondaryIcon,
                             ),
-                            onPressed: () => setState(() =>
-                                _isConfirmPasswordHidden =
-                                    !_isConfirmPasswordHidden,),
+                            onPressed:
+                                controller.toggleConfirmPasswordVisibility,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
+                        // Terms and Conditions с checkbox
                         PrimaryCard(
                           padding: AppSpacing.paddingMD,
+                          onTap: controller.toggleTermsAgreement,
                           child: Row(
                             children: [
-                              Icon(Icons.info_outline,
-                                  color: AppColors.info.withValues(alpha: 0.8),
-                                  size: 20,),
+                              Checkbox(
+                                value: state.agreedToTerms,
+                                onChanged: isLoading
+                                    ? null
+                                    : (_) => controller.toggleTermsAgreement(),
+                                activeColor: AppColors.primaryButton,
+                                checkColor: AppColors.primaryButtonText,
+                              ),
                               const SizedBox(width: AppSpacing.sm),
                               Expanded(
-                                child: Text(l10n.termsAndConditions,
-                                    style: AppTextStyles.caption,),
+                                child: Text(
+                                  l10n.termsAndConditions,
+                                  style: AppTextStyles.caption,
+                                ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
+                        // Register button
                         SizedBox(
                           width: double.infinity,
                           height: 56,
@@ -188,55 +208,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                          AppColors.primaryButtonText,),
+                                        AppColors.primaryButtonText,
+                                      ),
                                     ),
                                   )
-                                : Text(l10n.register,
-                                    style: AppTextStyles.buttonLarge,),
+                                : Text(
+                                    l10n.register,
+                                    style: AppTextStyles.buttonLarge,
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  SectionDivider(title: l10n.orSignUpWith),
-                  const SizedBox(height: AppSpacing.lg),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.g_mobiledata,
-                          text: l10n.google,
-                          enabled: !isLoading,
-                          onPressed: () =>
-                              context.showComingSoon('Google Sign Up'),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.facebook,
-                          text: l10n.facebook,
-                          enabled: !isLoading,
-                          onPressed: () =>
-                              context.showComingSoon('Facebook Sign Up'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SocialLoginButton(
-                    icon: Icons.apple,
-                    text: l10n.apple,
-                    enabled: !isLoading,
-                    onPressed: () => context.showComingSoon('Apple Sign Up'),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(l10n.haveAccount,
-                          style: AppTextStyles.linkSecondary,),
+                      Text(
+                        l10n.haveAccount,
+                        style: AppTextStyles.linkSecondary,
+                      ),
                       TextButton(
                         onPressed: isLoading
                             ? null
@@ -259,11 +251,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    final registerAction = ref.read(registerSignUpActionProvider);
-    await registerAction(
-      _emailController.text.trim(),
-      _passwordController.text,
-      _confirmPasswordController.text,
-    );
+    // Синхронизируем значения контроллеров с состоянием
+    final controller = ref.read(registerControllerProvider.notifier);
+    controller.updateEmail(_emailController.text);
+    controller.updatePassword(_passwordController.text);
+    controller.updateConfirmPassword(_confirmPasswordController.text);
+
+    // Вызываем регистрацию
+    await controller.register();
   }
 }
