@@ -23,8 +23,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // Удалить: bool _isPasswordHidden = true; - теперь в состоянии контроллера
-
   @override
   void initState() {
     super.initState();
