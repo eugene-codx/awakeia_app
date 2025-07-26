@@ -1,4 +1,3 @@
-export 'base/base_view_model.dart';
 export 'screens/route_error_screen.dart';
 export 'screens/widgets_demo_screen.dart';
 export 'theme/app_colors.dart';
