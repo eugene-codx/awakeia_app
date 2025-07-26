@@ -19,7 +19,7 @@ class AuthenticatedView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final welcomeMessage = ref.watch(welcomeMessageProvider);
+    final welcomeMessage = ref.watch(welcomeOnboardingMessageProvider);
 
     return Column(
       children: [

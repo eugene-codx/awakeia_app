@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/shared.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
-import '../providers/home_providers.dart';
+import '../controllers/home_controller.dart';
 
 /// Кастомный App Bar для главного экрана
 class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -107,8 +107,7 @@ class HomeContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final currentUser = ref.watch(currentUserProvider);
-    final homeViewModel = ref.watch(homeViewModelProvider);
+    final welcomeMessage = ref.watch(welcomeMessageProvider);
 
     return GradientBackground(
       colors: AppColors.primaryGradient,
@@ -120,17 +119,14 @@ class HomeContent extends ConsumerWidget {
             children: [
               // Приветственное сообщение
               WelcomeMessage(
-                title: homeViewModel.getWelcomeMessage(currentUser),
+                title: welcomeMessage,
                 subtitle: l10n.readyToCreateHabits,
               ),
 
               const SizedBox(height: AppSpacing.lg),
 
               // Предупреждение для гостевого пользователя
-              if (homeViewModel.isGuestUser) ...[
-                const _GuestUserPrompt(),
-                const SizedBox(height: AppSpacing.lg),
-              ],
+              const _GuestUserPrompt(),
 
               // Заголовок секции привычек
               Text(
@@ -167,6 +163,13 @@ class _GuestUserPrompt extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isGuest = ref.watch(isGuestUserProvider);
+
+    // Показываем только для гостевых пользователей
+    if (!isGuest) {
+      return const SizedBox.shrink();
+    }
+
     return PrimaryCard(
       padding: AppSpacing.paddingMD,
       child: Row(

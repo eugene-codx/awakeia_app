@@ -91,7 +91,7 @@ final navigateToAppActionProvider = Provider((ref) {
 });
 
 /// Провайдер для получения приветственного сообщения
-final welcomeMessageProvider = Provider<String>((ref) {
+final welcomeOnboardingMessageProvider = Provider<String>((ref) {
   final viewModel = ref.watch(onboardingViewModelProvider);
   final currentUser = viewModel.currentUser;
   return viewModel.getWelcomeMessage(currentUser);
