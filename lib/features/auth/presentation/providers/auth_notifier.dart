@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talker/talker.dart';
 
+import '../../../../core/logging/app_logger.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/login_use_case.dart';
@@ -16,7 +16,6 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   AuthRepository? _repository;
   LoginUseCase? _loginUseCase;
   RegisterUseCase? _registerUseCase;
-  Talker? _talker;
 
   StreamSubscription<UserEntity?>? _authStateSubscription;
 
@@ -36,24 +35,18 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     return _registerUseCase!;
   }
 
-  Talker get talker {
-    _talker ??= ref.read(talkerProvider);
-    return _talker!;
-  }
-
   @override
   Future<AuthState> build() async {
     // Initialize dependencies
     _repository = ref.watch(authRepositoryProvider);
     _loginUseCase = ref.watch(loginUseCaseProvider);
     _registerUseCase = ref.watch(registerUseCaseProvider);
-    _talker = ref.watch(talkerProvider);
 
-    talker.info('AuthNotifier: Initializing');
+    AppLogger.info('AuthNotifier: Initializing');
 
     // Clean up subscription when notifier is disposed
     ref.onDispose(() {
-      talker.info('AuthNotifier: Disposing');
+      AppLogger.info('AuthNotifier: Disposing');
       _authStateSubscription?.cancel();
     });
 
@@ -63,8 +56,9 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     // Then setup listener for future changes
     _authStateSubscription?.cancel();
     _authStateSubscription = repository.authStateChanges.listen((user) {
-      talker.info(
-          'AuthNotifier: Auth state changed from stream - user: ${user?.id}',);
+      AppLogger.info(
+        'AuthNotifier: Auth state changed from stream - user: ${user?.id}',
+      );
 
       if (user != null) {
         state = AsyncData(AuthState.authenticated(user));
@@ -78,21 +72,21 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   /// Check current authentication status
   Future<AuthState> _checkAuthStatus() async {
-    talker.info('Checking authentication status');
+    AppLogger.info('Checking authentication status');
 
     final result = await repository.getCurrentUser();
 
     return result.fold(
       (failure) {
-        talker.error('Failed to get current user: ${failure.toMessage()}');
+        AppLogger.error('Failed to get current user: ${failure.toMessage()}');
         return AuthState.unauthenticated(failure);
       },
       (user) {
         if (user != null) {
-          talker.info('User authenticated: ${user.id}');
+          AppLogger.info('User authenticated: ${user.id}');
           return AuthState.authenticated(user);
         } else {
-          talker.info('User not authenticated');
+          AppLogger.info('User not authenticated');
           return const AuthState.unauthenticated();
         }
       },
@@ -108,11 +102,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        talker.error('Login failed: ${failure.toMessage()}');
+        AppLogger.error('Login failed: ${failure.toMessage()}');
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        talker.info('Login successful: ${user.id}');
+        AppLogger.info('Login successful: ${user.id}');
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -127,11 +121,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        talker.error('Registration failed: ${failure.toMessage()}');
+        AppLogger.error('Registration failed: ${failure.toMessage()}');
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        talker.info('Registration successful: ${user.id}');
+        AppLogger.info('Registration successful: ${user.id}');
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -145,11 +139,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        talker.error('Guest sign in failed: ${failure.toMessage()}');
+        AppLogger.error('Guest sign in failed: ${failure.toMessage()}');
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        talker.info('Guest sign in successful: ${user.id}');
+        AppLogger.info('Guest sign in successful: ${user.id}');
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -163,12 +157,12 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        talker.error('Sign out failed: ${failure.toMessage()}');
+        AppLogger.error('Sign out failed: ${failure.toMessage()}');
         // Even if sign out fails, we should unauthenticate locally
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (_) {
-        talker.info('Sign out successful');
+        AppLogger.info('Sign out successful');
         state = const AsyncData(AuthState.unauthenticated());
       },
     );
@@ -178,7 +172,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> updateProfile({String? name}) async {
     final currentUser = state.valueOrNull?.user;
     if (currentUser == null) {
-      talker.error('Cannot update profile: no authenticated user');
+      AppLogger.error('Cannot update profile: no authenticated user');
       return;
     }
 
@@ -191,16 +185,14 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        talker.error('Profile update failed: ${failure.toMessage()}');
+        AppLogger.error('Profile update failed: ${failure.toMessage()}');
         // Restore previous state with error
         state = AsyncData(AuthState.authenticated(currentUser));
       },
       (updatedUser) {
-        talker.info('Profile updated successfully');
+        AppLogger.info('Profile updated successfully');
         state = AsyncData(AuthState.authenticated(updatedUser));
       },
     );
   }
 }
-
-// Providers are imported from auth_providers.dart

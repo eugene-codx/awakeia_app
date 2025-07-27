@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:talker/talker.dart';
 
+import '../../../../core/logging/app_logger.dart';
 import '../../domain/entities/onboarding_entity.dart';
 import '../../domain/failures/onboarding_failure.dart';
 import '../../domain/repositories/onboarding_repository.dart';
@@ -12,17 +12,14 @@ import '../models/onboarding_model.dart';
 class OnboardingRepositoryImpl implements OnboardingRepository {
   OnboardingRepositoryImpl({
     required OnboardingLocalDataSource localDataSource,
-    required Talker talker,
-  })  : _localDataSource = localDataSource,
-        _talker = talker;
+  }) : _localDataSource = localDataSource;
   final OnboardingLocalDataSource _localDataSource;
-  final Talker _talker;
 
   @override
   Future<Either<OnboardingFailure, OnboardingEntity>>
       getOnboardingState() async {
     try {
-      _talker.info('Getting onboarding state');
+      AppLogger.info('Getting onboarding state');
 
       final model = await _localDataSource.getOnboardingState();
 
@@ -40,7 +37,7 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
       final entity = OnboardingMapper.toEntity(model);
       return Right(entity);
     } catch (e, stackTrace) {
-      _talker.error('Failed to get onboarding state', e, stackTrace);
+      AppLogger.error('Failed to get onboarding state', e, stackTrace);
       return Left(OnboardingFailure.unexpectedError(e.toString()));
     }
   }
@@ -48,7 +45,7 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
   @override
   Future<Either<OnboardingFailure, Unit>> completeOnboarding() async {
     try {
-      _talker.info('Completing onboarding');
+      AppLogger.info('Completing onboarding');
 
       final model = OnboardingModel(
         isCompleted: true,
@@ -59,10 +56,10 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
 
       await _localDataSource.saveOnboardingState(model);
 
-      _talker.info('Onboarding completed successfully');
+      AppLogger.info('Onboarding completed successfully');
       return const Right(unit);
     } catch (e, stackTrace) {
-      _talker.error('Failed to complete onboarding', e, stackTrace);
+      AppLogger.error('Failed to complete onboarding', e, stackTrace);
       return Left(OnboardingFailure.unexpectedError(e.toString()));
     }
   }
@@ -73,7 +70,7 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
     Map<String, dynamic>? preferences,
   }) async {
     try {
-      _talker.info('Updating onboarding progress to step $step');
+      AppLogger.info('Updating onboarding progress to step $step');
 
       // Get current state
       final currentModel = await _localDataSource.getOnboardingState();
@@ -89,7 +86,7 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
 
       return const Right(unit);
     } catch (e, stackTrace) {
-      _talker.error('Failed to update onboarding progress', e, stackTrace);
+      AppLogger.error('Failed to update onboarding progress', e, stackTrace);
       return Left(OnboardingFailure.unexpectedError(e.toString()));
     }
   }
@@ -97,7 +94,7 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
   @override
   Future<Either<OnboardingFailure, Unit>> skipOnboarding() async {
     try {
-      _talker.info('Skipping onboarding');
+      AppLogger.info('Skipping onboarding');
 
       final model = OnboardingModel(
         isCompleted: true,
@@ -108,10 +105,10 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
 
       await _localDataSource.saveOnboardingState(model);
 
-      _talker.info('Onboarding skipped successfully');
+      AppLogger.info('Onboarding skipped successfully');
       return const Right(unit);
     } catch (e, stackTrace) {
-      _talker.error('Failed to skip onboarding', e, stackTrace);
+      AppLogger.error('Failed to skip onboarding', e, stackTrace);
       return Left(OnboardingFailure.unexpectedError(e.toString()));
     }
   }

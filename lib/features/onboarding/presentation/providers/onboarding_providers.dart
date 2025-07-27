@@ -20,11 +20,9 @@ final onboardingLocalDataSourceProvider =
 /// Provider for onboarding repository
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
   final localDataSource = ref.watch(onboardingLocalDataSourceProvider);
-  final talker = ref.watch(talkerProvider);
 
   return OnboardingRepositoryImpl(
     localDataSource: localDataSource,
-    talker: talker,
   );
 });
 

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:talker/talker.dart';
 
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/logging/app_logger.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/failures/auth_failure.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -18,16 +18,14 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remoteDataSource,
     required AuthLocalDataSource localDataSource,
-    required Talker talker,
   })  : _remoteDataSource = remoteDataSource,
-        _localDataSource = localDataSource,
-        _talker = talker {
+        _localDataSource = localDataSource {
     // Initialize auth state
     _initializeAuthState();
   }
+
   final AuthRemoteDataSource _remoteDataSource;
   final AuthLocalDataSource _localDataSource;
-  final Talker _talker;
 
   // Stream controller for auth state changes
   final _authStateController = StreamController<UserEntity?>.broadcast();
@@ -35,17 +33,17 @@ class AuthRepositoryImpl implements AuthRepository {
 // Initialize auth state from local storage
   Future<void> _initializeAuthState() async {
     try {
-      _talker.info('Initializing auth state from local storage');
+      AppLogger.info('Initializing auth state from local storage');
       final cachedUser = await _localDataSource.getCachedUser();
       if (cachedUser != null) {
-        _talker.info('Found cached user: ${cachedUser.id}');
+        AppLogger.info('Found cached user: ${cachedUser.id}');
         _authStateController.add(UserMapper.toEntity(cachedUser));
       } else {
-        _talker.info('No cached user found');
+        AppLogger.info('No cached user found');
         _authStateController.add(null);
       }
     } catch (e) {
-      _talker.error('Failed to initialize auth state', e);
+      AppLogger.error('Failed to initialize auth state', e);
       _authStateController.add(null);
     }
   }
@@ -59,7 +57,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      _talker.info('Attempting to sign in with email: $email');
+      AppLogger.info('Attempting to sign in with email: $email');
 
       // Validate inputs locally first
       if (email.isEmpty || password.isEmpty) {
@@ -89,16 +87,16 @@ class AuthRepositoryImpl implements AuthRepository {
       // Update auth state
       _authStateController.add(userEntity);
 
-      _talker.info('Sign in successful for user: ${userEntity.id}');
+      AppLogger.info('Sign in successful for user: ${userEntity.id}');
       return Right(userEntity);
     } on ServerException catch (e, stackTrace) {
-      _talker.error('Server error during sign in', e, stackTrace);
+      AppLogger.error('Server error during sign in', e, stackTrace);
       return Left(AuthFailure.serverError(e.message));
     } on NetworkException catch (e, stackTrace) {
-      _talker.error('Network error during sign in', e, stackTrace);
+      AppLogger.error('Network error during sign in', e, stackTrace);
       return const Left(AuthFailure.networkError());
     } catch (e, stackTrace) {
-      _talker.error('Unexpected error during sign in', e, stackTrace);
+      AppLogger.error('Unexpected error during sign in', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -109,7 +107,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      _talker.info('Attempting to register with email: $email');
+      AppLogger.info('Attempting to register with email: $email');
 
       // Validate inputs locally first
       if (email.isEmpty || password.isEmpty) {
@@ -139,10 +137,10 @@ class AuthRepositoryImpl implements AuthRepository {
       // Update auth state
       _authStateController.add(userEntity);
 
-      _talker.info('Registration successful for user: ${userEntity.id}');
+      AppLogger.info('Registration successful for user: ${userEntity.id}');
       return Right(userEntity);
     } on ServerException catch (e, stackTrace) {
-      _talker.error('Server error during registration', e, stackTrace);
+      AppLogger.error('Server error during registration', e, stackTrace);
 
       // Handle specific registration errors
       if (e.message.contains('already exists')) {
@@ -151,10 +149,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Left(AuthFailure.serverError(e.message));
     } on NetworkException catch (e, stackTrace) {
-      _talker.error('Network error during registration', e, stackTrace);
+      AppLogger.error('Network error during registration', e, stackTrace);
       return const Left(AuthFailure.networkError());
     } catch (e, stackTrace) {
-      _talker.error('Unexpected error during registration', e, stackTrace);
+      AppLogger.error('Unexpected error during registration', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -162,7 +160,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<AuthFailure, UserEntity>> signInAsGuest() async {
     try {
-      _talker.info('Attempting to sign in as guest');
+      AppLogger.info('Attempting to sign in as guest');
 
       // Create guest user
       final guestUser = UserModel(
@@ -182,10 +180,10 @@ class AuthRepositoryImpl implements AuthRepository {
       // Update auth state
       _authStateController.add(userEntity);
 
-      _talker.info('Guest sign in successful');
+      AppLogger.info('Guest sign in successful');
       return Right(userEntity);
     } catch (e, stackTrace) {
-      _talker.error('Error during guest sign in', e, stackTrace);
+      AppLogger.error('Error during guest sign in', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -193,7 +191,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<AuthFailure, Unit>> signOut() async {
     try {
-      _talker.info('Attempting to sign out');
+      AppLogger.info('Attempting to sign out');
 
       // Clear local cache first
       await _localDataSource.clearCachedUser();
@@ -204,16 +202,16 @@ class AuthRepositoryImpl implements AuthRepository {
         await _remoteDataSource.signOut();
       } catch (e) {
         // Log error but don't fail - user is already logged out locally
-        _talker.warning('Failed to sign out from remote', e);
+        AppLogger.warning('Failed to sign out from remote', e);
       }
 
       // Update auth state
       _authStateController.add(null);
 
-      _talker.info('Sign out successful');
+      AppLogger.info('Sign out successful');
       return const Right(unit);
     } catch (e, stackTrace) {
-      _talker.error('Error during sign out', e, stackTrace);
+      AppLogger.error('Error during sign out', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -221,7 +219,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<AuthFailure, UserEntity?>> getCurrentUser() async {
     try {
-      _talker.info('Getting current user');
+      AppLogger.info('Getting current user');
 
       // First check local cache
       final cachedUser = await _localDataSource.getCachedUser();
@@ -229,7 +227,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (cachedUser != null) {
         // If user is guest, return cached data
         if (cachedUser.isGuest) {
-          _talker.info('Returning cached guest user');
+          AppLogger.info('Returning cached guest user');
           return Right(UserMapper.toEntity(cachedUser));
         }
 
@@ -241,18 +239,19 @@ class AuthRepositoryImpl implements AuthRepository {
             await _localDataSource.cacheUser(remoteUser);
             return Right(UserMapper.toEntity(remoteUser));
           }
-        } catch (e) {
+        } catch (e, stackTrace) {
           // If remote fails, return cached data
-          _talker.warning('Failed to get user from remote, using cache', e);
+          AppLogger.warning(
+              'Failed to get user from remote, using cache', e, stackTrace,);
           return Right(UserMapper.toEntity(cachedUser));
         }
       }
 
       // No cached user and no remote user
-      _talker.info('No current user found');
+      AppLogger.info('No current user found');
       return const Right(null);
     } catch (e, stackTrace) {
-      _talker.error('Error getting current user', e, stackTrace);
+      AppLogger.error('Error getting current user', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }
@@ -263,7 +262,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final cachedUser = await _localDataSource.getCachedUser();
       return cachedUser != null;
     } catch (e, stackTrace) {
-      _talker.error('Error checking authentication status', e, stackTrace);
+      AppLogger.error('Error checking authentication status', e, stackTrace);
       return false;
     }
   }
@@ -274,7 +273,7 @@ class AuthRepositoryImpl implements AuthRepository {
     String? name,
   }) async {
     try {
-      _talker.info('Updating user profile for user: $userId');
+      AppLogger.info('Updating user profile for user: $userId');
 
       // Get current cached user
       final cachedUser = await _localDataSource.getCachedUser();
@@ -309,16 +308,16 @@ class AuthRepositoryImpl implements AuthRepository {
       // Update auth state
       _authStateController.add(userEntity);
 
-      _talker.info('Profile update successful');
+      AppLogger.info('Profile update successful');
       return Right(userEntity);
     } on ServerException catch (e, stackTrace) {
-      _talker.error('Server error during profile update', e, stackTrace);
+      AppLogger.error('Server error during profile update', e, stackTrace);
       return Left(AuthFailure.serverError(e.message));
     } on NetworkException {
-      _talker.error('Network error during profile update');
+      AppLogger.error('Network error during profile update');
       return const Left(AuthFailure.networkError());
     } catch (e, stackTrace) {
-      _talker.error('Error updating profile', e, stackTrace);
+      AppLogger.error('Error updating profile', e, stackTrace);
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
   }

@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:talker/talker.dart';
 
 import '../../../../core/core.dart';
 import '../../../auth/auth.dart';
@@ -15,7 +14,6 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
   late final GetOnboardingStateUseCase _getOnboardingStateUseCase;
   late final CompleteOnboardingUseCase _completeOnboardingUseCase;
   late final SkipOnboardingUseCase _skipOnboardingUseCase;
-  late final Talker _talker;
 
   @override
   Future<OnboardingState> build() async {
@@ -23,9 +21,8 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
     _getOnboardingStateUseCase = ref.watch(getOnboardingStateUseCaseProvider);
     _completeOnboardingUseCase = ref.watch(completeOnboardingUseCaseProvider);
     _skipOnboardingUseCase = ref.watch(skipOnboardingUseCaseProvider);
-    _talker = ref.watch(talkerProvider);
 
-    _talker.info('OnboardingNotifier: Initializing');
+    AppLogger.info('OnboardingNotifier: Initializing');
 
     // Listen to auth state changes
     ref.listen(authNotifierProvider, (previous, next) {
@@ -68,7 +65,7 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
         },
       );
     } catch (e, stackTrace) {
-      _talker.error('Failed to load initial onboarding state', e, stackTrace);
+      AppLogger.error('Failed to load initial onboarding state', e, stackTrace);
       return OnboardingState.error(e.toString());
     }
   }
@@ -100,12 +97,12 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
           state = AsyncValue.data(OnboardingState.error(failure.toMessage()));
         },
         (_) {
-          _talker.info('Successfully continued as guest');
+          AppLogger.info('Successfully continued as guest');
           // State will be updated by auth state listener
         },
       );
     } catch (e, stackTrace) {
-      _talker.error('Failed to continue as guest', e, stackTrace);
+      AppLogger.error('Failed to continue as guest', e, stackTrace);
       state = AsyncValue.data(OnboardingState.error(e.toString()));
     }
   }
@@ -122,13 +119,13 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
           state = AsyncValue.data(OnboardingState.error(failure.toMessage()));
         },
         (_) async {
-          _talker.info('Onboarding completed successfully');
+          AppLogger.info('Onboarding completed successfully');
           // Reload state
           state = await AsyncValue.guard(() => _loadInitialState());
         },
       );
     } catch (e, stackTrace) {
-      _talker.error('Failed to complete onboarding', e, stackTrace);
+      AppLogger.error('Failed to complete onboarding', e, stackTrace);
       state = AsyncValue.data(OnboardingState.error(e.toString()));
     }
   }
