@@ -15,7 +15,6 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthLoadingState {
   bool get isCheckingAuth;
-  bool get hasNavigated;
   String? get error;
 
   /// Create a copy of AuthLoadingState
@@ -33,18 +32,15 @@ mixin _$AuthLoadingState {
             other is AuthLoadingState &&
             (identical(other.isCheckingAuth, isCheckingAuth) ||
                 other.isCheckingAuth == isCheckingAuth) &&
-            (identical(other.hasNavigated, hasNavigated) ||
-                other.hasNavigated == hasNavigated) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, isCheckingAuth, hasNavigated, error);
+  int get hashCode => Object.hash(runtimeType, isCheckingAuth, error);
 
   @override
   String toString() {
-    return 'AuthLoadingState(isCheckingAuth: $isCheckingAuth, hasNavigated: $hasNavigated, error: $error)';
+    return 'AuthLoadingState(isCheckingAuth: $isCheckingAuth, error: $error)';
   }
 }
 
@@ -54,7 +50,7 @@ abstract mixin class $AuthLoadingStateCopyWith<$Res> {
           AuthLoadingState value, $Res Function(AuthLoadingState) _then) =
       _$AuthLoadingStateCopyWithImpl;
   @useResult
-  $Res call({bool isCheckingAuth, bool hasNavigated, String? error});
+  $Res call({bool isCheckingAuth, String? error});
 }
 
 /// @nodoc
@@ -71,17 +67,12 @@ class _$AuthLoadingStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object? isCheckingAuth = null,
-    Object? hasNavigated = null,
     Object? error = freezed,
   }) {
     return _then(_self.copyWith(
       isCheckingAuth: null == isCheckingAuth
           ? _self.isCheckingAuth
           : isCheckingAuth // ignore: cast_nullable_to_non_nullable
-              as bool,
-      hasNavigated: null == hasNavigated
-          ? _self.hasNavigated
-          : hasNavigated // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _self.error
@@ -184,14 +175,13 @@ extension AuthLoadingStatePatterns on AuthLoadingState {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(bool isCheckingAuth, bool hasNavigated, String? error)?
-        $default, {
+    TResult Function(bool isCheckingAuth, String? error)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _AuthLoadingState() when $default != null:
-        return $default(_that.isCheckingAuth, _that.hasNavigated, _that.error);
+        return $default(_that.isCheckingAuth, _that.error);
       case _:
         return orElse();
     }
@@ -212,13 +202,12 @@ extension AuthLoadingStatePatterns on AuthLoadingState {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(bool isCheckingAuth, bool hasNavigated, String? error)
-        $default,
+    TResult Function(bool isCheckingAuth, String? error) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthLoadingState():
-        return $default(_that.isCheckingAuth, _that.hasNavigated, _that.error);
+        return $default(_that.isCheckingAuth, _that.error);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -238,13 +227,12 @@ extension AuthLoadingStatePatterns on AuthLoadingState {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(bool isCheckingAuth, bool hasNavigated, String? error)?
-        $default,
+    TResult? Function(bool isCheckingAuth, String? error)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AuthLoadingState() when $default != null:
-        return $default(_that.isCheckingAuth, _that.hasNavigated, _that.error);
+        return $default(_that.isCheckingAuth, _that.error);
       case _:
         return null;
     }
@@ -254,15 +242,11 @@ extension AuthLoadingStatePatterns on AuthLoadingState {
 /// @nodoc
 
 class _AuthLoadingState implements AuthLoadingState {
-  const _AuthLoadingState(
-      {this.isCheckingAuth = true, this.hasNavigated = false, this.error});
+  const _AuthLoadingState({this.isCheckingAuth = true, this.error});
 
   @override
   @JsonKey()
   final bool isCheckingAuth;
-  @override
-  @JsonKey()
-  final bool hasNavigated;
   @override
   final String? error;
 
@@ -281,18 +265,15 @@ class _AuthLoadingState implements AuthLoadingState {
             other is _AuthLoadingState &&
             (identical(other.isCheckingAuth, isCheckingAuth) ||
                 other.isCheckingAuth == isCheckingAuth) &&
-            (identical(other.hasNavigated, hasNavigated) ||
-                other.hasNavigated == hasNavigated) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, isCheckingAuth, hasNavigated, error);
+  int get hashCode => Object.hash(runtimeType, isCheckingAuth, error);
 
   @override
   String toString() {
-    return 'AuthLoadingState(isCheckingAuth: $isCheckingAuth, hasNavigated: $hasNavigated, error: $error)';
+    return 'AuthLoadingState(isCheckingAuth: $isCheckingAuth, error: $error)';
   }
 }
 
@@ -304,7 +285,7 @@ abstract mixin class _$AuthLoadingStateCopyWith<$Res>
       __$AuthLoadingStateCopyWithImpl;
   @override
   @useResult
-  $Res call({bool isCheckingAuth, bool hasNavigated, String? error});
+  $Res call({bool isCheckingAuth, String? error});
 }
 
 /// @nodoc
@@ -321,17 +302,12 @@ class __$AuthLoadingStateCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? isCheckingAuth = null,
-    Object? hasNavigated = null,
     Object? error = freezed,
   }) {
     return _then(_AuthLoadingState(
       isCheckingAuth: null == isCheckingAuth
           ? _self.isCheckingAuth
           : isCheckingAuth // ignore: cast_nullable_to_non_nullable
-              as bool,
-      hasNavigated: null == hasNavigated
-          ? _self.hasNavigated
-          : hasNavigated // ignore: cast_nullable_to_non_nullable
               as bool,
       error: freezed == error
           ? _self.error

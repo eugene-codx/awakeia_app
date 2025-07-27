@@ -25,12 +25,10 @@ final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
   final localDataSource = ref.watch(authLocalDataSourceProvider);
-  final talker = ref.watch(talkerProvider);
 
   return AuthRepositoryImpl(
     remoteDataSource: remoteDataSource,
     localDataSource: localDataSource,
-    talker: talker,
   );
 });
 
@@ -49,11 +47,6 @@ final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
 });
 
 // ===== Core Dependencies =====
-
-/// Provider for Talker logger
-final talkerProvider = Provider<Talker>((ref) {
-  return AppLogger.instance.talker;
-});
 
 /// Provider for SecureStorage
 final secureStorageProvider = Provider<SecureStorage>((ref) {

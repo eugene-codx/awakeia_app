@@ -4,7 +4,6 @@ import 'package:talker/talker.dart';
 /// Centralized logging system using Talker 4.9.2
 /// Provides consistent logging across the entire application
 class AppLogger {
-
   /// Private constructor
   AppLogger._internal() {
     _talker = Talker(
@@ -67,8 +66,12 @@ class AppLogger {
   }
 
   /// Log warning messages
-  static void warning(String message) {
-    instance._talker.warning(message);
+  static void warning(String message, [Object? error, StackTrace? stackTrace]) {
+    if (error != null && stackTrace != null) {
+      instance._talker.warning(message, error, stackTrace);
+    } else {
+      instance._talker.warning(message);
+    }
   }
 
   /// Log error messages
@@ -81,8 +84,11 @@ class AppLogger {
   }
 
   /// Log critical messages
-  static void critical(String message,
-      [Object? error, StackTrace? stackTrace,]) {
+  static void critical(
+    String message, [
+    Object? error,
+    StackTrace? stackTrace,
+  ]) {
     if (error != null && stackTrace != null) {
       instance._talker.handle(error, stackTrace, message);
     } else {

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/core.dart';
@@ -17,8 +15,6 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
   late final CompleteOnboardingUseCase _completeOnboardingUseCase;
   late final SkipOnboardingUseCase _skipOnboardingUseCase;
 
-  StreamSubscription<AsyncValue<dynamic>>? _authSubscription;
-
   @override
   Future<OnboardingState> build() async {
     // Initialize dependencies
@@ -28,16 +24,10 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
 
     AppLogger.info('OnboardingNotifier: Initializing');
 
-    // Clean up subscription on dispose
-    ref.onDispose(() {
-      AppLogger.info('OnboardingNotifier: Disposing');
-      _authSubscription?.cancel();
-    });
-
     // Listen to auth state changes
-    _authSubscription = ref.listen(authNotifierProvider, (previous, next) {
+    ref.listen(authNotifierProvider, (previous, next) {
       _handleAuthStateChange(next);
-    }) as StreamSubscription<AsyncValue>?;
+    });
 
     // Get initial state
     return await _loadInitialState();
