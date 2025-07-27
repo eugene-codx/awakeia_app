@@ -1,4 +1,3 @@
-// Presentation layer exports for onboarding feature
 export 'providers/onboarding_notifier.dart';
 export 'providers/onboarding_providers.dart';
 export 'providers/onboarding_state.dart';
