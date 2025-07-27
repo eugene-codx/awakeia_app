@@ -23,12 +23,19 @@ class AppDecorations {
     ),
   );
 
-  static const BoxDecoration headerGradient = BoxDecoration(
-    gradient: LinearGradient(
+  static BoxDecoration headerGradient = BoxDecoration(
+    gradient: const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: AppColors.headerGradient,
     ),
+    boxShadow: [
+      BoxShadow(
+        color: AppColors.mediumPurple.withValues(alpha: 0.3),
+        blurRadius: 20,
+        spreadRadius: 5,
+      ),
+    ],
   );
 
   // Card decorations

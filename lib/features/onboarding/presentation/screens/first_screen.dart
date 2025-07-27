@@ -5,10 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
-import '../providers/onboarding_providers.dart';
-import '../widgets/onboarding_widgets.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../presentation.dart';
 
-/// Первый экран приложения (welcome/onboarding) с использованием Clean Architecture
+/// First screen of the app (welcome/onboarding) using Clean Architecture
 class FirstScreen extends ConsumerStatefulWidget {
   const FirstScreen({super.key});
 
@@ -31,26 +31,27 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final showAuthenticatedView = ref.watch(showAuthenticatedViewProvider);
-    final isLoading = ref.watch(onboardingOverallLoadingProvider);
+    final onboardingState = ref.watch(onboardingNotifierProvider);
+    final isLoading = ref.watch(onboardingLoadingProvider);
 
-    // Слушаем ошибки onboarding view model
-    ref.listen(onboardingErrorProvider, (previous, current) {
-      if (current != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(current),
-            backgroundColor: AppColors.error,
-            action: SnackBarAction(
-              label: 'Dismiss',
-              textColor: AppColors.primaryText,
-              onPressed: () {
-                ref.read(clearOnboardingErrorActionProvider)();
-              },
-            ),
-          ),
-        );
-      }
+    // Listen for errors
+    ref.listen(onboardingNotifierProvider, (previous, next) {
+      next.whenOrNull(
+        data: (state) {
+          state.whenOrNull(
+            error: (message) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
+          );
+        },
+      );
     });
 
     return Scaffold(
@@ -61,36 +62,55 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Spacer для центрирования
                 const Spacer(),
 
-                // Логотип приложения
-                _AppLogo(),
-
-                const SizedBox(height: AppSpacing.xl),
-
-                // Название приложения
-                _AppTitle(),
-
-                const SizedBox(height: AppSpacing.sm),
-
-                // Подзаголовок приложения
-                _AppSubtitle(),
+                // App logo and title
+                const AppLogo(),
+                const SizedBox(height: AppSpacing.lg),
+                const AppTitle(),
+                const SizedBox(height: AppSpacing.md),
+                const AppSubtitle(),
 
                 const Spacer(),
 
-                // Основной контент в зависимости от состояния аутентификации
-                _MainContent(
-                  showAuthenticatedView: showAuthenticatedView,
-                  isLoading: isLoading,
+                // Main content based on state
+                onboardingState.when(
+                  data: (state) => state.when(
+                    initial: () => const SizedBox.shrink(),
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    authenticated: (user, onboarding) => AuthenticatedView(
+                      userName: user.displayName,
+                      onContinueToApp: () => _handleContinueToApp(context),
+                      onSignOut: () => _handleSignOut(context),
+                      isLoading: isLoading,
+                    ),
+                    unauthenticated: (onboarding) => UnauthenticatedView(
+                      onLogin: () => context.goToLogin(),
+                      onRegister: () => context.goToRegister(),
+                      onGuestLogin: () => _handleGuestLogin(context),
+                      isLoading: isLoading,
+                    ),
+                    error: (message) => ErrorView(
+                      message: message,
+                      onRetry: () => _handleRetry(context),
+                    ),
+                  ),
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  error: (error, stack) => ErrorView(
+                    message: error.toString(),
+                    onRetry: () => _handleRetry(context),
+                  ),
                 ),
 
-                const SizedBox(height: AppSpacing.lg),
+                const Spacer(),
 
-                // Демо кнопка (только в debug режиме)
-                if (const bool.fromEnvironment('dart.vm.product') == false) ...[
+                // Development mode indicator
+                if (const bool.fromEnvironment('dart.vm.product') == false)
                   _DemoButton(isLoading: isLoading),
-                ],
               ],
             ),
           ),
@@ -98,104 +118,44 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
       ),
     );
   }
-}
 
-/// Логотип приложения
-class _AppLogo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: AppDecorations.logoContainer,
-      child: const Icon(
-        Icons.self_improvement,
-        size: 64,
-        color: AppColors.primaryIcon,
-      ),
-    );
-  }
-}
-
-/// Название приложения
-class _AppTitle extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-
-    return Text(
-      l10n.appName,
-      style: AppTextStyles.headline1,
-    );
-  }
-}
-
-/// Подзаголовок приложения
-class _AppSubtitle extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-
-    return Text(
-      l10n.appSubtitle,
-      style: AppTextStyles.subtitle,
-      textAlign: TextAlign.center,
-    );
-  }
-}
-
-/// Основной контент экрана
-class _MainContent extends StatelessWidget {
-  const _MainContent({
-    required this.showAuthenticatedView,
-    required this.isLoading,
-  });
-
-  final bool showAuthenticatedView;
-  final bool isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    if (showAuthenticatedView) {
-      return AuthenticatedView(
-        onContinueToApp: () => context.goToHome(),
-        onSignOut: () => _handleSignOut(context),
-        isLoading: isLoading,
-      );
-    } else {
-      return UnauthenticatedView(
-        onLogin: () => context.goToLogin(),
-        onRegister: () => context.goToRegister(),
-        onGuestLogin: () => _handleGuestLogin(context),
-        isLoading: isLoading,
-      );
+  Future<void> _handleContinueToApp(BuildContext context) async {
+    // Complete onboarding if not already completed
+    final onboarding = ref.read(currentOnboardingProvider);
+    if (onboarding != null && !onboarding.isCompleted) {
+      final completeAction = ref.read(completeOnboardingActionProvider);
+      await completeAction();
     }
-  }
 
-  Future<void> _handleSignOut(BuildContext context) async {
-    final container = ProviderScope.containerOf(context);
-    final signOutAction = container.read(onboardingSignOutActionProvider);
-    await signOutAction();
-  }
-
-  Future<void> _handleGuestLogin(BuildContext context) async {
-    final container = ProviderScope.containerOf(context);
-    final guestSignInAction =
-        container.read(onboardingSignInAsGuestActionProvider);
-    await guestSignInAction();
-
-    // Навигация произойдет автоматически после успешного входа
     if (context.mounted) {
       context.goToHome();
     }
   }
+
+  Future<void> _handleSignOut(BuildContext context) async {
+    final signOutAction = ref.read(signOutActionProvider);
+    await signOutAction();
+  }
+
+  Future<void> _handleGuestLogin(BuildContext context) async {
+    final continueAsGuestAction = ref.read(continueAsGuestActionProvider);
+    await continueAsGuestAction();
+
+    // Navigation will happen automatically after successful guest login
+    if (context.mounted) {
+      context.goToHome();
+    }
+  }
+
+  void _handleRetry(BuildContext context) {
+    // Refresh the onboarding state
+    ref.invalidate(onboardingNotifierProvider);
+  }
 }
 
-/// Демо кнопка (только для разработки)
+/// Demo button (only for development)
 class _DemoButton extends ConsumerWidget {
-  const _DemoButton({
-    required this.isLoading,
-  });
+  const _DemoButton({required this.isLoading});
 
   final bool isLoading;
 
@@ -209,6 +169,43 @@ class _DemoButton extends ConsumerWidget {
           color: AppColors.secondaryText.withValues(alpha: 0.5),
         ),
       ),
+    );
+  }
+}
+
+/// Error view widget
+class ErrorView extends StatelessWidget {
+  const ErrorView({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(
+          Icons.error_outline,
+          size: 48,
+          color: AppColors.error,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          message,
+          style: AppTextStyles.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        ElevatedButton(
+          onPressed: onRetry,
+          child: const Text('Retry'),
+        ),
+      ],
     );
   }
 }
