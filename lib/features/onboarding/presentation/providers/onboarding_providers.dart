@@ -1,105 +1,107 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../view_models/onboarding_view_model.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../data/data.dart';
+import '../../domain/domain.dart';
+import 'onboarding_notifier.dart';
+import 'onboarding_state.dart';
 
-/// Провайдер для OnboardingViewModel
-final onboardingViewModelProvider =
-    ChangeNotifierProvider<OnboardingViewModel>((ref) {
-  return OnboardingViewModel(ref);
+// ===== Data Sources Providers =====
+
+/// Provider for onboarding local data source
+final onboardingLocalDataSourceProvider =
+    Provider<OnboardingLocalDataSource>((ref) {
+  final secureStorage = ref.watch(secureStorageProvider);
+  return OnboardingLocalDataSourceImpl(secureStorage: secureStorage);
 });
 
-/// Провайдер для состояния onboarding экрана
-final onboardingStateProvider = Provider<OnboardingState?>((ref) {
-  return ref.watch(onboardingViewModelProvider).state;
+// ===== Repository Provider =====
+
+/// Provider for onboarding repository
+final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
+  final localDataSource = ref.watch(onboardingLocalDataSourceProvider);
+  final talker = ref.watch(talkerProvider);
+
+  return OnboardingRepositoryImpl(
+    localDataSource: localDataSource,
+    talker: talker,
+  );
 });
 
-/// Провайдер для флага загрузки onboarding экрана
+// ===== Use Cases Providers =====
+
+/// Provider for get onboarding state use case
+final getOnboardingStateUseCaseProvider =
+    Provider<GetOnboardingStateUseCase>((ref) {
+  final repository = ref.watch(onboardingRepositoryProvider);
+  return GetOnboardingStateUseCase(repository: repository);
+});
+
+/// Provider for complete onboarding use case
+final completeOnboardingUseCaseProvider =
+    Provider<CompleteOnboardingUseCase>((ref) {
+  final repository = ref.watch(onboardingRepositoryProvider);
+  return CompleteOnboardingUseCase(repository: repository);
+});
+
+/// Provider for skip onboarding use case
+final skipOnboardingUseCaseProvider = Provider<SkipOnboardingUseCase>((ref) {
+  final repository = ref.watch(onboardingRepositoryProvider);
+  return SkipOnboardingUseCase(repository: repository);
+});
+
+// ===== State Management =====
+
+/// Main onboarding notifier provider
+final onboardingNotifierProvider =
+    AsyncNotifierProvider<OnboardingNotifier, OnboardingState>(() {
+  return OnboardingNotifier();
+});
+
+// ===== Convenience Providers =====
+
+/// Provider to check if onboarding is loading
 final onboardingLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(onboardingViewModelProvider).isLoading;
+  return ref.watch(onboardingNotifierProvider).isLoading;
 });
 
-/// Провайдер для ошибки onboarding экрана
-final onboardingErrorProvider = Provider<String?>((ref) {
-  return ref.watch(onboardingViewModelProvider).error;
+/// Provider to check if user is authenticated on onboarding screen
+final onboardingAuthenticatedProvider = Provider<bool>((ref) {
+  final state = ref.watch(onboardingNotifierProvider);
+  return state.maybeWhen(
+    data: (data) => data.maybeWhen(
+      authenticated: (_, __) => true,
+      orElse: () => false,
+    ),
+    orElse: () => false,
+  );
 });
 
-/// Провайдер для флага процесса входа как гость
-final isSigningInAsGuestProvider = Provider<bool>((ref) {
-  return ref.watch(onboardingStateProvider)?.isSigningInAsGuest ?? false;
-});
-
-/// Провайдер для отображения аутентифицированного состояния
-final showAuthenticatedViewProvider = Provider<bool>((ref) {
-  return ref.watch(onboardingStateProvider)?.showAuthenticatedView ?? false;
-});
-
-/// Провайдер для общего состояния загрузки
-final onboardingOverallLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(onboardingViewModelProvider).isOverallLoading;
-});
-
-/// Провайдер для проверки аутентификации
-final onboardingIsAuthenticatedProvider = Provider<bool>((ref) {
-  return ref.watch(onboardingViewModelProvider).isAuthenticated;
-});
-
-/// Провайдер для проверки гостевого пользователя
-final onboardingIsGuestUserProvider = Provider<bool>((ref) {
-  return ref.watch(onboardingViewModelProvider).isGuestUser;
-});
-
-/// Провайдер для текущего пользователя
-final onboardingCurrentUserProvider = Provider((ref) {
-  return ref.watch(onboardingViewModelProvider).currentUser;
+/// Provider to get current onboarding entity
+final currentOnboardingProvider = Provider<OnboardingEntity?>((ref) {
+  final state = ref.watch(onboardingNotifierProvider);
+  return state.maybeWhen(
+    data: (data) => data.maybeWhen(
+      authenticated: (_, onboarding) => onboarding,
+      unauthenticated: (onboarding) => onboarding,
+      orElse: () => null,
+    ),
+    orElse: () => null,
+  );
 });
 
 // ===== Action Providers =====
 
-/// Провайдер для действия входа как гость
-final onboardingSignInAsGuestActionProvider = Provider((ref) {
+/// Action to continue as guest
+final continueAsGuestActionProvider = Provider((ref) {
   return () async {
-    await ref.read(onboardingViewModelProvider).signInAsGuest();
+    await ref.read(onboardingNotifierProvider.notifier).continueAsGuest();
   };
 });
 
-/// Провайдер для действия выхода из системы
-final onboardingSignOutActionProvider = Provider((ref) {
+/// Action to complete onboarding
+final completeOnboardingActionProvider = Provider((ref) {
   return () async {
-    await ref.read(onboardingViewModelProvider).signOut();
-  };
-});
-
-/// Провайдер для действия навигации к логину
-final navigateToLoginActionProvider = Provider((ref) {
-  return () {
-    ref.read(onboardingViewModelProvider).navigateToLogin();
-  };
-});
-
-/// Провайдер для действия навигации к регистрации
-final navigateToRegisterActionProvider = Provider((ref) {
-  return () {
-    ref.read(onboardingViewModelProvider).navigateToRegister();
-  };
-});
-
-/// Провайдер для действия навигации в приложение
-final navigateToAppActionProvider = Provider((ref) {
-  return () {
-    ref.read(onboardingViewModelProvider).navigateToApp();
-  };
-});
-
-/// Провайдер для получения приветственного сообщения
-final welcomeOnboardingMessageProvider = Provider<String>((ref) {
-  final viewModel = ref.watch(onboardingViewModelProvider);
-  final currentUser = viewModel.currentUser;
-  return viewModel.getWelcomeMessage(currentUser);
-});
-
-/// Провайдер для очистки ошибок onboarding
-final clearOnboardingErrorActionProvider = Provider((ref) {
-  return () {
-    ref.read(onboardingViewModelProvider).clearError();
+    await ref.read(onboardingNotifierProvider.notifier).completeOnboarding();
   };
 });
