@@ -1,3 +1,4 @@
+// lib/features/auth/presentation/screens/auth_loading_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +17,8 @@ class AuthLoadingScreen extends ConsumerStatefulWidget {
 }
 
 class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
+  bool _hasNavigated = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,27 +30,52 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
     });
   }
 
+  void _navigateBasedOnAuthState() {
+    if (_hasNavigated || !mounted) return;
+
+    final authAsyncValue = ref.read(authNotifierProvider);
+
+    authAsyncValue.whenOrNull(
+      data: (authState) {
+        if (authState.isAuthenticated) {
+          AppLogger.info(
+              'AuthLoadingScreen: User authenticated, navigating to home',);
+          _hasNavigated = true;
+          // Используем pushReplacement чтобы заменить loading screen
+          GoRouter.of(context).go('/home');
+        } else if (authState.isUnauthenticated) {
+          AppLogger.info(
+              'AuthLoadingScreen: User not authenticated, navigating to first',);
+          _hasNavigated = true;
+          GoRouter.of(context).go('/first');
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Слушаем необходимость навигации
-    ref.listen(shouldNavigateProvider, (previous, next) {
-      if (next != null && mounted) {
-        AppLogger.info('AuthLoadingScreen: Navigating to ${next.name}');
+    // Слушаем изменения auth state и навигируем когда готово
+    ref.listen(authNotifierProvider, (previous, next) {
+      next.whenOrNull(
+        data: (authState) {
+          AppLogger.debug(
+              'AuthLoadingScreen: Auth state changed, checking navigation',);
+          _navigateBasedOnAuthState();
+        },
+      );
+    });
 
-        switch (next) {
-          case NavigationTarget.home:
-            context.go('/home');
-            break;
-          case NavigationTarget.first:
-            context.go('/first');
-            break;
-        }
+    // Также проверяем при каждом build (на случай если состояние уже есть)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_hasNavigated) {
+        _navigateBasedOnAuthState();
       }
     });
 
-    // Получаем состояние
-    final isCheckingAuth = ref.watch(isCheckingAuthProvider);
-    final error = ref.watch(authLoadingErrorProvider);
+    // Получаем состояние для UI
+    final controller = ref.watch(authLoadingControllerProvider);
+    final error = controller.error;
 
     return Scaffold(
       body: GradientBackground(
@@ -82,24 +110,21 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.error,
                   ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  error,
-                  style: AppTextStyles.caption,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 ElevatedButton(
                   onPressed: () {
-                    // Сбрасываем состояние и пробуем снова
+                    _hasNavigated = false;
+                    // Пробуем снова
                     ref.invalidate(authNotifierProvider);
-                    ref.invalidate(authLoadingControllerProvider);
+                    ref
+                        .read(authLoadingControllerProvider.notifier)
+                        .checkAuthStatus();
                   },
                   child: const Text('Retry'),
                 ),
-              ] else if (isCheckingAuth) ...[
-                // Loading indicator
+              ] else ...[
                 const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
                     AppColors.primaryText,
@@ -108,7 +133,9 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   'Loading...',
-                  style: AppTextStyles.bodyMedium,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.secondaryText,
+                  ),
                 ),
               ],
             ],
@@ -116,5 +143,11 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    AppLogger.info('AuthLoadingScreen disposed');
+    super.dispose();
   }
 }
