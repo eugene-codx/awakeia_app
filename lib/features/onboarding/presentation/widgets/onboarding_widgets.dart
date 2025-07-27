@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../shared/shared.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
@@ -185,23 +184,14 @@ class UnauthenticatedView extends ConsumerWidget {
 
         const SizedBox(height: AppSpacing.md),
 
-        // Register button
+        // Sign up button
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
+          child: ElevatedButton(
             onPressed: (isLoading || isLoadingAuth) ? null : onRegister,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              side: const BorderSide(color: AppColors.mediumPurple),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDecorations.radiusLarge),
-              ),
-            ),
             child: Text(
               l10n.register,
-              style: AppTextStyles.buttonLarge.copyWith(
-                color: AppColors.mediumPurple,
-              ),
+              style: AppTextStyles.buttonLarge,
             ),
           ),
         ),
@@ -256,114 +246,7 @@ class UnauthenticatedView extends ConsumerWidget {
         ),
 
         const SizedBox(height: AppSpacing.xxl),
-
-        // Social login section (coming soon)
-        _SocialLoginSection(isDisabled: isLoading || isLoadingAuth),
       ],
-    );
-  }
-}
-
-/// Social login buttons section
-class _SocialLoginSection extends StatelessWidget {
-  const _SocialLoginSection({required this.isDisabled});
-
-  final bool isDisabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Column(
-      children: [
-        Text(
-          l10n.orSignInWith,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.secondaryText,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        // Social login buttons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Google button
-            _SocialButton(
-              icon: Icons.g_mobiledata,
-              label: l10n.google,
-              onPressed: isDisabled
-                  ? null
-                  : () => context.showComingSoon(l10n.googleSignInComingSoon),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Facebook button
-            _SocialButton(
-              icon: Icons.facebook,
-              label: l10n.facebook,
-              onPressed: isDisabled
-                  ? null
-                  : () => context.showComingSoon(l10n.facebookSignInComingSoon),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Apple button (only on iOS)
-            if (Theme.of(context).platform == TargetPlatform.iOS)
-              _SocialButton(
-                icon: Icons.apple,
-                label: 'Apple',
-                onPressed: isDisabled
-                    ? null
-                    : () => context.showComingSoon(l10n.appleSignInComingSoon),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-/// Individual social login button
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.primaryButton,
-      borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColors.divider,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
-          ),
-          child: Icon(
-            icon,
-            size: 24,
-            color: onPressed == null
-                ? AppColors.secondaryIcon.withValues(alpha: 0.5)
-                : AppColors.secondaryIcon,
-          ),
-        ),
-      ),
     );
   }
 }
