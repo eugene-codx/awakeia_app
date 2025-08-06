@@ -13,28 +13,6 @@ import '../shared/screens/route_error_screen.dart';
 import '../shared/screens/widgets_demo_screen.dart';
 import 'guards/auth_guards.dart';
 
-// First launch provider
-final isFirstLaunchProvider = FutureProvider<bool>((ref) async {
-  final secureStorage = ref.watch(secureStorageProvider);
-
-  try {
-    // Check if we have a flag indicating app has been launched before
-    final hasLaunched = await secureStorage.read(key: 'has_launched');
-
-    if (hasLaunched == null) {
-      // First launch - set the flag
-      await secureStorage.write(key: 'has_launched', value: 'true');
-      return true;
-    }
-
-    return false;
-  } catch (e) {
-    // On error, assume not first launch
-    AppLogger.error('Error checking first launch status', e);
-    return false;
-  }
-});
-
 // Provider for router configuration with auth state listening
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -60,7 +38,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // If auth is still loading, redirect to loading screen
       if (authAsyncValue.isLoading) {
         AppLogger.debug(
-            'Router: Auth still loading, redirecting to loading screen',);
+          'Router: Auth still loading, redirecting to loading screen',
+        );
         return '/';
       }
 
@@ -76,19 +55,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Now check authentication status
       final isAuthenticated = authState.isAuthenticated;
       AppLogger.debug(
-          'Router: Auth state - isAuthenticated: $isAuthenticated, location: $location',);
+        'Router: Auth state - isAuthenticated: $isAuthenticated, location: $location',
+      );
 
       // Check if trying to access protected route without auth
       if (!isAuthenticated && isProtectedRoute(location)) {
         AppLogger.info(
-            'Router: Redirecting to login from protected route: $location',);
+          'Router: Redirecting to login from protected route: $location',
+        );
         return '/login?redirect=$location';
       }
 
       // Check if authenticated user trying to access guest-only route
       if (isAuthenticated && isGuestOnlyRoute(location)) {
         AppLogger.info(
-            'Router: Redirecting to home from guest route: $location',);
+          'Router: Redirecting to home from guest route: $location',
+        );
         return '/home';
       }
 

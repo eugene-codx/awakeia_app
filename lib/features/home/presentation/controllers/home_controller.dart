@@ -230,19 +230,9 @@ final homeControllerProvider =
 
 // Convenience providers
 
-/// Текущий пользователь
-final homeCurrentUserProvider = Provider.autoDispose<UserEntity?>((ref) {
-  return ref.watch(currentUserProvider);
-});
-
 /// Состояние загрузки
 final homeLoadingProvider = Provider.autoDispose<bool>((ref) {
   return ref.watch(homeControllerProvider).isLoading;
-});
-
-/// Состояние обновления
-final homeRefreshingProvider = Provider.autoDispose<bool>((ref) {
-  return ref.watch(homeControllerProvider).isRefreshing;
 });
 
 /// Ошибка
