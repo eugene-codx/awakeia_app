@@ -53,30 +53,6 @@ final secureStorageProvider = Provider<SecureStorage>((ref) {
   return SecureStorage.instance;
 });
 
-// ===== App State Providers =====
-
-/// Provider to check if this is the first launch of the app
-final isFirstLaunchProvider = FutureProvider<bool>((ref) async {
-  final secureStorage = ref.watch(secureStorageProvider);
-
-  try {
-    // Check if we have a flag indicating app has been launched before
-    final hasLaunched = await secureStorage.read(key: 'has_launched');
-
-    if (hasLaunched == null) {
-      // First launch - set the flag
-      await secureStorage.write(key: 'has_launched', value: 'true');
-      return true;
-    }
-
-    return false;
-  } catch (e) {
-    // On error, assume not first launch
-    AppLogger.error('Error checking first launch status', e);
-    return false;
-  }
-});
-
 // ===== Main Auth Provider =====
 
 /// Main auth state provider using AsyncNotifier
