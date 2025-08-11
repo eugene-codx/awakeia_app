@@ -20,12 +20,12 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
   @override
   void initState() {
     super.initState();
-    AppLogger.info('FirstScreen initialized');
+    AppLogger.info('_FirstScreenState.initState: FirstScreen initialized');
   }
 
   @override
   void dispose() {
-    AppLogger.info('FirstScreen disposed');
+    AppLogger.info('_FirstScreenState.dispose: FirstScreen disposed');
     super.dispose();
   }
 

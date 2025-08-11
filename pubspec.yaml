@@ -54,6 +54,10 @@ dependencies:
   path: any
   path_provider: any
   sqlite3: any
+
+  uuid: ^4.5.1
+  flutter_native_splash: ^2.4.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -73,11 +77,21 @@ flutter:
   generate: true
 
   # Assets - append images and other assets here later
-  # assets:
-  #   - images/
+  assets:
+    - assets/images/
 
   # Fonts - append custom fonts here later
   # fonts:
   #   - family: CustomFont
   #     fonts:
   #       - asset: fonts/CustomFont.ttf
+
+flutter_native_splash:
+  color: "#1A1A2E"  # Ваш основной цвет фона
+  image: assets/images/awakeia_logo.png
+  android: true
+  ios: true
+  android_12:
+    image: assets/images/awakeia_logo.png
+    color: "#1A1A2E"
+  fullscreen: true

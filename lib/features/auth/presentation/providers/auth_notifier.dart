@@ -42,11 +42,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     _loginUseCase = ref.watch(loginUseCaseProvider);
     _registerUseCase = ref.watch(registerUseCaseProvider);
 
-    AppLogger.info('AuthNotifier: Initializing');
+    AppLogger.info('AuthNotifier.build: Initializing');
 
     // Clean up subscription when notifier is disposed
     ref.onDispose(() {
-      AppLogger.info('AuthNotifier: Disposing');
+      AppLogger.info('AuthNotifier.build: Disposing');
       _authStateSubscription?.cancel();
     });
 
@@ -57,7 +57,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     _authStateSubscription?.cancel();
     _authStateSubscription = repository.authStateChanges.listen((user) {
       AppLogger.info(
-        'AuthNotifier: Auth state changed from stream - user: ${user?.id}',
+        'AuthNotifier.build: Auth state changed from stream - user: ${user?.id}',
       );
 
       if (user != null) {
@@ -72,21 +72,25 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   /// Check current authentication status
   Future<AuthState> _checkAuthStatus() async {
-    AppLogger.info('Checking authentication status');
+    AppLogger.info(
+        'AuthNotifier._checkAuthStatus: Checking authentication status',);
 
     final result = await repository.getCurrentUser();
 
     return result.fold(
       (failure) {
-        AppLogger.error('Failed to get current user: ${failure.toMessage()}');
+        AppLogger.error(
+            'AuthNotifier._checkAuthStatus: Failed to get current user: ${failure.toMessage()}',);
         return AuthState.unauthenticated(failure);
       },
       (user) {
         if (user != null) {
-          AppLogger.info('User authenticated: ${user.id}');
+          AppLogger.info(
+              'AuthNotifier._checkAuthStatus: User authenticated: ${user.id}',);
           return AuthState.authenticated(user);
         } else {
-          AppLogger.info('User not authenticated');
+          AppLogger.info(
+              'AuthNotifier._checkAuthStatus: User not authenticated',);
           return const AuthState.unauthenticated();
         }
       },
@@ -102,11 +106,12 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        AppLogger.error('Login failed: ${failure.toMessage()}');
+        AppLogger.error(
+            'AuthNotifier.signIn: Login failed: ${failure.toMessage()}',);
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        AppLogger.info('Login successful: ${user.id}');
+        AppLogger.info('AuthNotifier.signIn: Login successful: ${user.id}');
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -121,11 +126,13 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        AppLogger.error('Registration failed: ${failure.toMessage()}');
+        AppLogger.error(
+            'AuthNotifier.register: Registration failed: ${failure.toMessage()}',);
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        AppLogger.info('Registration successful: ${user.id}');
+        AppLogger.info(
+            'AuthNotifier.register: Registration successful: ${user.id}',);
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -139,11 +146,13 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        AppLogger.error('Guest sign in failed: ${failure.toMessage()}');
+        AppLogger.error(
+            'AuthNotifier.signInAsGuest: Guest sign in failed: ${failure.toMessage()}',);
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        AppLogger.info('Guest sign in successful: ${user.id}');
+        AppLogger.info(
+            'AuthNotifier.signInAsGuest: Guest sign in successful: ${user.id}',);
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -157,12 +166,13 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        AppLogger.error('Sign out failed: ${failure.toMessage()}');
+        AppLogger.error(
+            'AuthNotifier.signOut: Sign out failed: ${failure.toMessage()}',);
         // Even if sign out fails, we should unauthenticate locally
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (_) {
-        AppLogger.info('Sign out successful');
+        AppLogger.info('AuthNotifier.signOut: Sign out successful');
         state = const AsyncData(AuthState.unauthenticated());
       },
     );
@@ -172,7 +182,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> updateProfile({String? name}) async {
     final currentUser = state.valueOrNull?.user;
     if (currentUser == null) {
-      AppLogger.error('Cannot update profile: no authenticated user');
+      AppLogger.error(
+          'AuthNotifier.updateProfile: Cannot update profile: no authenticated user',);
       return;
     }
 
@@ -185,12 +196,14 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
     result.fold(
       (failure) {
-        AppLogger.error('Profile update failed: ${failure.toMessage()}');
+        AppLogger.error(
+            'AuthNotifier.updateProfile: Profile update failed: ${failure.toMessage()}',);
         // Restore previous state with error
         state = AsyncData(AuthState.authenticated(currentUser));
       },
       (updatedUser) {
-        AppLogger.info('Profile updated successfully');
+        AppLogger.info(
+            'AuthNotifier.updateProfile: Profile updated successfully',);
         state = AsyncData(AuthState.authenticated(updatedUser));
       },
     );

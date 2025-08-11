@@ -33,9 +33,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    // Получаем состояние и действия из view model
-    final isLoading = ref.watch(homeLoadingProvider);
-    final selectedTabIndex = ref.watch(selectedTabIndexProvider);
+    // Получаем состояние из provider
+    final isLoading = ref.watch(homeProvider.select((s) => s.isLoading));
+    final selectedTabIndex =
+        ref.watch(homeProvider.select((s) => s.selectedTabIndex));
 
     // Слушаем изменения состояния аутентификации
     ref.listen(authNotifierProvider, (previous, next) {
@@ -52,8 +53,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     });
 
-    // Слушаем ошибки home view model
-    ref.listen(homeErrorProvider, (previous, current) {
+    // Слушаем ошибки home provider
+    ref.listen(homeProvider.select((s) => s.error), (previous, current) {
       if (current != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -63,7 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               label: 'Dismiss',
               textColor: AppColors.primaryText,
               onPressed: () {
-                ref.read(clearHomeErrorActionProvider)();
+                ref.read(homeProvider.notifier).clearError();
               },
             ),
           ),
@@ -86,18 +87,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         loadingText: l10n.loadingData,
         child: RefreshIndicator(
           onRefresh: () async {
-            final refreshAction = ref.read(refreshHomeActionProvider);
-            await refreshAction();
+            await ref.read(homeProvider.notifier).refresh();
           },
           child: HomeContent(
             onCreateHabit: () {
-              final createAction = ref.read(createHabitActionProvider);
-              createAction();
+              ref.read(homeProvider.notifier).createNewHabit();
             },
             onHabitTap: (habitId) {
-              final markCompletedAction =
-                  ref.read(markHabitCompletedActionProvider);
-              markCompletedAction(habitId);
+              ref.read(homeProvider.notifier).markHabitCompleted(habitId);
             },
           ),
         ),
@@ -106,8 +103,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       // Floating Action Button
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final createAction = ref.read(createHabitActionProvider);
-          createAction();
+          ref.read(homeProvider.notifier).createNewHabit();
         },
         child: const Icon(Icons.add),
       ),
@@ -116,8 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: HomeBottomNavigation(
         currentIndex: selectedTabIndex,
         onTap: (index) {
-          final changeTabAction = ref.read(changeTabActionProvider);
-          changeTabAction(index);
+          ref.read(homeProvider.notifier).changeTab(index);
           _handleBottomNavTap(context, index);
         },
       ),
@@ -163,8 +158,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     if (shouldSignOut == true && mounted) {
-      final signOutAction = ref.read(homeSignOutActionProvider);
-      await signOutAction();
+      await ref.read(homeProvider.notifier).signOut();
     }
   }
 }

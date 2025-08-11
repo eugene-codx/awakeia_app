@@ -86,8 +86,8 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
 
     try {
       // First sign in as guest
-      final signInAsGuest = ref.read(signInAsGuestActionProvider);
-      await signInAsGuest();
+      final authNotifier = ref.read(authNotifierProvider.notifier);
+      await authNotifier.signInAsGuest();
 
       // Then skip onboarding
       final skipResult = await _skipOnboardingUseCase();

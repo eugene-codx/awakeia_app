@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/logging/app_logger.dart';
+import '../features/auth/auth.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
 import '../features/auth/presentation/screens/auth_loading_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -11,246 +13,236 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/onboarding/presentation/screens/first_screen.dart';
 import '../shared/screens/route_error_screen.dart';
 import '../shared/screens/widgets_demo_screen.dart';
-import 'guards/auth_guards.dart';
+import 'constants/route_constants.dart';
 
-// Provider for router configuration with auth state listening
+// ===== Router-specific Providers =====
+
+/// Provider that determines if auth is still loading
+final _authLoadingStateProvider = Provider<bool>((ref) {
+  final authAsyncValue = ref.watch(authNotifierProvider);
+  return authAsyncValue.isLoading;
+});
+
+/// Provider that determines routing direction based on auth state
+final _routingDirectionProvider = Provider<String?>((ref) {
+  final authAsyncValue = ref.watch(authNotifierProvider);
+
+  return authAsyncValue.when(
+    loading: () => null, // Stay where we are during loading
+    error: (_, __) => RouteConstants.login,
+    data: (authState) => authState.when(
+      initial: () => RouteConstants.loading,
+      loading: () => RouteConstants.loading,
+      authenticated: (_) => null, // Authenticated user can stay
+      unauthenticated: (_) => RouteConstants.first,
+    ),
+  );
+});
+
+/// Provider for router configuration with simplified auth handling
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    // Always start from loading screen
-    initialLocation: '/',
-
-    // Refresh listener for auth state changes
+    initialLocation: RouteConstants.loading,
     refreshListenable: _RouterRefreshStream(ref),
-
-// Global redirect for auth state changes
-    redirect: (context, state) {
-      final location = state.matchedLocation;
-
-      // Always allow loading screen
-      if (location == '/') {
-        AppLogger.debug('Router: On loading screen, no redirect');
-        return null;
-      }
-
-      // Check auth state
-      final authAsyncValue = ref.read(authNotifierProvider);
-
-      // If auth is still loading, redirect to loading screen
-      if (authAsyncValue.isLoading) {
-        AppLogger.debug(
-          'Router: Auth still loading, redirecting to loading screen',
-        );
-        return '/';
-      }
-
-      // Get the actual auth state
-      final authState = authAsyncValue.valueOrNull;
-
-      // If we don't have auth state yet, go to loading screen
-      if (authState == null) {
-        AppLogger.debug('Router: No auth state, redirecting to loading screen');
-        return '/';
-      }
-
-      // Now check authentication status
-      final isAuthenticated = authState.isAuthenticated;
-      AppLogger.debug(
-        'Router: Auth state - isAuthenticated: $isAuthenticated, location: $location',
-      );
-
-      // Check if trying to access protected route without auth
-      if (!isAuthenticated && isProtectedRoute(location)) {
-        AppLogger.info(
-          'Router: Redirecting to login from protected route: $location',
-        );
-        return '/login?redirect=$location';
-      }
-
-      // Check if authenticated user trying to access guest-only route
-      if (isAuthenticated && isGuestOnlyRoute(location)) {
-        AppLogger.info(
-          'Router: Redirecting to home from guest route: $location',
-        );
-        return '/home';
-      }
-
-      return null;
-    },
-
-    // Route definitions
-    routes: [
-      // Loading route - shown while checking auth
-      GoRoute(
-        path: '/',
-        name: 'loading',
-        builder: (context, state) => const AuthLoadingScreen(),
-      ),
-
-      // First Screen - welcome/onboarding
-      GoRoute(
-        path: '/first',
-        name: 'first',
-        builder: (context, state) => const FirstScreen(),
-        redirect: optionalAuthGuard,
-      ),
-
-      // Login Screen
-      GoRoute(
-        path: '/login',
-        name: 'login',
-        builder: (context, state) => const LoginScreen(),
-        redirect: guestGuard,
-      ),
-
-      // Register Screen
-      GoRoute(
-        path: '/register',
-        name: 'register',
-        builder: (context, state) => const RegisterScreen(),
-        redirect: guestGuard,
-      ),
-
-      // Home Screen - requires authentication
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        builder: (context, state) => const HomeScreen(),
-        redirect: authGuard,
-      ),
-
-      // Feature placeholder screens
-      GoRoute(
-        path: '/profile',
-        name: 'profile',
-        builder: (context, state) => const _PlaceholderScreen(
-          title: 'Profile',
-          featureName: 'Profile management',
-        ),
-        redirect: authGuard,
-      ),
-
-      GoRoute(
-        path: '/habits',
-        name: 'habits',
-        builder: (context, state) => const _PlaceholderScreen(
-          title: 'Habits',
-          featureName: 'Habit tracking',
-        ),
-        redirect: authGuard,
-      ),
-
-      GoRoute(
-        path: '/statistics',
-        name: 'statistics',
-        builder: (context, state) => const _PlaceholderScreen(
-          title: 'Statistics',
-          featureName: 'Statistics and analytics',
-        ),
-        redirect: authGuard,
-      ),
-
-      GoRoute(
-        path: '/settings',
-        name: 'settings',
-        builder: (context, state) => const _PlaceholderScreen(
-          title: 'Settings',
-          featureName: 'App settings',
-        ),
-        redirect: authGuard,
-      ),
-
-      // Demo Screen (only for development)
-      if (const bool.fromEnvironment('dart.vm.product') == false)
-        GoRoute(
-          path: '/demo',
-          name: 'demo',
-          builder: (context, state) => const WidgetsDemoScreen(),
-        ),
-
-      // Auth feature nested routes
-      GoRoute(
-        path: '/forgot-password',
-        name: 'forgot-password',
-        builder: (context, state) => const _PlaceholderScreen(
-          title: 'Forgot Password',
-          featureName: 'Password recovery',
-        ),
-        redirect: guestGuard,
-      ),
-
-      GoRoute(
-        path: '/verify-email',
-        name: 'verify-email',
-        builder: (context, state) => const _PlaceholderScreen(
-          title: 'Verify Email',
-          featureName: 'Email verification',
-        ),
-      ),
-
-      // Habit management routes
-      GoRoute(
-        path: '/habits/create',
-        name: 'create-habit',
-        builder: (context, state) => const _PlaceholderScreen(
-          title: 'Create Habit',
-          featureName: 'Habit creation',
-        ),
-        redirect: authGuard,
-      ),
-
-      GoRoute(
-        path: '/habits/:id',
-        name: 'habit-details',
-        builder: (context, state) {
-          final habitId = state.pathParameters['id']!;
-          return _PlaceholderScreen(
-            title: 'Habit Details',
-            featureName: 'Habit details for ID: $habitId',
-          );
-        },
-        redirect: authGuard,
-      ),
-    ],
-
+    redirect: (context, state) => _handleRedirect(ref, state),
+    routes: _buildRoutes(),
     // Error page builder
     errorBuilder: (context, state) => RouteErrorScreen(
       error: state.error?.toString(),
     ),
-
-    // Debug logging
-    debugLogDiagnostics: true,
-
-    // Navigation observers
-    observers: [
-      _LoggingNavigatorObserver(),
-    ],
+    debugLogDiagnostics: kDebugMode,
+    observers: [_LoggingNavigatorObserver()],
   );
 });
 
-/// Helper functions to check route types
-bool isProtectedRoute(String location) {
-  const protectedRoutes = [
-    '/home',
-    '/profile',
-    '/habits',
-    '/statistics',
-    '/settings',
-  ];
-  return protectedRoutes.any((route) => location.startsWith(route));
+// ===== Helper Functions =====
+
+/// Handles redirect logic based on auth state
+String? _handleRedirect(Ref ref, GoRouterState state) {
+  final location = state.matchedLocation;
+  AppLogger.debug('Router: Redirecting from location: $location');
+
+  // Always allow loading screen
+  if (location == RouteConstants.loading) {
+    AppLogger.debug('Router: On loading screen, no redirect');
+    return null;
+  }
+
+  // Check if auth is loading
+  final isAuthLoading = ref.read(_authLoadingStateProvider);
+  if (isAuthLoading) {
+    AppLogger.debug('Router: Auth loading, redirecting to loading screen');
+    return RouteConstants.loading;
+  }
+
+  // Get routing direction
+  final redirectTo = ref.read(_routingDirectionProvider);
+  if (redirectTo != null && redirectTo != location) {
+    AppLogger.debug('Router: Redirecting to: $redirectTo');
+    return redirectTo;
+  }
+
+  AppLogger.debug('Router: No redirect needed');
+  return null;
 }
 
-bool isGuestOnlyRoute(String location) {
-  const guestOnlyRoutes = [
-    '/login',
-    '/register',
-    '/forgot-password',
+/// Builds all application routes
+List<RouteBase> _buildRoutes() {
+  return [
+    // Core routes
+    ..._buildCoreRoutes(),
+
+    // Feature routes
+    ..._buildFeatureRoutes(),
+
+    // Auth routes
+    ..._buildAuthRoutes(),
+
+    // Habit routes
+    ..._buildHabitRoutes(),
+
+    // Development routes
+    ..._buildDevelopmentRoutes(),
   ];
-  return guestOnlyRoutes.any((route) => location.startsWith(route));
+}
+
+/// Core application routes
+List<RouteBase> _buildCoreRoutes() {
+  return [
+    GoRoute(
+      path: RouteConstants.loading,
+      name: RouteNames.loading,
+      builder: (context, state) => const AuthLoadingScreen(),
+    ),
+    GoRoute(
+      path: RouteConstants.first,
+      name: RouteNames.first,
+      builder: (context, state) => const FirstScreen(),
+    ),
+    GoRoute(
+      path: RouteConstants.login,
+      name: RouteNames.login,
+      builder: (context, state) => const LoginScreen(),
+    ),
+    GoRoute(
+      path: RouteConstants.register,
+      name: RouteNames.register,
+      builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: RouteConstants.home,
+      name: RouteNames.home,
+      builder: (context, state) => const HomeScreen(),
+    ),
+  ];
+}
+
+/// Feature-specific routes
+List<RouteBase> _buildFeatureRoutes() {
+  return [
+    GoRoute(
+      path: RouteConstants.profile,
+      name: RouteNames.profile,
+      builder: (context, state) => const _PlaceholderScreen(
+        title: 'Profile',
+        featureName: 'Profile management',
+      ),
+    ),
+    GoRoute(
+      path: RouteConstants.habits,
+      name: RouteNames.habits,
+      builder: (context, state) => const _PlaceholderScreen(
+        title: 'Habits',
+        featureName: 'Habit tracking',
+      ),
+    ),
+    GoRoute(
+      path: RouteConstants.statistics,
+      name: RouteNames.statistics,
+      builder: (context, state) => const _PlaceholderScreen(
+        title: 'Statistics',
+        featureName: 'Statistics and analytics',
+      ),
+    ),
+    GoRoute(
+      path: RouteConstants.settings,
+      name: RouteNames.settings,
+      builder: (context, state) => const _PlaceholderScreen(
+        title: 'Settings',
+        featureName: 'App settings',
+      ),
+    ),
+  ];
+}
+
+/// Authentication-related routes
+List<RouteBase> _buildAuthRoutes() {
+  return [
+    GoRoute(
+      path: RouteConstants.forgotPassword,
+      name: RouteNames.forgotPassword,
+      builder: (context, state) => const _PlaceholderScreen(
+        title: 'Forgot Password',
+        featureName: 'Password recovery',
+      ),
+    ),
+    GoRoute(
+      path: RouteConstants.verifyEmail,
+      name: RouteNames.verifyEmail,
+      builder: (context, state) => const _PlaceholderScreen(
+        title: 'Verify Email',
+        featureName: 'Email verification',
+      ),
+    ),
+  ];
+}
+
+/// Habit management routes
+List<RouteBase> _buildHabitRoutes() {
+  return [
+    GoRoute(
+      path: RouteConstants.createHabit,
+      name: RouteNames.createHabit,
+      builder: (context, state) => const _PlaceholderScreen(
+        title: 'Create Habit',
+        featureName: 'Habit creation',
+      ),
+    ),
+    GoRoute(
+      path: '/habits/:id',
+      name: RouteNames.habitDetails,
+      builder: (context, state) {
+        final habitId = state.pathParameters['id']!;
+        return _PlaceholderScreen(
+          title: 'Habit Details',
+          featureName: 'Habit details for ID: $habitId',
+        );
+      },
+    ),
+  ];
+}
+
+/// Development-only routes
+List<RouteBase> _buildDevelopmentRoutes() {
+  if (const bool.fromEnvironment('dart.vm.product')) {
+    return [];
+  }
+
+  return [
+    GoRoute(
+      path: '/demo',
+      name: 'demo',
+      builder: (context, state) => const WidgetsDemoScreen(),
+    ),
+  ];
 }
 
 /// Custom refresh listenable for router
 class _RouterRefreshStream extends ChangeNotifier {
   _RouterRefreshStream(this._ref) {
+    AppLogger.info(
+      '_RouterRefreshStream: Initialized, listening to auth state changes',
+    );
     // Listen to auth state changes
     _ref.listen(
       authNotifierProvider,

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/logging/app_logger.dart';
 
 /// Базовый класс для Notifier с типизированным состоянием
-/// Заменяет BaseViewModelWithState
 abstract class BaseStateNotifier<T> extends AutoDisposeNotifier<T> {
   /// Логировать действия
   void logAction(String action) {
@@ -21,68 +20,67 @@ abstract class BaseStateNotifier<T> extends AutoDisposeNotifier<T> {
   }
 }
 
-/// Базовый класс для AsyncNotifier
-/// Заменяет BaseViewModel с loading/error состояниями
-abstract class BaseAsyncNotifier<T> extends AutoDisposeAsyncNotifier<T> {
-  /// Логировать действия
-  void logAction(String action) {
-    AppLogger.debug('$runtimeType: $action');
-  }
-
-  /// Логировать ошибку
-  void logError(String message, [Object? error, StackTrace? stackTrace]) {
-    AppLogger.error('$runtimeType: $message', error, stackTrace);
-  }
-
-  /// Выполнить операцию с автоматическим управлением состояния loading
-  Future<T?> executeAsync(
-    Future<T> Function() operation, {
-    bool keepPreviousData = true,
-  }) async {
-    try {
-      // Устанавливаем loading, сохраняя предыдущие данные если нужно
-      if (keepPreviousData && state.hasValue) {
-        state = AsyncLoading<T>().copyWithPrevious(state);
-      } else {
-        state = const AsyncLoading();
-      }
-
-      final result = await operation();
-      state = AsyncData(result);
-      return result;
-    } catch (error, stackTrace) {
-      logError('Operation failed', error, stackTrace);
-
-      // Устанавливаем error, сохраняя предыдущие данные если нужно
-      if (keepPreviousData && state.hasValue) {
-        state = AsyncError<T>(error, stackTrace).copyWithPrevious(state);
-      } else {
-        state = AsyncError(error, stackTrace);
-      }
-
-      return null;
-    }
-  }
-
-  /// Обновить данные если они есть
-  void updateData(T Function(T) updater) {
-    state.whenData((value) {
-      state = AsyncData(updater(value));
-    });
-  }
-
-  /// Установить ошибку
-  void setError(Object error, [StackTrace? stackTrace]) {
-    state = AsyncError(error, stackTrace ?? StackTrace.current);
-  }
-
-  /// Очистить ошибку и вернуться к данным
-  void clearError() {
-    if (state.hasValue) {
-      state = AsyncData(state.value as T);
-    }
-  }
-}
+// /// Базовый класс для AsyncNotifier
+// abstract class BaseAsyncNotifier<T> extends AutoDisposeAsyncNotifier<T> {
+//   /// Логировать действия
+//   void logAction(String action) {
+//     AppLogger.debug('$runtimeType: $action');
+//   }
+//
+//   /// Логировать ошибку
+//   void logError(String message, [Object? error, StackTrace? stackTrace]) {
+//     AppLogger.error('$runtimeType: $message', error, stackTrace);
+//   }
+//
+//   /// Выполнить операцию с автоматическим управлением состояния loading
+//   Future<T?> executeAsync(
+//     Future<T> Function() operation, {
+//     bool keepPreviousData = true,
+//   }) async {
+//     try {
+//       // Устанавливаем loading, сохраняя предыдущие данные если нужно
+//       if (keepPreviousData && state.hasValue) {
+//         state = AsyncLoading<T>().copyWithPrevious(state);
+//       } else {
+//         state = const AsyncLoading();
+//       }
+//
+//       final result = await operation();
+//       state = AsyncData(result);
+//       return result;
+//     } catch (error, stackTrace) {
+//       logError('Operation failed', error, stackTrace);
+//
+//       // Устанавливаем error, сохраняя предыдущие данные если нужно
+//       if (keepPreviousData && state.hasValue) {
+//         state = AsyncError<T>(error, stackTrace).copyWithPrevious(state);
+//       } else {
+//         state = AsyncError(error, stackTrace);
+//       }
+//
+//       return null;
+//     }
+//   }
+//
+//   /// Обновить данные если они есть
+//   void updateData(T Function(T) updater) {
+//     state.whenData((value) {
+//       state = AsyncData(updater(value));
+//     });
+//   }
+//
+//   /// Установить ошибку
+//   void setError(Object error, [StackTrace? stackTrace]) {
+//     state = AsyncError(error, stackTrace ?? StackTrace.current);
+//   }
+//
+//   /// Очистить ошибку и вернуться к данным
+//   void clearError() {
+//     if (state.hasValue) {
+//       state = AsyncData(state.value as T);
+//     }
+//   }
+// }
 
 /// Миксин для валидации форм в Riverpod Notifier
 mixin FormValidationMixin<T> on AutoDisposeNotifier<T> {

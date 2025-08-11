@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 import '../models/user_model.dart';
 
 /// Abstract class defining the contract for remote authentication operations
@@ -61,8 +63,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     // Return mock user
     return UserModel(
-      id: 'user_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       email: email,
+      username: 'user_${DateTime.now().millisecondsSinceEpoch}',
       name: email.split('@')[0],
       createdAt: DateTime.now(),
       isGuest: false,
@@ -92,8 +95,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
     // Return mock user
     return UserModel(
-      id: 'user_${DateTime.now().millisecondsSinceEpoch}',
+      id: const Uuid().v4(),
       email: email,
+      username: 'user_${DateTime.now().millisecondsSinceEpoch}',
       name: email.split('@')[0],
       createdAt: DateTime.now(),
       isGuest: false,
@@ -126,8 +130,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     // For mock, just return a user with updated name
     return UserModel(
       id: userId,
-      email: 'user@example.com',
+      email: 'mock_user@example.com',
       name: name,
+      username: 'mock_user_${DateTime.now().millisecondsSinceEpoch}',
       createdAt: DateTime.now(),
       isGuest: false,
     );

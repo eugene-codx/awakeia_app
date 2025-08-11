@@ -105,33 +105,8 @@ final authStateChangesProvider = StreamProvider<UserEntity?>((ref) {
   return repository.authStateChanges;
 });
 
-// ===== Actions Providers =====
 
-/// Provider for sign in action
-final signInActionProvider = Provider((ref) {
-  return (String email, String password) async {
-    final notifier = ref.read(authNotifierProvider.notifier);
-    await notifier.signIn(email, password);
-  };
-});
-
-/// Provider for register action
-final registerActionProvider = Provider((ref) {
-  return (String email, String password) async {
-    final notifier = ref.read(authNotifierProvider.notifier);
-    await notifier.register(email, password);
-  };
-});
-
-/// Provider for sign in as guest action
-final signInAsGuestActionProvider = Provider((ref) {
-  return () async {
-    final notifier = ref.read(authNotifierProvider.notifier);
-    await notifier.signInAsGuest();
-  };
-});
-
-/// Provider for sign out action
+/// Provider for sign out action (kept for reusability across UI)
 final signOutActionProvider = Provider((ref) {
   return () async {
     final notifier = ref.read(authNotifierProvider.notifier);
@@ -139,10 +114,14 @@ final signOutActionProvider = Provider((ref) {
   };
 });
 
-/// Provider for update profile action
-final updateProfileActionProvider = Provider((ref) {
-  return ({String? name}) async {
-    final notifier = ref.read(authNotifierProvider.notifier);
-    await notifier.updateProfile(name: name);
-  };
+// ===== Specialized Providers =====
+
+/// Provider that returns whether auth loading screen should be shown
+final shouldShowAuthLoadingProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authNotifierProvider);
+  return authState.when(
+    loading: () => true,
+    data: (state) => state.isInitial || state.isLoading,
+    error: (_, __) => false,
+  );
 });

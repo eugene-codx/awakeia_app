@@ -10,6 +10,7 @@ class UserMapper {
       id: model.id,
       email: model.email,
       name: model.name,
+      username: model.username,
       createdAt: model.createdAt,
       isGuest: model.isGuest,
     );
@@ -21,6 +22,7 @@ class UserMapper {
       id: entity.id,
       email: entity.email,
       name: entity.name,
+      username: entity.username,
       createdAt: entity.createdAt,
       isGuest: entity.isGuest,
     );

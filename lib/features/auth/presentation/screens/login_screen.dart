@@ -8,8 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
-import '../controllers/login_controller.dart';
 import '../providers/auth_providers.dart';
+import '../providers/login_form_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -30,7 +30,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // Сбрасываем форму при инициализации
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(loginControllerProvider.notifier).resetForm();
+      ref.read(loginFormProvider.notifier).resetForm();
     });
   }
 
@@ -38,9 +38,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    // Получаем данные из нового контроллера
-    final controller = ref.read(loginControllerProvider.notifier);
-    final state = ref.watch(loginControllerProvider);
+    // Получаем данные из нового провайдера
+    final controller = ref.read(loginFormProvider.notifier);
+    final state = ref.watch(loginFormProvider);
     final isLoading = state.isLoading;
     final isPasswordHidden = state.isPasswordHidden;
 
@@ -60,9 +60,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     });
 
-    // Слушаем общие ошибки из контроллера
+    // Слушаем общие ошибки из провайдера
     ref.listen(
-      loginControllerProvider.select((state) => state.generalError),
+      loginFormProvider.select((state) => state.generalError),
       (previous, current) {
         if (current != null && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -241,7 +241,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleLogin() async {
     // Синхронизируем значения контроллеров с состоянием
-    final controller = ref.read(loginControllerProvider.notifier);
+    final controller = ref.read(loginFormProvider.notifier);
     controller.updateEmail(_emailController.text);
     controller.updatePassword(_passwordController.text);
 
