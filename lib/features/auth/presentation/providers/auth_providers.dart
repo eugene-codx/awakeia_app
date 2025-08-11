@@ -80,9 +80,8 @@ final isAuthenticatedProvider = Provider<bool>((ref) {
 });
 
 /// Provider that returns whether authentication is loading
-final isAuthLoadingProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authNotifierProvider);
-  return authState.isLoading;
+final isAuthLoadingProvider = Provider.autoDispose<bool>((ref) {
+  return ref.watch(authNotifierProvider.select((auth) => auth.isLoading));
 });
 
 /// Provider that returns current authentication error message
@@ -105,23 +104,10 @@ final authStateChangesProvider = StreamProvider<UserEntity?>((ref) {
   return repository.authStateChanges;
 });
 
-
 /// Provider for sign out action (kept for reusability across UI)
 final signOutActionProvider = Provider((ref) {
   return () async {
     final notifier = ref.read(authNotifierProvider.notifier);
     await notifier.signOut();
   };
-});
-
-// ===== Specialized Providers =====
-
-/// Provider that returns whether auth loading screen should be shown
-final shouldShowAuthLoadingProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authNotifierProvider);
-  return authState.when(
-    loading: () => true,
-    data: (state) => state.isInitial || state.isLoading,
-    error: (_, __) => false,
-  );
 });

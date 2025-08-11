@@ -15,30 +15,6 @@ import '../shared/screens/route_error_screen.dart';
 import '../shared/screens/widgets_demo_screen.dart';
 import 'constants/route_constants.dart';
 
-// ===== Router-specific Providers =====
-
-/// Provider that determines if auth is still loading
-final _authLoadingStateProvider = Provider<bool>((ref) {
-  final authAsyncValue = ref.watch(authNotifierProvider);
-  return authAsyncValue.isLoading;
-});
-
-/// Provider that determines routing direction based on auth state
-final _routingDirectionProvider = Provider<String?>((ref) {
-  final authAsyncValue = ref.watch(authNotifierProvider);
-
-  return authAsyncValue.when(
-    loading: () => null, // Stay where we are during loading
-    error: (_, __) => RouteConstants.login,
-    data: (authState) => authState.when(
-      initial: () => RouteConstants.loading,
-      loading: () => RouteConstants.loading,
-      authenticated: (_) => null, // Authenticated user can stay
-      unauthenticated: (_) => RouteConstants.first,
-    ),
-  );
-});
-
 /// Provider for router configuration with simplified auth handling
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -60,7 +36,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 /// Handles redirect logic based on auth state
 String? _handleRedirect(Ref ref, GoRouterState state) {
   final location = state.matchedLocation;
-  AppLogger.debug('Router: Redirecting from location: $location');
+  AppLogger.debug('Router: Redirecting to location: $location');
 
   // Always allow loading screen
   if (location == RouteConstants.loading) {
@@ -69,17 +45,49 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
   }
 
   // Check if auth is loading
-  final isAuthLoading = ref.read(_authLoadingStateProvider);
-  if (isAuthLoading) {
-    AppLogger.debug('Router: Auth loading, redirecting to loading screen');
+  // Проверяем загрузку аутентификации
+  final authAsync = ref.read(authNotifierProvider);
+  if (authAsync.isLoading) {
     return RouteConstants.loading;
   }
 
-  // Get routing direction
-  final redirectTo = ref.read(_routingDirectionProvider);
-  if (redirectTo != null && redirectTo != location) {
-    AppLogger.debug('Router: Redirecting to: $redirectTo');
-    return redirectTo;
+  // Получаем состояние аутентификации
+  final authState = authAsync.valueOrNull;
+  if (authState == null) return null;
+
+  final isAuthenticated = authState.when(
+    initial: () => false,
+    loading: () => false,
+    authenticated: (_) => true,
+    unauthenticated: (_) => false,
+  );
+
+  // Список публичных роутов (не требуют аутентификации)
+  final publicRoutes = {
+    RouteConstants.loading, // '/'
+    RouteConstants.first, // '/first'
+    RouteConstants.login, // '/login'
+    RouteConstants.register, // '/register'
+    RouteConstants.forgotPassword, // '/forgot-password'
+    '/demo', // development
+  };
+
+  // Если пользователь НЕ аутентифицирован
+  if (!isAuthenticated) {
+    // Если пытается попасть на защищенный роут - редиректим на /first
+    if (!publicRoutes.contains(location)) {
+      return RouteConstants.first;
+    }
+    // Если на публичном роуте - разрешаем
+    return null;
+  }
+
+  // Если пользователь аутентифицирован и находится на auth роутах - на главную
+  if (isAuthenticated &&
+      (location == RouteConstants.login ||
+          location == RouteConstants.register ||
+          location == RouteConstants.first)) {
+    return RouteConstants.home;
   }
 
   AppLogger.debug('Router: No redirect needed');
@@ -241,13 +249,8 @@ List<RouteBase> _buildDevelopmentRoutes() {
 class _RouterRefreshStream extends ChangeNotifier {
   _RouterRefreshStream(this._ref) {
     AppLogger.info(
-      '_RouterRefreshStream: Initialized, listening to auth state changes',
-    );
-    // Listen to auth state changes
-    _ref.listen(
-      authNotifierProvider,
-      (_, __) => notifyListeners(),
-    );
+        'RouterRefreshStream: Инициализирован, слушаем auth изменения',);
+    _ref.listen(authNotifierProvider, (_, __) => notifyListeners());
   }
 
   final Ref _ref;

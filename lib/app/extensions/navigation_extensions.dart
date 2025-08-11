@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../constants/route_constants.dart';
+
 /// Extensions for easier navigation with go_router
 extension NavigationExtensions on BuildContext {
   /// Navigate to login with optional redirect
@@ -8,7 +10,7 @@ extension NavigationExtensions on BuildContext {
     if (redirect != null && redirect.isNotEmpty) {
       go('/login?redirect=$redirect');
     } else {
-      go('/login');
+      go(RouteConstants.login);
     }
   }
 
