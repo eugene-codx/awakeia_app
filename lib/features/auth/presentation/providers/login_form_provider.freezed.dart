@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'login_controller.dart';
+part of 'login_form_provider.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -13,7 +13,7 @@ part of 'login_controller.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$LoginState {
+mixin _$LoginFormState {
   String get email;
   String get password;
   bool get isPasswordHidden;
@@ -22,18 +22,19 @@ mixin _$LoginState {
   bool get isLoading;
   String? get generalError;
 
-  /// Create a copy of LoginState
+  /// Create a copy of LoginFormState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $LoginStateCopyWith<LoginState> get copyWith =>
-      _$LoginStateCopyWithImpl<LoginState>(this as LoginState, _$identity);
+  $LoginFormStateCopyWith<LoginFormState> get copyWith =>
+      _$LoginFormStateCopyWithImpl<LoginFormState>(
+          this as LoginFormState, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is LoginState &&
+            other is LoginFormState &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.password, password) ||
                 other.password == password) &&
@@ -55,15 +56,15 @@ mixin _$LoginState {
 
   @override
   String toString() {
-    return 'LoginState(email: $email, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
+    return 'LoginFormState(email: $email, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
   }
 }
 
 /// @nodoc
-abstract mixin class $LoginStateCopyWith<$Res> {
-  factory $LoginStateCopyWith(
-          LoginState value, $Res Function(LoginState) _then) =
-      _$LoginStateCopyWithImpl;
+abstract mixin class $LoginFormStateCopyWith<$Res> {
+  factory $LoginFormStateCopyWith(
+          LoginFormState value, $Res Function(LoginFormState) _then) =
+      _$LoginFormStateCopyWithImpl;
   @useResult
   $Res call(
       {String email,
@@ -76,13 +77,14 @@ abstract mixin class $LoginStateCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$LoginStateCopyWithImpl<$Res> implements $LoginStateCopyWith<$Res> {
-  _$LoginStateCopyWithImpl(this._self, this._then);
+class _$LoginFormStateCopyWithImpl<$Res>
+    implements $LoginFormStateCopyWith<$Res> {
+  _$LoginFormStateCopyWithImpl(this._self, this._then);
 
-  final LoginState _self;
-  final $Res Function(LoginState) _then;
+  final LoginFormState _self;
+  final $Res Function(LoginFormState) _then;
 
-  /// Create a copy of LoginState
+  /// Create a copy of LoginFormState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -128,8 +130,8 @@ class _$LoginStateCopyWithImpl<$Res> implements $LoginStateCopyWith<$Res> {
   }
 }
 
-/// Adds pattern-matching-related methods to [LoginState].
-extension LoginStatePatterns on LoginState {
+/// Adds pattern-matching-related methods to [LoginFormState].
+extension LoginFormStatePatterns on LoginFormState {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -144,12 +146,12 @@ extension LoginStatePatterns on LoginState {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_LoginState value)? $default, {
+    TResult Function(_LoginFormState value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _LoginState() when $default != null:
+      case _LoginFormState() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -171,11 +173,11 @@ extension LoginStatePatterns on LoginState {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_LoginState value) $default,
+    TResult Function(_LoginFormState value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _LoginState():
+      case _LoginFormState():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -196,11 +198,11 @@ extension LoginStatePatterns on LoginState {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_LoginState value)? $default,
+    TResult? Function(_LoginFormState value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _LoginState() when $default != null:
+      case _LoginFormState() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -234,7 +236,7 @@ extension LoginStatePatterns on LoginState {
   }) {
     final _that = this;
     switch (_that) {
-      case _LoginState() when $default != null:
+      case _LoginFormState() when $default != null:
         return $default(
             _that.email,
             _that.password,
@@ -275,7 +277,7 @@ extension LoginStatePatterns on LoginState {
   ) {
     final _that = this;
     switch (_that) {
-      case _LoginState():
+      case _LoginFormState():
         return $default(
             _that.email,
             _that.password,
@@ -315,7 +317,7 @@ extension LoginStatePatterns on LoginState {
   ) {
     final _that = this;
     switch (_that) {
-      case _LoginState() when $default != null:
+      case _LoginFormState() when $default != null:
         return $default(
             _that.email,
             _that.password,
@@ -332,8 +334,8 @@ extension LoginStatePatterns on LoginState {
 
 /// @nodoc
 
-class _LoginState implements LoginState {
-  const _LoginState(
+class _LoginFormState implements LoginFormState {
+  const _LoginFormState(
       {this.email = '',
       this.password = '',
       this.isPasswordHidden = true,
@@ -361,19 +363,19 @@ class _LoginState implements LoginState {
   @override
   final String? generalError;
 
-  /// Create a copy of LoginState
+  /// Create a copy of LoginFormState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$LoginStateCopyWith<_LoginState> get copyWith =>
-      __$LoginStateCopyWithImpl<_LoginState>(this, _$identity);
+  _$LoginFormStateCopyWith<_LoginFormState> get copyWith =>
+      __$LoginFormStateCopyWithImpl<_LoginFormState>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _LoginState &&
+            other is _LoginFormState &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.password, password) ||
                 other.password == password) &&
@@ -395,16 +397,16 @@ class _LoginState implements LoginState {
 
   @override
   String toString() {
-    return 'LoginState(email: $email, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
+    return 'LoginFormState(email: $email, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$LoginStateCopyWith<$Res>
-    implements $LoginStateCopyWith<$Res> {
-  factory _$LoginStateCopyWith(
-          _LoginState value, $Res Function(_LoginState) _then) =
-      __$LoginStateCopyWithImpl;
+abstract mixin class _$LoginFormStateCopyWith<$Res>
+    implements $LoginFormStateCopyWith<$Res> {
+  factory _$LoginFormStateCopyWith(
+          _LoginFormState value, $Res Function(_LoginFormState) _then) =
+      __$LoginFormStateCopyWithImpl;
   @override
   @useResult
   $Res call(
@@ -418,13 +420,14 @@ abstract mixin class _$LoginStateCopyWith<$Res>
 }
 
 /// @nodoc
-class __$LoginStateCopyWithImpl<$Res> implements _$LoginStateCopyWith<$Res> {
-  __$LoginStateCopyWithImpl(this._self, this._then);
+class __$LoginFormStateCopyWithImpl<$Res>
+    implements _$LoginFormStateCopyWith<$Res> {
+  __$LoginFormStateCopyWithImpl(this._self, this._then);
 
-  final _LoginState _self;
-  final $Res Function(_LoginState) _then;
+  final _LoginFormState _self;
+  final $Res Function(_LoginFormState) _then;
 
-  /// Create a copy of LoginState
+  /// Create a copy of LoginFormState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
@@ -437,7 +440,7 @@ class __$LoginStateCopyWithImpl<$Res> implements _$LoginStateCopyWith<$Res> {
     Object? isLoading = null,
     Object? generalError = freezed,
   }) {
-    return _then(_LoginState(
+    return _then(_LoginFormState(
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable

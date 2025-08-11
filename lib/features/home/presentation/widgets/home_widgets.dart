@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/shared.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
-import '../controllers/home_controller.dart';
+import '../providers/home_providers.dart';
 
 /// Кастомный App Bar для главного экрана
 class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -223,7 +223,7 @@ class _HabitsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final hasHabits = ref.watch(hasHabitsProvider);
+    final hasHabits = ref.watch(homeProvider.select((s) => s.hasHabits));
 
     return PrimaryCard(
       child: hasHabits
@@ -269,8 +269,13 @@ class _StatsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final stats = ref.watch(habitsStatsProvider);
-    final completedText = ref.watch(completedHabitsTextProvider);
+    final homeState = ref.watch(homeProvider);
+    final stats = (
+      completed: homeState.todayCompletedHabits,
+      total: homeState.totalHabitsToday,
+      streak: homeState.currentStreak,
+    );
+    final completedText = homeState.completedHabitsText;
 
     return Row(
       children: [

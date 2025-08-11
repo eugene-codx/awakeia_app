@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$UserEntity {
   String get id;
   String get email;
+  String get username;
   String? get name;
   DateTime get createdAt;
   bool get isGuest;
@@ -34,6 +35,8 @@ mixin _$UserEntity {
             other is UserEntity &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -42,11 +45,11 @@ mixin _$UserEntity {
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, email, name, createdAt, isGuest);
+      Object.hash(runtimeType, id, email, username, name, createdAt, isGuest);
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, email: $email, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
+    return 'UserEntity(id: $id, email: $email, username: $username, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
   }
 }
 
@@ -59,6 +62,7 @@ abstract mixin class $UserEntityCopyWith<$Res> {
   $Res call(
       {String id,
       String email,
+      String username,
       String? name,
       DateTime createdAt,
       bool isGuest});
@@ -78,6 +82,7 @@ class _$UserEntityCopyWithImpl<$Res> implements $UserEntityCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? username = null,
     Object? name = freezed,
     Object? createdAt = null,
     Object? isGuest = null,
@@ -90,6 +95,10 @@ class _$UserEntityCopyWithImpl<$Res> implements $UserEntityCopyWith<$Res> {
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      username: null == username
+          ? _self.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
       name: freezed == name
           ? _self.name
@@ -200,16 +209,16 @@ extension UserEntityPatterns on UserEntity {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String id, String email, String? name, DateTime createdAt,
-            bool isGuest)?
+    TResult Function(String id, String email, String username, String? name,
+            DateTime createdAt, bool isGuest)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _UserEntity() when $default != null:
-        return $default(
-            _that.id, _that.email, _that.name, _that.createdAt, _that.isGuest);
+        return $default(_that.id, _that.email, _that.username, _that.name,
+            _that.createdAt, _that.isGuest);
       case _:
         return orElse();
     }
@@ -230,15 +239,15 @@ extension UserEntityPatterns on UserEntity {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String id, String email, String? name, DateTime createdAt,
-            bool isGuest)
+    TResult Function(String id, String email, String username, String? name,
+            DateTime createdAt, bool isGuest)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserEntity():
-        return $default(
-            _that.id, _that.email, _that.name, _that.createdAt, _that.isGuest);
+        return $default(_that.id, _that.email, _that.username, _that.name,
+            _that.createdAt, _that.isGuest);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -258,15 +267,15 @@ extension UserEntityPatterns on UserEntity {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String id, String email, String? name, DateTime createdAt,
-            bool isGuest)?
+    TResult? Function(String id, String email, String username, String? name,
+            DateTime createdAt, bool isGuest)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserEntity() when $default != null:
-        return $default(
-            _that.id, _that.email, _that.name, _that.createdAt, _that.isGuest);
+        return $default(_that.id, _that.email, _that.username, _that.name,
+            _that.createdAt, _that.isGuest);
       case _:
         return null;
     }
@@ -279,6 +288,7 @@ class _UserEntity extends UserEntity {
   const _UserEntity(
       {required this.id,
       required this.email,
+      required this.username,
       this.name,
       required this.createdAt,
       this.isGuest = false})
@@ -288,6 +298,8 @@ class _UserEntity extends UserEntity {
   final String id;
   @override
   final String email;
+  @override
+  final String username;
   @override
   final String? name;
   @override
@@ -311,6 +323,8 @@ class _UserEntity extends UserEntity {
             other is _UserEntity &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -319,11 +333,11 @@ class _UserEntity extends UserEntity {
 
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, email, name, createdAt, isGuest);
+      Object.hash(runtimeType, id, email, username, name, createdAt, isGuest);
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, email: $email, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
+    return 'UserEntity(id: $id, email: $email, username: $username, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
   }
 }
 
@@ -338,6 +352,7 @@ abstract mixin class _$UserEntityCopyWith<$Res>
   $Res call(
       {String id,
       String email,
+      String username,
       String? name,
       DateTime createdAt,
       bool isGuest});
@@ -357,6 +372,7 @@ class __$UserEntityCopyWithImpl<$Res> implements _$UserEntityCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? username = null,
     Object? name = freezed,
     Object? createdAt = null,
     Object? isGuest = null,
@@ -369,6 +385,10 @@ class __$UserEntityCopyWithImpl<$Res> implements _$UserEntityCopyWith<$Res> {
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      username: null == username
+          ? _self.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
       name: freezed == name
           ? _self.name

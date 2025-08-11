@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'register_controller.dart';
+part of 'register_form_provider.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -13,7 +13,7 @@ part of 'register_controller.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$RegisterState {
+mixin _$RegisterFormState {
   String get email;
   String get password;
   String get confirmPassword;
@@ -26,19 +26,19 @@ mixin _$RegisterState {
   String? get generalError;
   bool get agreedToTerms;
 
-  /// Create a copy of RegisterState
+  /// Create a copy of RegisterFormState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $RegisterStateCopyWith<RegisterState> get copyWith =>
-      _$RegisterStateCopyWithImpl<RegisterState>(
-          this as RegisterState, _$identity);
+  $RegisterFormStateCopyWith<RegisterFormState> get copyWith =>
+      _$RegisterFormStateCopyWithImpl<RegisterFormState>(
+          this as RegisterFormState, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is RegisterState &&
+            other is RegisterFormState &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.password, password) ||
                 other.password == password) &&
@@ -80,15 +80,15 @@ mixin _$RegisterState {
 
   @override
   String toString() {
-    return 'RegisterState(email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
+    return 'RegisterFormState(email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
   }
 }
 
 /// @nodoc
-abstract mixin class $RegisterStateCopyWith<$Res> {
-  factory $RegisterStateCopyWith(
-          RegisterState value, $Res Function(RegisterState) _then) =
-      _$RegisterStateCopyWithImpl;
+abstract mixin class $RegisterFormStateCopyWith<$Res> {
+  factory $RegisterFormStateCopyWith(
+          RegisterFormState value, $Res Function(RegisterFormState) _then) =
+      _$RegisterFormStateCopyWithImpl;
   @useResult
   $Res call(
       {String email,
@@ -105,14 +105,14 @@ abstract mixin class $RegisterStateCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$RegisterStateCopyWithImpl<$Res>
-    implements $RegisterStateCopyWith<$Res> {
-  _$RegisterStateCopyWithImpl(this._self, this._then);
+class _$RegisterFormStateCopyWithImpl<$Res>
+    implements $RegisterFormStateCopyWith<$Res> {
+  _$RegisterFormStateCopyWithImpl(this._self, this._then);
 
-  final RegisterState _self;
-  final $Res Function(RegisterState) _then;
+  final RegisterFormState _self;
+  final $Res Function(RegisterFormState) _then;
 
-  /// Create a copy of RegisterState
+  /// Create a copy of RegisterFormState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -178,8 +178,8 @@ class _$RegisterStateCopyWithImpl<$Res>
   }
 }
 
-/// Adds pattern-matching-related methods to [RegisterState].
-extension RegisterStatePatterns on RegisterState {
+/// Adds pattern-matching-related methods to [RegisterFormState].
+extension RegisterFormStatePatterns on RegisterFormState {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -194,12 +194,12 @@ extension RegisterStatePatterns on RegisterState {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_RegisterState value)? $default, {
+    TResult Function(_RegisterFormState value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _RegisterState() when $default != null:
+      case _RegisterFormState() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -221,11 +221,11 @@ extension RegisterStatePatterns on RegisterState {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_RegisterState value) $default,
+    TResult Function(_RegisterFormState value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _RegisterState():
+      case _RegisterFormState():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -246,11 +246,11 @@ extension RegisterStatePatterns on RegisterState {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_RegisterState value)? $default,
+    TResult? Function(_RegisterFormState value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _RegisterState() when $default != null:
+      case _RegisterFormState() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -288,7 +288,7 @@ extension RegisterStatePatterns on RegisterState {
   }) {
     final _that = this;
     switch (_that) {
-      case _RegisterState() when $default != null:
+      case _RegisterFormState() when $default != null:
         return $default(
             _that.email,
             _that.password,
@@ -337,7 +337,7 @@ extension RegisterStatePatterns on RegisterState {
   ) {
     final _that = this;
     switch (_that) {
-      case _RegisterState():
+      case _RegisterFormState():
         return $default(
             _that.email,
             _that.password,
@@ -385,7 +385,7 @@ extension RegisterStatePatterns on RegisterState {
   ) {
     final _that = this;
     switch (_that) {
-      case _RegisterState() when $default != null:
+      case _RegisterFormState() when $default != null:
         return $default(
             _that.email,
             _that.password,
@@ -406,8 +406,8 @@ extension RegisterStatePatterns on RegisterState {
 
 /// @nodoc
 
-class _RegisterState implements RegisterState {
-  const _RegisterState(
+class _RegisterFormState implements RegisterFormState {
+  const _RegisterFormState(
       {this.email = '',
       this.password = '',
       this.confirmPassword = '',
@@ -450,19 +450,19 @@ class _RegisterState implements RegisterState {
   @JsonKey()
   final bool agreedToTerms;
 
-  /// Create a copy of RegisterState
+  /// Create a copy of RegisterFormState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$RegisterStateCopyWith<_RegisterState> get copyWith =>
-      __$RegisterStateCopyWithImpl<_RegisterState>(this, _$identity);
+  _$RegisterFormStateCopyWith<_RegisterFormState> get copyWith =>
+      __$RegisterFormStateCopyWithImpl<_RegisterFormState>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _RegisterState &&
+            other is _RegisterFormState &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.password, password) ||
                 other.password == password) &&
@@ -504,16 +504,16 @@ class _RegisterState implements RegisterState {
 
   @override
   String toString() {
-    return 'RegisterState(email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
+    return 'RegisterFormState(email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$RegisterStateCopyWith<$Res>
-    implements $RegisterStateCopyWith<$Res> {
-  factory _$RegisterStateCopyWith(
-          _RegisterState value, $Res Function(_RegisterState) _then) =
-      __$RegisterStateCopyWithImpl;
+abstract mixin class _$RegisterFormStateCopyWith<$Res>
+    implements $RegisterFormStateCopyWith<$Res> {
+  factory _$RegisterFormStateCopyWith(
+          _RegisterFormState value, $Res Function(_RegisterFormState) _then) =
+      __$RegisterFormStateCopyWithImpl;
   @override
   @useResult
   $Res call(
@@ -531,14 +531,14 @@ abstract mixin class _$RegisterStateCopyWith<$Res>
 }
 
 /// @nodoc
-class __$RegisterStateCopyWithImpl<$Res>
-    implements _$RegisterStateCopyWith<$Res> {
-  __$RegisterStateCopyWithImpl(this._self, this._then);
+class __$RegisterFormStateCopyWithImpl<$Res>
+    implements _$RegisterFormStateCopyWith<$Res> {
+  __$RegisterFormStateCopyWithImpl(this._self, this._then);
 
-  final _RegisterState _self;
-  final $Res Function(_RegisterState) _then;
+  final _RegisterFormState _self;
+  final $Res Function(_RegisterFormState) _then;
 
-  /// Create a copy of RegisterState
+  /// Create a copy of RegisterFormState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
@@ -555,7 +555,7 @@ class __$RegisterStateCopyWithImpl<$Res>
     Object? generalError = freezed,
     Object? agreedToTerms = null,
   }) {
-    return _then(_RegisterState(
+    return _then(_RegisterFormState(
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable

@@ -8,8 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
-import '../controllers/register_controller.dart';
 import '../providers/auth_providers.dart';
+import '../providers/register_form_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -27,11 +27,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    AppLogger.info('RegisterScreen initialized');
+    AppLogger.info('RegisterScreen.initState: RegisterScreen initialized');
 
-    // Сбрасываем форму при инициализации
+    // reset the form state after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(registerControllerProvider.notifier).resetForm();
+      ref.read(registerFormProvider.notifier).resetForm();
     });
   }
 
@@ -39,33 +39,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    // Получаем данные из нового контроллера
-    final controller = ref.read(registerControllerProvider.notifier);
-    final state = ref.watch(registerControllerProvider);
+    // Get data and actions from the form provider
+    final controller = ref.read(registerFormProvider.notifier);
+    final state = ref.watch(registerFormProvider);
     final isLoading = state.isLoading;
     final isPasswordHidden = state.isPasswordHidden;
     final isConfirmPasswordHidden = state.isConfirmPasswordHidden;
 
-    // Слушатели без изменений...
+    // Listen to auth state changes
     ref.listen(authNotifierProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
           if (authState.isAuthenticated && mounted) {
             final redirect = context.queryParam('redirect');
+            AppLogger.info(
+                'RegisterScreen.build: User is authenticated - redirecting to $redirect',);
             if (redirect != null && redirect.isNotEmpty) {
               context.go(redirect);
             } else {
               context.goToHome();
             }
+          } else if (authState.isUnauthenticated && mounted) {
+            AppLogger.info('RegisterScreen.build: User is unauthenticated');
           }
         },
       );
     });
 
-    // Слушаем общие ошибки из контроллера
+    // Listen to registration errors
     ref.listen(
-      registerControllerProvider.select((state) => state.generalError),
+      registerFormProvider.select((state) => state.generalError),
       (previous, current) {
+        AppLogger.info(
+          'RegisterScreen.build: Listening to registration errors: prev($previous) -> current($current)',
+        );
         if (current != null && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -251,13 +258,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    // Синхронизируем значения контроллеров с состоянием
-    final controller = ref.read(registerControllerProvider.notifier);
+    AppLogger.info(
+      'RegisterScreen._handleRegister: Attempting to register with email: ${_emailController.text}',
+    );
+    // Synchronize the form state
+    final controller = ref.read(registerFormProvider.notifier);
     controller.updateEmail(_emailController.text);
     controller.updatePassword(_passwordController.text);
     controller.updateConfirmPassword(_confirmPasswordController.text);
 
-    // Вызываем регистрацию
+    // Call the register method
     await controller.register();
   }
 }

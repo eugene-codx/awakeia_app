@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
@@ -8,7 +9,9 @@ import 'core/storage/secure_storage.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
-  WidgetsFlutterBinding.ensureInitialized();
+  final WidgetsBinding widgetsBinding =
+      WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Initialize logging system
   AppLogger.instance;
@@ -23,6 +26,7 @@ void main() async {
     await AppDatabase.initialize();
     AppLogger.info('Encrypted database initialized');
 
+    FlutterNativeSplash.remove();
     // Run the Flutter application
     runApp(
       const ProviderScope(

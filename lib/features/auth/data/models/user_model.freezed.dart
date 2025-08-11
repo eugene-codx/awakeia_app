@@ -16,6 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$UserModel {
   String get id;
   String get email;
+  String get username;
   String? get name;
   DateTime get createdAt;
   bool get isGuest;
@@ -37,6 +38,8 @@ mixin _$UserModel {
             other is UserModel &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -46,11 +49,11 @@ mixin _$UserModel {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, email, name, createdAt, isGuest);
+      Object.hash(runtimeType, id, email, username, name, createdAt, isGuest);
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
+    return 'UserModel(id: $id, email: $email, username: $username, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
   }
 }
 
@@ -62,6 +65,7 @@ abstract mixin class $UserModelCopyWith<$Res> {
   $Res call(
       {String id,
       String email,
+      String username,
       String? name,
       DateTime createdAt,
       bool isGuest});
@@ -81,6 +85,7 @@ class _$UserModelCopyWithImpl<$Res> implements $UserModelCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? username = null,
     Object? name = freezed,
     Object? createdAt = null,
     Object? isGuest = null,
@@ -93,6 +98,10 @@ class _$UserModelCopyWithImpl<$Res> implements $UserModelCopyWith<$Res> {
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      username: null == username
+          ? _self.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
       name: freezed == name
           ? _self.name
@@ -203,16 +212,16 @@ extension UserModelPatterns on UserModel {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String id, String email, String? name, DateTime createdAt,
-            bool isGuest)?
+    TResult Function(String id, String email, String username, String? name,
+            DateTime createdAt, bool isGuest)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _UserModel() when $default != null:
-        return $default(
-            _that.id, _that.email, _that.name, _that.createdAt, _that.isGuest);
+        return $default(_that.id, _that.email, _that.username, _that.name,
+            _that.createdAt, _that.isGuest);
       case _:
         return orElse();
     }
@@ -233,15 +242,15 @@ extension UserModelPatterns on UserModel {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String id, String email, String? name, DateTime createdAt,
-            bool isGuest)
+    TResult Function(String id, String email, String username, String? name,
+            DateTime createdAt, bool isGuest)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserModel():
-        return $default(
-            _that.id, _that.email, _that.name, _that.createdAt, _that.isGuest);
+        return $default(_that.id, _that.email, _that.username, _that.name,
+            _that.createdAt, _that.isGuest);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -261,15 +270,15 @@ extension UserModelPatterns on UserModel {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String id, String email, String? name, DateTime createdAt,
-            bool isGuest)?
+    TResult? Function(String id, String email, String username, String? name,
+            DateTime createdAt, bool isGuest)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserModel() when $default != null:
-        return $default(
-            _that.id, _that.email, _that.name, _that.createdAt, _that.isGuest);
+        return $default(_that.id, _that.email, _that.username, _that.name,
+            _that.createdAt, _that.isGuest);
       case _:
         return null;
     }
@@ -282,6 +291,7 @@ class _UserModel extends UserModel {
   const _UserModel(
       {required this.id,
       required this.email,
+      required this.username,
       this.name,
       required this.createdAt,
       this.isGuest = false})
@@ -293,6 +303,8 @@ class _UserModel extends UserModel {
   final String id;
   @override
   final String email;
+  @override
+  final String username;
   @override
   final String? name;
   @override
@@ -323,6 +335,8 @@ class _UserModel extends UserModel {
             other is _UserModel &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -332,11 +346,11 @@ class _UserModel extends UserModel {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, id, email, name, createdAt, isGuest);
+      Object.hash(runtimeType, id, email, username, name, createdAt, isGuest);
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
+    return 'UserModel(id: $id, email: $email, username: $username, name: $name, createdAt: $createdAt, isGuest: $isGuest)';
   }
 }
 
@@ -351,6 +365,7 @@ abstract mixin class _$UserModelCopyWith<$Res>
   $Res call(
       {String id,
       String email,
+      String username,
       String? name,
       DateTime createdAt,
       bool isGuest});
@@ -370,6 +385,7 @@ class __$UserModelCopyWithImpl<$Res> implements _$UserModelCopyWith<$Res> {
   $Res call({
     Object? id = null,
     Object? email = null,
+    Object? username = null,
     Object? name = freezed,
     Object? createdAt = null,
     Object? isGuest = null,
@@ -382,6 +398,10 @@ class __$UserModelCopyWithImpl<$Res> implements _$UserModelCopyWith<$Res> {
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String,
+      username: null == username
+          ? _self.username
+          : username // ignore: cast_nullable_to_non_nullable
               as String,
       name: freezed == name
           ? _self.name

@@ -1,11 +1,9 @@
-// lib/features/auth/presentation/screens/auth_loading_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
-import '../controllers/auth_loading_controller.dart';
 import '../providers/auth_providers.dart';
 
 /// Loading screen shown while checking authentication status
@@ -22,12 +20,11 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   @override
   void initState() {
     super.initState();
-    AppLogger.info('AuthLoadingScreen initialized');
+    AppLogger.info(
+      'AuthLoadingScreen.initState: AuthLoadingScreen initialized',
+    );
 
-    // Проверяем auth статус после построения виджета
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(authLoadingControllerProvider.notifier).checkAuthStatus();
-    });
+    // Auth state checking is handled by authNotifierProvider automatically
   }
 
   void _navigateBasedOnAuthState() {
@@ -39,13 +36,17 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
       data: (authState) {
         if (authState.isAuthenticated) {
           AppLogger.info(
-              'AuthLoadingScreen: User authenticated, navigating to home',);
+            'AuthLoadingScreen._navigateBasedOnAuthState: User authenticated, navigating to home',
+          );
           _hasNavigated = true;
-          // Используем pushReplacement чтобы заменить loading screen
+          // Using GoRouter to navigate
+          // This will replace the current route with the home screen
+          // instead of pushing a new one
           GoRouter.of(context).go('/home');
         } else if (authState.isUnauthenticated) {
           AppLogger.info(
-              'AuthLoadingScreen: User not authenticated, navigating to first',);
+            'AuthLoadingScreen._navigateBasedOnAuthState: : User not authenticated, navigating to first',
+          );
           _hasNavigated = true;
           GoRouter.of(context).go('/first');
         }
@@ -55,18 +56,19 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Слушаем изменения auth state и навигируем когда готово
+    // Listen to auth state changes and navigate accordingly
     ref.listen(authNotifierProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
           AppLogger.debug(
-              'AuthLoadingScreen: Auth state changed, checking navigation',);
+            'AuthLoadingScreen.build(ref.listen): Auth state changed, checking navigation',
+          );
           _navigateBasedOnAuthState();
         },
       );
     });
 
-    // Также проверяем при каждом build (на случай если состояние уже есть)
+    // Also check auth state after the first frame is built to ensure we don't miss any changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_hasNavigated) {
         _navigateBasedOnAuthState();
@@ -74,8 +76,8 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
     });
 
     // Получаем состояние для UI
-    final controller = ref.watch(authLoadingControllerProvider);
-    final error = controller.error;
+    final authAsyncValue = ref.watch(authNotifierProvider);
+    final hasError = authAsyncValue.hasError;
 
     return Scaffold(
       body: GradientBackground(
@@ -98,7 +100,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
               const SizedBox(height: AppSpacing.xl),
 
               // Показываем индикатор загрузки или ошибку
-              if (error != null) ...[
+              if (hasError) ...[
                 const Icon(
                   Icons.error_outline,
                   size: 48,
@@ -118,9 +120,6 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
                     _hasNavigated = false;
                     // Пробуем снова
                     ref.invalidate(authNotifierProvider);
-                    ref
-                        .read(authLoadingControllerProvider.notifier)
-                        .checkAuthStatus();
                   },
                   child: const Text('Retry'),
                 ),
@@ -147,7 +146,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
 
   @override
   void dispose() {
-    AppLogger.info('AuthLoadingScreen disposed');
+    AppLogger.info('AuthLoadingScreen.dispose: AuthLoadingScreen disposed');
     super.dispose();
   }
 }

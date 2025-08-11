@@ -10,6 +10,7 @@ abstract class UserModel with _$UserModel {
   const factory UserModel({
     required String id,
     required String email,
+    required String username,
     String? name,
     required DateTime createdAt,
     @Default(false) bool isGuest,
