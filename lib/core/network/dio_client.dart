@@ -87,7 +87,7 @@ class DioClient {
 
       if (requiresAuth) {
         final token =
-            await SecureStorage.instance.read(key: StorageKeys.authToken);
+            await SecureStorage.instance.read(key: StorageKeys.accessToken);
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
@@ -156,6 +156,11 @@ class DioClient {
         break;
       case DioExceptionType.unknown:
         AppLogger.error('Unknown error: ${error.message}');
+        AppLogger.error('Error details: ${error.error}');
+        AppLogger.error('Request URL: ${error.requestOptions.uri}');
+        if (error.error != null) {
+          AppLogger.error('Underlying error type: ${error.error.runtimeType}');
+        }
         break;
     }
 
@@ -166,14 +171,14 @@ class DioClient {
   void _handleUnauthorized() {
     AppLogger.warning('Unauthorized access - token may be expired');
     // Clear stored token
-    SecureStorage.instance.delete(key: StorageKeys.authToken);
+    SecureStorage.instance.delete(key: StorageKeys.accessToken);
     // Note: In a real app, you might want to navigate to login screen
     // This would typically be handled by a navigation service
   }
 
   /// Clear all stored authentication data
   Future<void> clearAuthData() async {
-    await SecureStorage.instance.delete(key: StorageKeys.authToken);
+    await SecureStorage.instance.delete(key: StorageKeys.accessToken);
     await SecureStorage.instance.delete(key: StorageKeys.refreshToken);
   }
 

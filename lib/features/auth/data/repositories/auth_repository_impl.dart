@@ -40,7 +40,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final cachedUser = await _localDataSource.getCachedUser();
       if (cachedUser != null) {
         AppLogger.info(
-          'AuthRepositoryImpl._initializeAuthState: Found cached user: ${cachedUser.id}',
+          'AuthRepositoryImpl._initializeAuthState: Found cached user: ${cachedUser.publicId}',
         );
         _authStateController.add(UserMapper.toEntity(cachedUser));
       } else {
@@ -76,22 +76,23 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Left(AuthFailure.invalidEmailAndPasswordCombination());
       }
 
-      if (!_isValidEmail(email)) {
-        return const Left(AuthFailure.invalidEmail());
-      }
-
-      if (password.length < 6) {
-        return const Left(AuthFailure.weakPassword());
-      }
-
       // Call remote data source
-      final userModel = await _remoteDataSource.signInWithEmailAndPassword(
+      await _remoteDataSource.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      final userModel = await _remoteDataSource.getCurrentUser();
+
       // Cache user locally
-      await _localDataSource.cacheUser(userModel);
+      if (userModel != null) {
+        await _localDataSource.cacheUser(userModel);
+      } else {
+        AppLogger.warning(
+          'AuthRepositoryImpl.signInWithEmailAndPassword: No user data returned from remote',
+        );
+        return const Left(AuthFailure.userNotFound());
+      }
 
       // Convert to entity
       final userEntity = UserMapper.toEntity(userModel);
@@ -100,7 +101,7 @@ class AuthRepositoryImpl implements AuthRepository {
       _authStateController.add(userEntity);
 
       AppLogger.info(
-        'AuthRepositoryImpl.signInWithEmailAndPassword: Sign in successful for user: ${userEntity.id}',
+        'AuthRepositoryImpl.signInWithEmailAndPassword: Sign in successful for user: ${userEntity.publicId}',
       );
       return Right(userEntity);
     } on ServerException catch (e, stackTrace) {
@@ -166,7 +167,7 @@ class AuthRepositoryImpl implements AuthRepository {
       _authStateController.add(userEntity);
 
       AppLogger.info(
-        'AuthRepositoryImpl.registerWithEmailAndPassword: Registration successful for user: ${userEntity.id}',
+        'AuthRepositoryImpl.registerWithEmailAndPassword: Registration successful for user: ${userEntity.publicId}',
       );
       return Right(userEntity);
     } on ServerException catch (e, stackTrace) {
@@ -208,11 +209,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Create guest user
       final guestUser = UserModel(
-        id: const Uuid().v4(),
+        publicId: const Uuid().v4(),
         email: 'guest@awakeia.com',
         username: 'guest_${DateTime.now().millisecondsSinceEpoch}',
-        name: 'Guest User',
-        createdAt: DateTime.now(),
+        firstName: 'Guest User',
         isGuest: true,
       );
 
@@ -359,7 +359,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // If guest user, update locally only
       if (cachedUser.isGuest) {
-        final updatedUser = cachedUser.copyWith(name: name);
+        final updatedUser = cachedUser.copyWith(firstName: name);
         await _localDataSource.cacheUser(updatedUser);
 
         final userEntity = UserMapper.toEntity(updatedUser);

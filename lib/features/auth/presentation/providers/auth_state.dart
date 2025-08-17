@@ -38,7 +38,8 @@ class AuthState with _$AuthState {
     return when(
       initial: () => 'AuthState.initial()',
       loading: () => 'AuthState.loading()',
-      authenticated: (user) => 'AuthState.authenticated(user: ${user.id})',
+      authenticated: (user) =>
+          'AuthState.authenticated(user: ${user.publicId})',
       unauthenticated: (failure) =>
           'AuthState.unauthenticated(failure: $failure)',
     );

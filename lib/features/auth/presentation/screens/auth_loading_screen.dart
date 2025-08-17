@@ -23,8 +23,6 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
     AppLogger.info(
       'AuthLoadingScreen.initState: AuthLoadingScreen initialized',
     );
-
-    // Auth state checking is handled by authNotifierProvider automatically
   }
 
   void _navigateBasedOnAuthState() {

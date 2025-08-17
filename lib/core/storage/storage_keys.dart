@@ -5,9 +5,9 @@ class StorageKeys {
   StorageKeys._();
 
   // Authentication keys
-  static const String authToken = 'auth_token';
-  static const String refreshToken = 'auth_refresh_token';
-  static const String tokenExpiry = 'auth_token_expiry';
+  static const String accessToken = 'access_token';
+  static const String refreshToken = 'refresh_token';
+  static const String tokenExpiryIn = 'expires_in';
   static const String isLoggedIn = 'auth_is_logged_in';
   static const String loginType =
       'auth_login_type'; // email, google, facebook, etc.
@@ -78,9 +78,9 @@ class StorageKeys {
 
   /// Get all authentication-related keys
   static List<String> get authKeys => [
-        authToken,
+        accessToken,
         refreshToken,
-        tokenExpiry,
+        tokenExpiryIn,
         isLoggedIn,
         loginType,
         lastLoginTime,
@@ -126,7 +126,7 @@ class StorageKeys {
 
   /// Get all sensitive keys that should be handled with extra care
   static List<String> get sensitiveKeys => [
-        authToken,
+        accessToken,
         refreshToken,
         pinHash,
         databasePassword,
@@ -148,7 +148,7 @@ class StorageKeys {
   /// Get key description for debugging
   static String getKeyDescription(String key) {
     switch (key) {
-      case authToken:
+      case accessToken:
         return 'Authentication token for API access';
       case refreshToken:
         return 'Refresh token for token renewal';

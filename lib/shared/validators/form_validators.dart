@@ -9,11 +9,21 @@ class AuthFormValidators {
     return null;
   }
 
+  static String? validateUsername(String username) {
+    if (username.isEmpty) {
+      return 'Please enter your username';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(username)) {
+      return 'Please enter a valid username';
+    }
+    return null;
+  }
+
   static String? validatePassword(String password) {
     if (password.isEmpty) {
       return 'Please enter your password';
     }
-    if (password.length < 6) {
+    if (password.length < 5) {
       return 'Password must contain at least 6 characters';
     }
     return null;

@@ -8,7 +8,7 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/home_providers.dart';
 import '../widgets/home_widgets.dart';
 
-/// Главный экран приложения с использованием Clean Architecture
+/// Main application screen using Clean Architecture
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 

@@ -1,12 +1,17 @@
-import 'package:uuid/uuid.dart';
+import 'package:dio/dio.dart';
 
+import '../../../../core/error/exceptions.dart';
+import '../../../../core/network/api_endpoints.dart';
+import '../../../../core/network/dio_client.dart';
+import '../../../../core/storage/secure_storage.dart';
+import '../../../../core/storage/storage_keys.dart';
 import '../models/user_model.dart';
 
 /// Abstract class defining the contract for remote authentication operations
 abstract class AuthRemoteDataSource {
   /// Sign in with email and password
   /// Throws [ServerException] on failure
-  Future<UserModel> signInWithEmailAndPassword({
+  Future<void> signInWithEmailAndPassword({
     required String email,
     required String password,
   });
@@ -36,40 +41,76 @@ abstract class AuthRemoteDataSource {
 }
 
 /// Implementation of AuthRemoteDataSource
-/// For now, this is a mock implementation that simulates API calls
+/// Uses real HTTP requests via DioClient
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  AuthRemoteDataSourceImpl();
+  AuthRemoteDataSourceImpl() : _dio = DioClient.instance.dio;
+
+  final Dio _dio;
 
   @override
-  Future<UserModel> signInWithEmailAndPassword({
+  Future<void> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    // Simulate API call delay
-    await Future<void>.delayed(const Duration(seconds: 2));
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.login,
+        data: {
+          'email_username': email,
+          'password': password,
+        },
+      );
 
-    // Mock validation
-    if (email.isEmpty || password.isEmpty) {
-      throw Exception('Email and password cannot be empty');
+      if (response.statusCode == 200 && response.data != null) {
+        final responseData = response.data as Map<String, dynamic>;
+
+        // Extract and save token if present
+        if (responseData.containsKey(StorageKeys.accessToken)) {
+          final token = responseData[StorageKeys.accessToken] as String;
+          await SecureStorage.instance.write(
+            key: StorageKeys.accessToken,
+            value: token,
+          );
+
+          // Save additional auth info if present
+          if (responseData.containsKey(StorageKeys.refreshToken)) {
+            await SecureStorage.instance.write(
+              key: StorageKeys.refreshToken,
+              value: responseData[StorageKeys.refreshToken] as String,
+            );
+          }
+        }
+      } else {
+        throw const ServerException('Invalid response from server');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final statusCode = e.response!.statusCode;
+        final errorData = e.response!.data;
+
+        switch (statusCode) {
+          case 401:
+            throw const ServerException('Invalid email or password');
+          case 422:
+            final message =
+                errorData?['message'] as String? ?? 'Invalid input data';
+            throw ServerException(message);
+          case 500:
+            throw const ServerException('Server error occurred');
+          default:
+            throw ServerException(
+              'Login failed: ${e.response!.statusMessage ?? 'Unknown error'}',
+            );
+        }
+      } else {
+        // Network error
+        throw const ServerException(
+          'Network error. Please check your internet connection',
+        );
+      }
+    } catch (e) {
+      throw ServerException('Unexpected error: ${e.toString()}');
     }
-
-    if (!email.contains('@')) {
-      throw Exception('Invalid email format');
-    }
-
-    if (password.length < 6) {
-      throw Exception('Password must be at least 6 characters');
-    }
-
-    // Return mock user
-    return UserModel(
-      id: const Uuid().v4(),
-      email: email,
-      username: 'user_${DateTime.now().millisecondsSinceEpoch}',
-      name: email.split('@')[0],
-      createdAt: DateTime.now(),
-      isGuest: false,
-    );
   }
 
   @override
@@ -77,46 +118,128 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    // Simulate API call delay
-    await Future<void>.delayed(const Duration(seconds: 2));
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.register,
+        data: {
+          'username': email,
+          'password': password,
+          'email': email,
+        },
+      );
 
-    // Mock validation (same as login for now)
-    if (email.isEmpty || password.isEmpty) {
-      throw Exception('Email and password cannot be empty');
+      if (response.statusCode == 201 && response.data != null) {
+        final responseData = response.data as Map<String, dynamic>;
+
+        // Extract and save token if present
+        if (responseData.containsKey('token')) {
+          final token = responseData['token'] as String;
+          await SecureStorage.instance.write(
+            key: StorageKeys.accessToken,
+            value: token,
+          );
+
+          // Save additional auth info if present
+          if (responseData.containsKey('refresh_token')) {
+            await SecureStorage.instance.write(
+              key: StorageKeys.refreshToken,
+              value: responseData['refresh_token'] as String,
+            );
+          }
+        }
+
+        // Return user data (might be nested under 'user' key)
+        final userData = responseData.containsKey('user')
+            ? responseData['user'] as Map<String, dynamic>
+            : responseData;
+
+        return UserModel.fromJson(userData);
+      } else {
+        throw const ServerException('Invalid response from server');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final statusCode = e.response!.statusCode;
+        final errorData = e.response!.data;
+
+        switch (statusCode) {
+          case 409:
+            throw const ServerException('User already exists');
+          case 422:
+            final message =
+                errorData?['message'] as String? ?? 'Invalid input data';
+            throw ServerException(message);
+          case 500:
+            throw const ServerException('Server error occurred');
+          default:
+            throw ServerException(
+              'Registration failed: ${e.response!.statusMessage ?? 'Unknown error'}',
+            );
+        }
+      } else {
+        // Network error
+        throw const ServerException(
+          'Network error. Please check your internet connection',
+        );
+      }
+    } catch (e) {
+      throw ServerException('Unexpected error: ${e.toString()}');
     }
-
-    if (!email.contains('@')) {
-      throw Exception('Invalid email format');
-    }
-
-    if (password.length < 6) {
-      throw Exception('Password must be at least 6 characters');
-    }
-
-    // Return mock user
-    return UserModel(
-      id: const Uuid().v4(),
-      email: email,
-      username: 'user_${DateTime.now().millisecondsSinceEpoch}',
-      name: email.split('@')[0],
-      createdAt: DateTime.now(),
-      isGuest: false,
-    );
   }
 
   @override
   Future<void> signOut() async {
-    // Simulate API call delay
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.logout,
+        options: Options(
+          extra: {'requiresAuth': true}, // Requires authentication token
+        ),
+      );
+
+      // Clear auth data from client after successful logout
+      await DioClient.instance.clearAuthData();
+    } on DioException catch (e) {
+      // Even if logout fails on server, clear local auth data
+      await DioClient.instance.clearAuthData();
+
+      // Don't throw error for logout - log it but continue
+      if (e.response?.statusCode != 401) {
+        // 401 is expected if token is already expired
+        throw ServerException('Logout failed: ${e.message}');
+      }
+    } catch (e) {
+      await DioClient.instance.clearAuthData();
+      throw ServerException('Unexpected error during logout: ${e.toString()}');
+    }
   }
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    // Simulate API call delay
-    await Future<void>.delayed(const Duration(seconds: 1));
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        ApiEndpoints.me,
+        options: Options(
+          extra: {'requiresAuth': true}, // Requires authentication token
+        ),
+      );
 
-    // For now, always return null (not authenticated)
-    return null;
+      if (response.statusCode == 200 && response.data != null) {
+        return UserModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        return null; // No user found
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        // Token expired or invalid - clear auth data
+        await DioClient.instance.clearAuthData();
+        return null; // Not authenticated
+      }
+
+      throw ServerException('Failed to get current user: ${e.message}');
+    } catch (e) {
+      throw ServerException('Unexpected error getting user: ${e.toString()}');
+    }
   }
 
   @override
@@ -124,17 +247,52 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String userId,
     String? name,
   }) async {
-    // Simulate API call delay
-    await Future<void>.delayed(const Duration(seconds: 1));
+    try {
+      final data = <String, dynamic>{};
+      if (name != null) data['name'] = name;
 
-    // For mock, just return a user with updated name
-    return UserModel(
-      id: userId,
-      email: 'mock_user@example.com',
-      name: name,
-      username: 'mock_user_${DateTime.now().millisecondsSinceEpoch}',
-      createdAt: DateTime.now(),
-      isGuest: false,
-    );
+      final response = await _dio.put<Map<String, dynamic>>(
+        ApiEndpoints.updateProfile,
+        data: data,
+        options: Options(
+          extra: {'requiresAuth': true}, // Requires authentication token
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        return UserModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw const ServerException('Invalid response from server');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final statusCode = e.response!.statusCode;
+
+        switch (statusCode) {
+          case 401:
+            await DioClient.instance.clearAuthData();
+            throw const ServerException('Authentication required');
+          case 403:
+            throw const ServerException('Access forbidden');
+          case 422:
+            final errorData = e.response!.data;
+            final message =
+                errorData?['message'] as String? ?? 'Invalid input data';
+            throw ServerException(message);
+          case 500:
+            throw const ServerException('Server error occurred');
+          default:
+            throw ServerException(
+              'Update failed: ${e.response!.statusMessage ?? 'Unknown error'}',
+            );
+        }
+      } else {
+        throw const ServerException(
+          'Network error. Please check your internet connection',
+        );
+      }
+    } catch (e) {
+      throw ServerException('Unexpected error: ${e.toString()}');
+    }
   }
 }

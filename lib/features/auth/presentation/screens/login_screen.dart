@@ -115,7 +115,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           keyboardType: TextInputType.emailAddress,
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
-                          onChanged: controller.updateEmail,
+                          onChanged: controller.updateEmailUsername,
                           // Новый обработчик
                           validator: (_) =>
                               state.emailError, // Ошибка из состояния
@@ -242,7 +242,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleLogin() async {
     // Синхронизируем значения контроллеров с состоянием
     final controller = ref.read(loginFormProvider.notifier);
-    controller.updateEmail(_emailController.text);
+    controller.updateEmailUsername(_emailController.text);
     controller.updatePassword(_passwordController.text);
 
     // Вызываем вход
