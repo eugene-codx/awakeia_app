@@ -13,10 +13,10 @@ part 'login_form_provider.freezed.dart';
 @freezed
 abstract class LoginFormState with _$LoginFormState {
   const factory LoginFormState({
-    @Default('') String email,
+    @Default('') String emailUsername,
     @Default('') String password,
     @Default(true) bool isPasswordHidden,
-    String? emailError,
+    String? emailUsernameError,
     String? passwordError,
     @Default(false) bool isLoading,
     String? generalError,
@@ -32,20 +32,24 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
     return const LoginFormState();
   }
 
-  /// Update email field
-  void updateEmail(String email) {
-    logAction('LoginFormNotifier.updateEmail: Updating email');
+  /// Update emailUsername field
+  void updateEmailUsername(String emailUsername) {
+    logAction('LoginFormNotifier.updateEmailUsername: Updating emailUsername');
 
     state = state.copyWith(
-      email: email,
-      emailError: null,
+      emailUsername: emailUsername,
+      emailUsernameError: null,
       generalError: null,
     );
 
     // Delayed validation
     Future.delayed(const Duration(milliseconds: 500), () {
-      if (state.email == email) {
-        _validateEmail();
+      if (state.emailUsername == emailUsername) {
+        if (emailUsername.contains('@')) {
+          _validateEmail();
+        } else {
+          _validateUsername();
+        }
       }
     });
   }
@@ -71,7 +75,8 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
   /// Toggle password visibility
   void togglePasswordVisibility() {
     logAction(
-        'LoginFormNotifier.togglePasswordVisibility: Toggling visibility',);
+      'LoginFormNotifier.togglePasswordVisibility: Toggling visibility',
+    );
     state = state.copyWith(isPasswordHidden: !state.isPasswordHidden);
   }
 
@@ -84,7 +89,7 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
 
     // Validate form
     if (!_validateForm()) {
-      logAction('LoginFormNotifier.signIn: Form validation failed');
+      logError('LoginFormNotifier.signIn: Form validation failed');
       return;
     }
 
@@ -94,12 +99,55 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
     try {
       // Call auth notifier directly instead of using action provider
       final authNotifier = ref.read(authNotifierProvider.notifier);
-      await authNotifier.signIn(state.email.trim(), state.password);
+      await authNotifier.signIn(state.emailUsername.trim(), state.password);
 
       logAction('LoginFormNotifier.signIn: Sign in successful');
 
-      // Reset form on success
-      state = const LoginFormState();
+      // Check authentication result
+      final authState = ref.read(authNotifierProvider);
+
+      // Wait for state to update
+      await authState.when(
+        data: (authStateData) async {
+          if (authStateData.isAuthenticated) {
+            logAction('LoginFormNotifier.signIn: Sign in successful');
+            // Reset form on success
+            state = const LoginFormState();
+          } else {
+            // Handle authentication error
+            final failure = authStateData.errorMessage;
+            String errorMessage = 'Invalid email or password';
+
+            if (failure != null) {
+              errorMessage = failure;
+            }
+
+            logError(
+                'LoginFormNotifier.signIn: Authentication failed', failure);
+
+            state = state.copyWith(
+              isLoading: false,
+              generalError: errorMessage,
+            );
+          }
+        },
+        loading: () {
+          // State is still loading, wait
+        },
+        error: (error, _) {
+          logError('LoginFormNotifier.signIn: Sign in error', error);
+
+          String errorMessage = 'An error occurred during sign in';
+          if (error is AuthFailure) {
+            errorMessage = error.toMessage();
+          }
+
+          state = state.copyWith(
+            isLoading: false,
+            generalError: errorMessage,
+          );
+        },
+      );
     } catch (error) {
       logError('LoginFormNotifier.signIn: Sign in failed', error);
 
@@ -135,22 +183,29 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
 
   bool _validateForm() {
     logAction('LoginFormNotifier._validateForm: Validating form');
-    final emailError = AuthFormValidators.validateEmail(state.email);
-    final passwordError = AuthFormValidators.validatePassword(state.password);
+    if (state.emailUsername.contains('@')) {
+      _validateEmail();
+    } else {
+      _validateUsername();
+    }
+    _validatePassword();
 
-    state = state.copyWith(
-      emailError: emailError,
-      passwordError: passwordError,
-    );
-
-    return emailError == null && passwordError == null;
+    return state.emailUsernameError == null && state.passwordError == null;
   }
 
   void _validateEmail() {
     logAction('LoginFormNotifier._validateEmail: Validating email');
-    final error = AuthFormValidators.validateEmail(state.email);
-    if (state.emailError != error) {
-      state = state.copyWith(emailError: error);
+    final error = AuthFormValidators.validateEmail(state.emailUsername);
+    if (state.emailUsernameError != error) {
+      state = state.copyWith(emailUsernameError: error);
+    }
+  }
+
+  void _validateUsername() {
+    logAction('LoginFormNotifier._validateUsername: Validating username');
+    final error = AuthFormValidators.validateUsername(state.emailUsername);
+    if (state.emailUsernameError != error) {
+      state = state.copyWith(emailUsernameError: error);
     }
   }
 
@@ -168,32 +223,3 @@ final loginFormProvider =
     AutoDisposeNotifierProvider<LoginFormNotifier, LoginFormState>(
   LoginFormNotifier.new,
 );
-
-// Convenience providers for accessing specific parts of the state
-//   Better to use the notifier directly for loading state
-//   final isLoading = ref.watch(loginFormProvider.select((s) => s.isLoading));
-
-// Provider for loading state
-// final loginFormLoadingProvider = Provider.autoDispose<bool>((ref) {
-//   return ref.watch(loginFormProvider).isLoading;
-// });
-//
-// /// Provider for general error
-// final loginFormErrorProvider = Provider.autoDispose<String?>((ref) {
-//   return ref.watch(loginFormProvider).generalError;
-// });
-//
-// /// Provider for email error
-// final loginFormEmailErrorProvider = Provider.autoDispose<String?>((ref) {
-//   return ref.watch(loginFormProvider).emailError;
-// });
-//
-// /// Provider for password error
-// final loginFormPasswordErrorProvider = Provider.autoDispose<String?>((ref) {
-//   return ref.watch(loginFormProvider).passwordError;
-// });
-//
-// /// Provider for password visibility
-// final loginFormPasswordVisibilityProvider = Provider.autoDispose<bool>((ref) {
-//   return ref.watch(loginFormProvider).isPasswordHidden;
-// });

@@ -27,7 +27,7 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
 
   /// Handle user change
   void _onUserChanged(UserEntity? user) {
-    logAction('HomeNotifier._onUserChanged: User changed: ${user?.id}');
+    logAction('HomeNotifier._onUserChanged: User changed: ${user?.publicId}');
 
     if (user == null) {
       // User logged out, clear state
@@ -48,7 +48,8 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
 
   /// Load user data
   Future<void> _loadUserData(UserEntity user) async {
-    logAction('HomeNotifier._loadUserData: Loading data for user: ${user.id}');
+    logAction(
+        'HomeNotifier._loadUserData: Loading data for user: ${user.publicId}',);
 
     // Show loading indicator only if not refreshing
     if (!state.isRefreshing) {
@@ -72,8 +73,11 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
 
       logAction('HomeNotifier._loadUserData: User data loaded successfully');
     } catch (e, stackTrace) {
-      logError('HomeNotifier._loadUserData: Failed to load user data', e,
-          stackTrace,);
+      logError(
+        'HomeNotifier._loadUserData: Failed to load user data',
+        e,
+        stackTrace,
+      );
       state = state.copyWith(
         isLoading: false,
         isRefreshing: false,
@@ -131,7 +135,8 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
   /// Mark habit as completed
   Future<void> markHabitCompleted(String habitId) async {
     logAction(
-        'HomeNotifier.markHabitCompleted: Marking habit as completed: $habitId',);
+      'HomeNotifier.markHabitCompleted: Marking habit as completed: $habitId',
+    );
 
     state = state.copyWith(isLoading: true, error: null);
 
@@ -146,9 +151,10 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
       );
     } catch (e, stackTrace) {
       logError(
-          'HomeNotifier.markHabitCompleted: Failed to mark habit as completed',
-          e,
-          stackTrace,);
+        'HomeNotifier.markHabitCompleted: Failed to mark habit as completed',
+        e,
+        stackTrace,
+      );
       state = state.copyWith(
         isLoading: false,
         error: 'Failed to update habit',

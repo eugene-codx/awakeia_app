@@ -1,41 +1,41 @@
-// /// Расширения для удобной работы с AsyncValue
+// /// Extensions for convenient work with AsyncValue
 // extension AsyncValueX<T> on AsyncValue<T> {
-//   /// Проверка, что состояние в процессе загрузки
+//   /// Check if state is loading
 //   bool get isLoadingState => this is AsyncLoading<T>;
 //
-//   /// Проверка на наличие ошибки
+//   /// Check for error
 //   bool get hasErrorState => this is AsyncError<T>;
 //
-//   /// Проверка на наличие данных
+//   /// Check for data
 //   bool get hasDataState => this is AsyncData<T>;
 //
-//   /// Безопасное получение данных
+//   /// Safe data retrieval
 //   T? get valueOrNull => whenOrNull(data: (value) => value);
 //
-//   /// Получить ошибку если есть
+//   /// Get error if exists
 //   Object? get errorOrNull => whenOrNull(
 //         error: (error, _) => error,
 //       );
 //
-//   /// Получить сообщение об ошибке
+//   /// Get error message
 //   String? get errorMessage => whenOrNull(
 //         error: (error, _) => error.toString(),
 //       );
 //
-//   /// Выполнить действие только если есть данные
+//   /// Execute action only if data exists
 //   void whenData(void Function(T value) action) {
 //     whenOrNull(data: action);
 //   }
 //
-//   /// Выполнить действие только если есть ошибка
+//   /// Execute action only if error exists
 //   void whenError(void Function(Object error, StackTrace stackTrace) action) {
 //     whenOrNull(error: action);
 //   }
 // }
 
-// /// Расширения для AsyncValue с возможностью обновления
+// /// Extensions for AsyncValue with update capability
 // extension AsyncValueModifierX<T> on AsyncValue<T> {
-//   /// Обновить данные сохраняя состояние loading/error
+//   /// Update data preserving loading/error state
 //   AsyncValue<T> updateData(T Function(T) updater) {
 //     return when(
 //       data: (value) => AsyncData(updater(value)),
@@ -44,7 +44,7 @@
 //     );
 //   }
 //
-//   /// Установить состояние loading сохраняя предыдущие данные
+//   /// Set loading state preserving previous data
 //   AsyncValue<T> toLoading() {
 //     return whenOrNull(
 //           data: (value) => AsyncLoading<T>().copyWithPrevious(AsyncData(value)),
@@ -52,7 +52,7 @@
 //         const AsyncLoading();
 //   }
 //
-//   /// Установить состояние ошибки сохраняя предыдущие данные
+//   /// Set error state preserving previous data
 //   AsyncValue<T> toError(Object error, StackTrace stackTrace) {
 //     return whenOrNull(
 //           data: (value) => AsyncError<T>(error, stackTrace)

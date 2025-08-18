@@ -56,7 +56,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     _authStateSubscription?.cancel();
     _authStateSubscription = repository.authStateChanges.listen((user) {
       AppLogger.info(
-        'AuthNotifier.build: Auth state changed from stream - user: ${user?.id}',
+        'AuthNotifier.build: Auth state changed from stream - user: ${user?.publicId}',
       );
 
       if (user != null) {
@@ -87,7 +87,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       (user) {
         if (user != null) {
           AppLogger.info(
-            'AuthNotifier._checkAuthStatus: User authenticated: ${user.id}',
+            'AuthNotifier._checkAuthStatus: User authenticated: ${user.publicId}',
           );
           return AuthState.authenticated(user);
         } else {
@@ -115,7 +115,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         state = AsyncData(AuthState.unauthenticated(failure));
       },
       (user) {
-        AppLogger.info('AuthNotifier.signIn: Login successful: ${user.id}');
+        AppLogger.info(
+            'AuthNotifier.signIn: Login successful: ${user.publicId}',);
         state = AsyncData(AuthState.authenticated(user));
       },
     );
@@ -137,7 +138,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       },
       (user) {
         AppLogger.info(
-          'AuthNotifier.register: Registration successful: ${user.id}',
+          'AuthNotifier.register: Registration successful: ${user.publicId}',
         );
         state = AsyncData(AuthState.authenticated(user));
       },
@@ -159,7 +160,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       },
       (user) {
         AppLogger.info(
-          'AuthNotifier.signInAsGuest: Guest sign in successful: ${user.id}',
+          'AuthNotifier.signInAsGuest: Guest sign in successful: ${user.publicId}',
         );
         state = AsyncData(AuthState.authenticated(user));
       },
@@ -200,7 +201,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     state = const AsyncLoading();
 
     final result = await repository.updateUserProfile(
-      userId: currentUser.id,
+      userId: currentUser.publicId,
       name: name,
     );
 

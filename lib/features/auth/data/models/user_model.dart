@@ -8,11 +8,12 @@ part 'user_model.g.dart';
 @freezed
 abstract class UserModel with _$UserModel {
   const factory UserModel({
-    required String id,
+    required String publicId,
     required String email,
     required String username,
-    String? name,
-    required DateTime createdAt,
+    String? firstName,
+    String? roleName,
+    int? roleId,
     @Default(false) bool isGuest,
   }) = _UserModel;
 
@@ -22,8 +23,9 @@ abstract class UserModel with _$UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
 
-  /// Custom JSON serialization for DateTime
-  Map<String, dynamic> toJsonWithCustomDate() {
-    return toJson()..['createdAt'] = createdAt.toIso8601String();
-  }
+  /// Get display name - returns firstName if available, otherwise username
+  String get displayName => firstName ?? username;
+
+  /// Check if user has completed profile
+  bool get hasCompletedProfile => firstName != null && firstName!.isNotEmpty;
 }

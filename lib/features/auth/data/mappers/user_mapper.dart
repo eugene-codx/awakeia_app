@@ -7,11 +7,12 @@ class UserMapper {
   /// Converts UserModel (data layer) to UserEntity (domain layer)
   static UserEntity toEntity(UserModel model) {
     return UserEntity(
-      id: model.id,
+      publicId: model.publicId,
       email: model.email,
-      name: model.name,
       username: model.username,
-      createdAt: model.createdAt,
+      firstName: model.firstName,
+      roleName: model.roleName,
+      roleId: model.roleId,
       isGuest: model.isGuest,
     );
   }
@@ -19,11 +20,10 @@ class UserMapper {
   /// Converts UserEntity (domain layer) to UserModel (data layer)
   static UserModel toModel(UserEntity entity) {
     return UserModel(
-      id: entity.id,
+      publicId: entity.publicId,
       email: entity.email,
-      name: entity.name,
       username: entity.username,
-      createdAt: entity.createdAt,
+      firstName: entity.firstName,
       isGuest: entity.isGuest,
     );
   }

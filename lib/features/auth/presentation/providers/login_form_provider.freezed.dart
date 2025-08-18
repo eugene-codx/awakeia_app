@@ -14,10 +14,10 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$LoginFormState {
-  String get email;
+  String get emailUsername;
   String get password;
   bool get isPasswordHidden;
-  String? get emailError;
+  String? get emailUsernameError;
   String? get passwordError;
   bool get isLoading;
   String? get generalError;
@@ -35,13 +35,14 @@ mixin _$LoginFormState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is LoginFormState &&
-            (identical(other.email, email) || other.email == email) &&
+            (identical(other.emailUsername, emailUsername) ||
+                other.emailUsername == emailUsername) &&
             (identical(other.password, password) ||
                 other.password == password) &&
             (identical(other.isPasswordHidden, isPasswordHidden) ||
                 other.isPasswordHidden == isPasswordHidden) &&
-            (identical(other.emailError, emailError) ||
-                other.emailError == emailError) &&
+            (identical(other.emailUsernameError, emailUsernameError) ||
+                other.emailUsernameError == emailUsernameError) &&
             (identical(other.passwordError, passwordError) ||
                 other.passwordError == passwordError) &&
             (identical(other.isLoading, isLoading) ||
@@ -51,12 +52,19 @@ mixin _$LoginFormState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, email, password,
-      isPasswordHidden, emailError, passwordError, isLoading, generalError);
+  int get hashCode => Object.hash(
+      runtimeType,
+      emailUsername,
+      password,
+      isPasswordHidden,
+      emailUsernameError,
+      passwordError,
+      isLoading,
+      generalError);
 
   @override
   String toString() {
-    return 'LoginFormState(email: $email, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
+    return 'LoginFormState(emailUsername: $emailUsername, password: $password, isPasswordHidden: $isPasswordHidden, emailUsernameError: $emailUsernameError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
   }
 }
 
@@ -67,10 +75,10 @@ abstract mixin class $LoginFormStateCopyWith<$Res> {
       _$LoginFormStateCopyWithImpl;
   @useResult
   $Res call(
-      {String email,
+      {String emailUsername,
       String password,
       bool isPasswordHidden,
-      String? emailError,
+      String? emailUsernameError,
       String? passwordError,
       bool isLoading,
       String? generalError});
@@ -89,18 +97,18 @@ class _$LoginFormStateCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? email = null,
+    Object? emailUsername = null,
     Object? password = null,
     Object? isPasswordHidden = null,
-    Object? emailError = freezed,
+    Object? emailUsernameError = freezed,
     Object? passwordError = freezed,
     Object? isLoading = null,
     Object? generalError = freezed,
   }) {
     return _then(_self.copyWith(
-      email: null == email
-          ? _self.email
-          : email // ignore: cast_nullable_to_non_nullable
+      emailUsername: null == emailUsername
+          ? _self.emailUsername
+          : emailUsername // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _self.password
@@ -110,9 +118,9 @@ class _$LoginFormStateCopyWithImpl<$Res>
           ? _self.isPasswordHidden
           : isPasswordHidden // ignore: cast_nullable_to_non_nullable
               as bool,
-      emailError: freezed == emailError
-          ? _self.emailError
-          : emailError // ignore: cast_nullable_to_non_nullable
+      emailUsernameError: freezed == emailUsernameError
+          ? _self.emailUsernameError
+          : emailUsernameError // ignore: cast_nullable_to_non_nullable
               as String?,
       passwordError: freezed == passwordError
           ? _self.passwordError
@@ -224,10 +232,10 @@ extension LoginFormStatePatterns on LoginFormState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            String email,
+            String emailUsername,
             String password,
             bool isPasswordHidden,
-            String? emailError,
+            String? emailUsernameError,
             String? passwordError,
             bool isLoading,
             String? generalError)?
@@ -238,10 +246,10 @@ extension LoginFormStatePatterns on LoginFormState {
     switch (_that) {
       case _LoginFormState() when $default != null:
         return $default(
-            _that.email,
+            _that.emailUsername,
             _that.password,
             _that.isPasswordHidden,
-            _that.emailError,
+            _that.emailUsernameError,
             _that.passwordError,
             _that.isLoading,
             _that.generalError);
@@ -266,10 +274,10 @@ extension LoginFormStatePatterns on LoginFormState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            String email,
+            String emailUsername,
             String password,
             bool isPasswordHidden,
-            String? emailError,
+            String? emailUsernameError,
             String? passwordError,
             bool isLoading,
             String? generalError)
@@ -279,10 +287,10 @@ extension LoginFormStatePatterns on LoginFormState {
     switch (_that) {
       case _LoginFormState():
         return $default(
-            _that.email,
+            _that.emailUsername,
             _that.password,
             _that.isPasswordHidden,
-            _that.emailError,
+            _that.emailUsernameError,
             _that.passwordError,
             _that.isLoading,
             _that.generalError);
@@ -306,10 +314,10 @@ extension LoginFormStatePatterns on LoginFormState {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            String email,
+            String emailUsername,
             String password,
             bool isPasswordHidden,
-            String? emailError,
+            String? emailUsernameError,
             String? passwordError,
             bool isLoading,
             String? generalError)?
@@ -319,10 +327,10 @@ extension LoginFormStatePatterns on LoginFormState {
     switch (_that) {
       case _LoginFormState() when $default != null:
         return $default(
-            _that.email,
+            _that.emailUsername,
             _that.password,
             _that.isPasswordHidden,
-            _that.emailError,
+            _that.emailUsernameError,
             _that.passwordError,
             _that.isLoading,
             _that.generalError);
@@ -336,17 +344,17 @@ extension LoginFormStatePatterns on LoginFormState {
 
 class _LoginFormState implements LoginFormState {
   const _LoginFormState(
-      {this.email = '',
+      {this.emailUsername = '',
       this.password = '',
       this.isPasswordHidden = true,
-      this.emailError,
+      this.emailUsernameError,
       this.passwordError,
       this.isLoading = false,
       this.generalError});
 
   @override
   @JsonKey()
-  final String email;
+  final String emailUsername;
   @override
   @JsonKey()
   final String password;
@@ -354,7 +362,7 @@ class _LoginFormState implements LoginFormState {
   @JsonKey()
   final bool isPasswordHidden;
   @override
-  final String? emailError;
+  final String? emailUsernameError;
   @override
   final String? passwordError;
   @override
@@ -376,13 +384,14 @@ class _LoginFormState implements LoginFormState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _LoginFormState &&
-            (identical(other.email, email) || other.email == email) &&
+            (identical(other.emailUsername, emailUsername) ||
+                other.emailUsername == emailUsername) &&
             (identical(other.password, password) ||
                 other.password == password) &&
             (identical(other.isPasswordHidden, isPasswordHidden) ||
                 other.isPasswordHidden == isPasswordHidden) &&
-            (identical(other.emailError, emailError) ||
-                other.emailError == emailError) &&
+            (identical(other.emailUsernameError, emailUsernameError) ||
+                other.emailUsernameError == emailUsernameError) &&
             (identical(other.passwordError, passwordError) ||
                 other.passwordError == passwordError) &&
             (identical(other.isLoading, isLoading) ||
@@ -392,12 +401,19 @@ class _LoginFormState implements LoginFormState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, email, password,
-      isPasswordHidden, emailError, passwordError, isLoading, generalError);
+  int get hashCode => Object.hash(
+      runtimeType,
+      emailUsername,
+      password,
+      isPasswordHidden,
+      emailUsernameError,
+      passwordError,
+      isLoading,
+      generalError);
 
   @override
   String toString() {
-    return 'LoginFormState(email: $email, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
+    return 'LoginFormState(emailUsername: $emailUsername, password: $password, isPasswordHidden: $isPasswordHidden, emailUsernameError: $emailUsernameError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
   }
 }
 
@@ -410,10 +426,10 @@ abstract mixin class _$LoginFormStateCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String email,
+      {String emailUsername,
       String password,
       bool isPasswordHidden,
-      String? emailError,
+      String? emailUsernameError,
       String? passwordError,
       bool isLoading,
       String? generalError});
@@ -432,18 +448,18 @@ class __$LoginFormStateCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? email = null,
+    Object? emailUsername = null,
     Object? password = null,
     Object? isPasswordHidden = null,
-    Object? emailError = freezed,
+    Object? emailUsernameError = freezed,
     Object? passwordError = freezed,
     Object? isLoading = null,
     Object? generalError = freezed,
   }) {
     return _then(_LoginFormState(
-      email: null == email
-          ? _self.email
-          : email // ignore: cast_nullable_to_non_nullable
+      emailUsername: null == emailUsername
+          ? _self.emailUsername
+          : emailUsername // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _self.password
@@ -453,9 +469,9 @@ class __$LoginFormStateCopyWithImpl<$Res>
           ? _self.isPasswordHidden
           : isPasswordHidden // ignore: cast_nullable_to_non_nullable
               as bool,
-      emailError: freezed == emailError
-          ? _self.emailError
-          : emailError // ignore: cast_nullable_to_non_nullable
+      emailUsernameError: freezed == emailUsernameError
+          ? _self.emailUsernameError
+          : emailUsernameError // ignore: cast_nullable_to_non_nullable
               as String?,
       passwordError: freezed == passwordError
           ? _self.passwordError

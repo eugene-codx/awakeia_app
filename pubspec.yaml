@@ -29,7 +29,7 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
 
-  # HTTP и API
+  # HTTP and API
   dio: ^5.8.0+1
   retrofit: ^4.6.0
   pretty_dio_logger: ^1.4.0
@@ -87,7 +87,7 @@ flutter:
   #       - asset: fonts/CustomFont.ttf
 
 flutter_native_splash:
-  color: "#1A1A2E"  # Ваш основной цвет фона
+  color: "#1A1A2E"  # Your main background color
   image: assets/images/awakeia_logo.png
   android: true
   ios: true

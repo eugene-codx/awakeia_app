@@ -53,7 +53,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           if (authState.isAuthenticated && mounted) {
             final redirect = context.queryParam('redirect');
             AppLogger.info(
-                'RegisterScreen.build: User is authenticated - redirecting to $redirect',);
+              'RegisterScreen.build: User is authenticated - redirecting to $redirect',
+            );
             if (redirect != null && redirect.isNotEmpty) {
               context.go(redirect);
             } else {
@@ -120,7 +121,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Email поле
+                        // Email field
                         CustomTextField(
                           controller: _emailController,
                           hintText: l10n.emailAddress,
@@ -129,10 +130,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
                           onChanged: controller.updateEmail,
-                          validator: (_) => state.emailError,
+                          errorText: state.emailError,
                         ),
                         const SizedBox(height: AppSpacing.md),
-                        // Password поле
+                        // Password field
                         CustomTextField(
                           controller: _passwordController,
                           hintText: l10n.password,
@@ -141,7 +142,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
                           onChanged: controller.updatePassword,
-                          validator: (_) => state.passwordError,
+                          errorText: state.passwordError,
                           suffixIcon: IconButton(
                             icon: Icon(
                               isPasswordHidden
@@ -154,7 +155,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         const SizedBox(height: AppSpacing.md),
 
-                        // Confirm Password поле
+                        // Confirm Password field
                         CustomTextField(
                           controller: _confirmPasswordController,
                           hintText: l10n.confirmPassword,
@@ -164,7 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _handleRegister(),
                           onChanged: controller.updateConfirmPassword,
-                          validator: (_) => state.confirmPasswordError,
+                          errorText: state.confirmPasswordError,
                           suffixIcon: IconButton(
                             icon: Icon(
                               isConfirmPasswordHidden
@@ -177,7 +178,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        // Terms and Conditions с checkbox
+                        // Terms and Conditions with checkbox
                         PrimaryCard(
                           padding: AppSpacing.paddingMD,
                           onTap: controller.toggleTermsAgreement,

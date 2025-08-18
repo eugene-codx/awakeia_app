@@ -5,7 +5,7 @@ import '../../../../shared/shared.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../providers/home_providers.dart';
 
-/// Кастомный App Bar для главного экрана
+/// Custom App Bar for the main screen
 class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const HomeAppBar({
     super.key,
@@ -93,7 +93,7 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
   }
 }
 
-/// Основной контент главного экрана
+/// Main content of the home screen
 class HomeContent extends ConsumerWidget {
   const HomeContent({
     super.key,
@@ -117,7 +117,7 @@ class HomeContent extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Приветственное сообщение
+              // Welcome message
               WelcomeMessage(
                 title: welcomeMessage,
                 subtitle: l10n.readyToCreateHabits,
@@ -125,10 +125,10 @@ class HomeContent extends ConsumerWidget {
 
               const SizedBox(height: AppSpacing.lg),
 
-              // Предупреждение для гостевого пользователя
+              // Warning for guest user
               const _GuestUserPrompt(),
 
-              // Заголовок секции привычек
+              // Habits section title
               Text(
                 l10n.todaysHabits,
                 style: AppTextStyles.headline5,
@@ -136,7 +136,7 @@ class HomeContent extends ConsumerWidget {
 
               const SizedBox(height: AppSpacing.md),
 
-              // Секция с привычками
+              // Habits section
               Expanded(
                 flex: 0,
                 child: _HabitsSection(
@@ -147,7 +147,7 @@ class HomeContent extends ConsumerWidget {
 
               const SizedBox(height: AppSpacing.md),
 
-              // Секция со статистикой
+              // Statistics section
               const _StatsSection(),
             ],
           ),
@@ -157,7 +157,7 @@ class HomeContent extends ConsumerWidget {
   }
 }
 
-/// Предупреждение для гостевого пользователя
+/// Warning for guest user
 class _GuestUserPrompt extends ConsumerWidget {
   const _GuestUserPrompt();
 
@@ -165,7 +165,7 @@ class _GuestUserPrompt extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isGuest = ref.watch(isGuestUserProvider);
 
-    // Показываем только для гостевых пользователей
+    // Show only for guest users
     if (!isGuest) {
       return const SizedBox.shrink();
     }
@@ -200,7 +200,7 @@ class _GuestUserPrompt extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              // TODO: Навигация к регистрации
+              // TODO: Navigation to registration
             },
             child: const Text('Sign Up'),
           ),
@@ -210,7 +210,7 @@ class _GuestUserPrompt extends ConsumerWidget {
   }
 }
 
-/// Секция с привычками
+/// Habits section
 class _HabitsSection extends ConsumerWidget {
   const _HabitsSection({
     this.onCreateHabit,
@@ -239,7 +239,7 @@ class _HabitsSection extends ConsumerWidget {
   }
 }
 
-/// Список привычек (пока заглушка)
+/// Habits list (placeholder for now)
 class _HabitsList extends StatelessWidget {
   const _HabitsList({
     this.onHabitTap,
@@ -249,7 +249,7 @@ class _HabitsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Реализовать список привычек
+    // TODO: Implement habits list
     return Center(
       child: Padding(
         padding: AppSpacing.paddingLG,
@@ -262,7 +262,7 @@ class _HabitsList extends StatelessWidget {
   }
 }
 
-/// Секция со статистикой
+/// Statistics section
 class _StatsSection extends ConsumerWidget {
   const _StatsSection();
 
@@ -279,7 +279,7 @@ class _StatsSection extends ConsumerWidget {
 
     return Row(
       children: [
-        // Счетчик дней подряд
+        // Days in a row counter
         Expanded(
           child: StatsCard(
             icon: Icons.local_fire_department,
@@ -291,7 +291,7 @@ class _StatsSection extends ConsumerWidget {
 
         const SizedBox(width: AppSpacing.md),
 
-        // Выполнено сегодня
+        // Completed today
         Expanded(
           child: StatsCard(
             icon: Icons.check_circle,
@@ -305,7 +305,7 @@ class _StatsSection extends ConsumerWidget {
   }
 }
 
-/// Кастомная нижняя навигация для главного экрана
+/// Custom bottom navigation for the home screen
 class HomeBottomNavigation extends StatelessWidget {
   const HomeBottomNavigation({
     super.key,

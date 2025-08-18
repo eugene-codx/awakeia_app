@@ -2,119 +2,57 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/logging/app_logger.dart';
 
-/// Базовый класс для Notifier с типизированным состоянием
+/// Base class for Notifier with typed state
 abstract class BaseStateNotifier<T> extends AutoDisposeNotifier<T> {
-  /// Логировать действия
+  /// Log actions
   void logAction(String action) {
     AppLogger.debug('$runtimeType: $action');
   }
 
-  /// Логировать ошибку
+  /// Log error
   void logError(String message, [Object? error, StackTrace? stackTrace]) {
     AppLogger.error('$runtimeType: $message', error, stackTrace);
   }
 
-  /// Безопасное обновление состояния
+  /// Safe state update
   void updateState(T Function(T) updater) {
     state = updater(state);
   }
 }
 
-// /// Базовый класс для AsyncNotifier
-// abstract class BaseAsyncNotifier<T> extends AutoDisposeAsyncNotifier<T> {
-//   /// Логировать действия
-//   void logAction(String action) {
-//     AppLogger.debug('$runtimeType: $action');
-//   }
-//
-//   /// Логировать ошибку
-//   void logError(String message, [Object? error, StackTrace? stackTrace]) {
-//     AppLogger.error('$runtimeType: $message', error, stackTrace);
-//   }
-//
-//   /// Выполнить операцию с автоматическим управлением состояния loading
-//   Future<T?> executeAsync(
-//     Future<T> Function() operation, {
-//     bool keepPreviousData = true,
-//   }) async {
-//     try {
-//       // Устанавливаем loading, сохраняя предыдущие данные если нужно
-//       if (keepPreviousData && state.hasValue) {
-//         state = AsyncLoading<T>().copyWithPrevious(state);
-//       } else {
-//         state = const AsyncLoading();
-//       }
-//
-//       final result = await operation();
-//       state = AsyncData(result);
-//       return result;
-//     } catch (error, stackTrace) {
-//       logError('Operation failed', error, stackTrace);
-//
-//       // Устанавливаем error, сохраняя предыдущие данные если нужно
-//       if (keepPreviousData && state.hasValue) {
-//         state = AsyncError<T>(error, stackTrace).copyWithPrevious(state);
-//       } else {
-//         state = AsyncError(error, stackTrace);
-//       }
-//
-//       return null;
-//     }
-//   }
-//
-//   /// Обновить данные если они есть
-//   void updateData(T Function(T) updater) {
-//     state.whenData((value) {
-//       state = AsyncData(updater(value));
-//     });
-//   }
-//
-//   /// Установить ошибку
-//   void setError(Object error, [StackTrace? stackTrace]) {
-//     state = AsyncError(error, stackTrace ?? StackTrace.current);
-//   }
-//
-//   /// Очистить ошибку и вернуться к данным
-//   void clearError() {
-//     if (state.hasValue) {
-//       state = AsyncData(state.value as T);
-//     }
-//   }
-// }
-
-/// Миксин для валидации форм в Riverpod Notifier
+/// Mixin for form validation in Riverpod Notifier
 mixin FormValidationMixin<T> on AutoDisposeNotifier<T> {
   final Map<String, String?> _validationErrors = {};
 
-  /// Ошибки валидации
+  /// Validation errors
   Map<String, String?> get validationErrors =>
       Map.unmodifiable(_validationErrors);
 
-  /// Проверка на наличие ошибок валидации
+  /// Check for validation errors
   bool get hasValidationErrors =>
       _validationErrors.values.any((error) => error != null);
 
-  /// Установить ошибку валидации для поля
+  /// Set validation error for field
   void setFieldError(String field, String? error) {
     if (error == null) {
       _validationErrors.remove(field);
     } else {
       _validationErrors[field] = error;
     }
-    // Триггерим обновление состояния
+    // Trigger state update
     ref.notifyListeners();
   }
 
-  /// Получить ошибку валидации для поля
+  /// Get validation error for field
   String? getFieldError(String field) => _validationErrors[field];
 
-  /// Очистить все ошибки валидации
+  /// Clear all validation errors
   void clearValidationErrors() {
     _validationErrors.clear();
     ref.notifyListeners();
   }
 
-  /// Валидировать форму
+  /// Validate form
   bool validateForm(Map<String, String? Function()> validators) {
     clearValidationErrors();
 

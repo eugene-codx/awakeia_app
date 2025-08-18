@@ -23,8 +23,6 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
     AppLogger.info(
       'AuthLoadingScreen.initState: AuthLoadingScreen initialized',
     );
-
-    // Auth state checking is handled by authNotifierProvider automatically
   }
 
   void _navigateBasedOnAuthState() {
@@ -75,7 +73,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
       }
     });
 
-    // Получаем состояние для UI
+    // Get state for UI
     final authAsyncValue = ref.watch(authNotifierProvider);
     final hasError = authAsyncValue.hasError;
 
@@ -99,7 +97,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
 
               const SizedBox(height: AppSpacing.xl),
 
-              // Показываем индикатор загрузки или ошибку
+              // Show loading indicator or error
               if (hasError) ...[
                 const Icon(
                   Icons.error_outline,
@@ -118,7 +116,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
                 ElevatedButton(
                   onPressed: () {
                     _hasNavigated = false;
-                    // Пробуем снова
+                    // Try again
                     ref.invalidate(authNotifierProvider);
                   },
                   child: const Text('Retry'),

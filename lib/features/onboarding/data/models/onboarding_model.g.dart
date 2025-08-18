@@ -8,18 +8,18 @@ part of 'onboarding_model.dart';
 
 _OnboardingModel _$OnboardingModelFromJson(Map<String, dynamic> json) =>
     _OnboardingModel(
-      isCompleted: json['isCompleted'] as bool,
-      completedAt: json['completedAt'] == null
+      isCompleted: json['is_completed'] as bool,
+      completedAt: json['completed_at'] == null
           ? null
-          : DateTime.parse(json['completedAt'] as String),
-      currentStep: (json['currentStep'] as num?)?.toInt() ?? 0,
+          : DateTime.parse(json['completed_at'] as String),
+      currentStep: (json['current_step'] as num?)?.toInt() ?? 0,
       preferences: json['preferences'] as Map<String, dynamic>? ?? const {},
     );
 
 Map<String, dynamic> _$OnboardingModelToJson(_OnboardingModel instance) =>
     <String, dynamic>{
-      'isCompleted': instance.isCompleted,
-      'completedAt': instance.completedAt?.toIso8601String(),
-      'currentStep': instance.currentStep,
+      'is_completed': instance.isCompleted,
+      'completed_at': instance.completedAt?.toIso8601String(),
+      'current_step': instance.currentStep,
       'preferences': instance.preferences,
     };
