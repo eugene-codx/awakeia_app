@@ -112,7 +112,9 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         AppLogger.error(
           'AuthNotifier.signIn: Login failed: ${failure.toMessage()}',
         );
-        state = AsyncData(AuthState.unauthenticated(failure));
+        // Use AsyncError instead of changing auth state to unauthenticated
+        // This prevents router from redirecting while still allowing error handling
+        state = AsyncError(failure, StackTrace.current);
       },
       (user) {
         AppLogger.info(
@@ -134,7 +136,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         AppLogger.error(
           'AuthNotifier.register: Registration failed: ${failure.toMessage()}',
         );
-        state = AsyncData(AuthState.unauthenticated(failure));
+        // Use AsyncError instead of changing auth state to unauthenticated
+        state = AsyncError(failure, StackTrace.current);
       },
       (user) {
         AppLogger.info(
@@ -156,7 +159,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         AppLogger.error(
           'AuthNotifier.signInAsGuest: Guest sign in failed: ${failure.toMessage()}',
         );
-        state = AsyncData(AuthState.unauthenticated(failure));
+        // Use AsyncError instead of changing auth state to unauthenticated
+        state = AsyncError(failure, StackTrace.current);
       },
       (user) {
         AppLogger.info(

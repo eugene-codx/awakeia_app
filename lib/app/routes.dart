@@ -51,6 +51,12 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
     return RouteConstants.loading;
   }
 
+  // If there's an auth error (like login failure), don't redirect
+  if (authAsync.hasError) {
+    AppLogger.debug('Router: Auth error detected, staying on current route');
+    return null;
+  }
+
   // Get authentication state
   final authState = authAsync.valueOrNull;
   if (authState == null) return null;
@@ -74,7 +80,8 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
 
   // If user is NOT authenticated
   if (!isAuthenticated) {
-    // Don't redirect if already on login/register page
+    // Don't redirect if already on login/register page, especially if there's an auth error
+    // This prevents redirecting users away from login screen when login fails
     if (location == RouteConstants.login ||
         location == RouteConstants.register) {
       return null;

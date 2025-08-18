@@ -48,6 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listen(authNotifierProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
+          // Only navigate on successful authentication, not on authentication errors
           if (authState.isAuthenticated && mounted) {
             final redirect = context.queryParam('redirect');
             if (redirect != null && redirect.isNotEmpty) {
@@ -56,6 +57,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               context.goToHome();
             }
           }
+          // Don't redirect on unauthenticated state - let the error be shown
         },
       );
     });
