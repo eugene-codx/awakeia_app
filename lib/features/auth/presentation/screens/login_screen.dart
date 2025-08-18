@@ -117,8 +117,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           textInputAction: TextInputAction.next,
                           onChanged: controller.updateEmailUsername,
                           // Новый обработчик
-                          validator: (_) =>
-                              state.emailError, // Ошибка из состояния
+                          errorText: state.emailUsernameError,
                         ),
 
                         const SizedBox(height: AppSpacing.md),
@@ -135,7 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onFieldSubmitted: (_) => _handleLogin(),
                           onChanged: controller.updatePassword,
                           // Новый обработчик
-                          validator: (_) => state.passwordError,
+                          errorText: state.passwordError,
                           // Ошибка из состояния
                           suffixIcon: IconButton(
                             icon: Icon(

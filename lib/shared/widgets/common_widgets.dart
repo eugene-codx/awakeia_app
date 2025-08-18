@@ -185,6 +185,7 @@ class CustomTextField extends StatelessWidget {
     this.enabled = true,
     this.textInputAction,
     this.onFieldSubmitted,
+    this.errorText,
   });
 
   final String hintText;
@@ -198,6 +199,7 @@ class CustomTextField extends StatelessWidget {
   final bool enabled;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onFieldSubmitted;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -213,6 +215,7 @@ class CustomTextField extends StatelessWidget {
       onFieldSubmitted: onFieldSubmitted,
       decoration: AppDecorations.primaryInput.copyWith(
         hintText: hintText,
+        errorText: errorText,
         prefixIcon: prefixIcon != null
             ? Icon(
                 prefixIcon,

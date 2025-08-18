@@ -17,8 +17,7 @@ mixin _$LoginFormState {
   String get emailUsername;
   String get password;
   bool get isPasswordHidden;
-  String? get emailError;
-  String? get usernameError;
+  String? get emailUsernameError;
   String? get passwordError;
   bool get isLoading;
   String? get generalError;
@@ -42,10 +41,8 @@ mixin _$LoginFormState {
                 other.password == password) &&
             (identical(other.isPasswordHidden, isPasswordHidden) ||
                 other.isPasswordHidden == isPasswordHidden) &&
-            (identical(other.emailError, emailError) ||
-                other.emailError == emailError) &&
-            (identical(other.usernameError, usernameError) ||
-                other.usernameError == usernameError) &&
+            (identical(other.emailUsernameError, emailUsernameError) ||
+                other.emailUsernameError == emailUsernameError) &&
             (identical(other.passwordError, passwordError) ||
                 other.passwordError == passwordError) &&
             (identical(other.isLoading, isLoading) ||
@@ -60,15 +57,14 @@ mixin _$LoginFormState {
       emailUsername,
       password,
       isPasswordHidden,
-      emailError,
-      usernameError,
+      emailUsernameError,
       passwordError,
       isLoading,
       generalError);
 
   @override
   String toString() {
-    return 'LoginFormState(emailUsername: $emailUsername, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, usernameError: $usernameError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
+    return 'LoginFormState(emailUsername: $emailUsername, password: $password, isPasswordHidden: $isPasswordHidden, emailUsernameError: $emailUsernameError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
   }
 }
 
@@ -82,8 +78,7 @@ abstract mixin class $LoginFormStateCopyWith<$Res> {
       {String emailUsername,
       String password,
       bool isPasswordHidden,
-      String? emailError,
-      String? usernameError,
+      String? emailUsernameError,
       String? passwordError,
       bool isLoading,
       String? generalError});
@@ -105,8 +100,7 @@ class _$LoginFormStateCopyWithImpl<$Res>
     Object? emailUsername = null,
     Object? password = null,
     Object? isPasswordHidden = null,
-    Object? emailError = freezed,
-    Object? usernameError = freezed,
+    Object? emailUsernameError = freezed,
     Object? passwordError = freezed,
     Object? isLoading = null,
     Object? generalError = freezed,
@@ -124,13 +118,9 @@ class _$LoginFormStateCopyWithImpl<$Res>
           ? _self.isPasswordHidden
           : isPasswordHidden // ignore: cast_nullable_to_non_nullable
               as bool,
-      emailError: freezed == emailError
-          ? _self.emailError
-          : emailError // ignore: cast_nullable_to_non_nullable
-              as String?,
-      usernameError: freezed == usernameError
-          ? _self.usernameError
-          : usernameError // ignore: cast_nullable_to_non_nullable
+      emailUsernameError: freezed == emailUsernameError
+          ? _self.emailUsernameError
+          : emailUsernameError // ignore: cast_nullable_to_non_nullable
               as String?,
       passwordError: freezed == passwordError
           ? _self.passwordError
@@ -245,8 +235,7 @@ extension LoginFormStatePatterns on LoginFormState {
             String emailUsername,
             String password,
             bool isPasswordHidden,
-            String? emailError,
-            String? usernameError,
+            String? emailUsernameError,
             String? passwordError,
             bool isLoading,
             String? generalError)?
@@ -260,8 +249,7 @@ extension LoginFormStatePatterns on LoginFormState {
             _that.emailUsername,
             _that.password,
             _that.isPasswordHidden,
-            _that.emailError,
-            _that.usernameError,
+            _that.emailUsernameError,
             _that.passwordError,
             _that.isLoading,
             _that.generalError);
@@ -289,8 +277,7 @@ extension LoginFormStatePatterns on LoginFormState {
             String emailUsername,
             String password,
             bool isPasswordHidden,
-            String? emailError,
-            String? usernameError,
+            String? emailUsernameError,
             String? passwordError,
             bool isLoading,
             String? generalError)
@@ -303,8 +290,7 @@ extension LoginFormStatePatterns on LoginFormState {
             _that.emailUsername,
             _that.password,
             _that.isPasswordHidden,
-            _that.emailError,
-            _that.usernameError,
+            _that.emailUsernameError,
             _that.passwordError,
             _that.isLoading,
             _that.generalError);
@@ -331,8 +317,7 @@ extension LoginFormStatePatterns on LoginFormState {
             String emailUsername,
             String password,
             bool isPasswordHidden,
-            String? emailError,
-            String? usernameError,
+            String? emailUsernameError,
             String? passwordError,
             bool isLoading,
             String? generalError)?
@@ -345,8 +330,7 @@ extension LoginFormStatePatterns on LoginFormState {
             _that.emailUsername,
             _that.password,
             _that.isPasswordHidden,
-            _that.emailError,
-            _that.usernameError,
+            _that.emailUsernameError,
             _that.passwordError,
             _that.isLoading,
             _that.generalError);
@@ -363,8 +347,7 @@ class _LoginFormState implements LoginFormState {
       {this.emailUsername = '',
       this.password = '',
       this.isPasswordHidden = true,
-      this.emailError,
-      this.usernameError,
+      this.emailUsernameError,
       this.passwordError,
       this.isLoading = false,
       this.generalError});
@@ -379,9 +362,7 @@ class _LoginFormState implements LoginFormState {
   @JsonKey()
   final bool isPasswordHidden;
   @override
-  final String? emailError;
-  @override
-  final String? usernameError;
+  final String? emailUsernameError;
   @override
   final String? passwordError;
   @override
@@ -409,10 +390,8 @@ class _LoginFormState implements LoginFormState {
                 other.password == password) &&
             (identical(other.isPasswordHidden, isPasswordHidden) ||
                 other.isPasswordHidden == isPasswordHidden) &&
-            (identical(other.emailError, emailError) ||
-                other.emailError == emailError) &&
-            (identical(other.usernameError, usernameError) ||
-                other.usernameError == usernameError) &&
+            (identical(other.emailUsernameError, emailUsernameError) ||
+                other.emailUsernameError == emailUsernameError) &&
             (identical(other.passwordError, passwordError) ||
                 other.passwordError == passwordError) &&
             (identical(other.isLoading, isLoading) ||
@@ -427,15 +406,14 @@ class _LoginFormState implements LoginFormState {
       emailUsername,
       password,
       isPasswordHidden,
-      emailError,
-      usernameError,
+      emailUsernameError,
       passwordError,
       isLoading,
       generalError);
 
   @override
   String toString() {
-    return 'LoginFormState(emailUsername: $emailUsername, password: $password, isPasswordHidden: $isPasswordHidden, emailError: $emailError, usernameError: $usernameError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
+    return 'LoginFormState(emailUsername: $emailUsername, password: $password, isPasswordHidden: $isPasswordHidden, emailUsernameError: $emailUsernameError, passwordError: $passwordError, isLoading: $isLoading, generalError: $generalError)';
   }
 }
 
@@ -451,8 +429,7 @@ abstract mixin class _$LoginFormStateCopyWith<$Res>
       {String emailUsername,
       String password,
       bool isPasswordHidden,
-      String? emailError,
-      String? usernameError,
+      String? emailUsernameError,
       String? passwordError,
       bool isLoading,
       String? generalError});
@@ -474,8 +451,7 @@ class __$LoginFormStateCopyWithImpl<$Res>
     Object? emailUsername = null,
     Object? password = null,
     Object? isPasswordHidden = null,
-    Object? emailError = freezed,
-    Object? usernameError = freezed,
+    Object? emailUsernameError = freezed,
     Object? passwordError = freezed,
     Object? isLoading = null,
     Object? generalError = freezed,
@@ -493,13 +469,9 @@ class __$LoginFormStateCopyWithImpl<$Res>
           ? _self.isPasswordHidden
           : isPasswordHidden // ignore: cast_nullable_to_non_nullable
               as bool,
-      emailError: freezed == emailError
-          ? _self.emailError
-          : emailError // ignore: cast_nullable_to_non_nullable
-              as String?,
-      usernameError: freezed == usernameError
-          ? _self.usernameError
-          : usernameError // ignore: cast_nullable_to_non_nullable
+      emailUsernameError: freezed == emailUsernameError
+          ? _self.emailUsernameError
+          : emailUsernameError // ignore: cast_nullable_to_non_nullable
               as String?,
       passwordError: freezed == passwordError
           ? _self.passwordError

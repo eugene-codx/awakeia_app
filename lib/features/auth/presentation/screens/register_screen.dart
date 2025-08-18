@@ -53,7 +53,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           if (authState.isAuthenticated && mounted) {
             final redirect = context.queryParam('redirect');
             AppLogger.info(
-                'RegisterScreen.build: User is authenticated - redirecting to $redirect',);
+              'RegisterScreen.build: User is authenticated - redirecting to $redirect',
+            );
             if (redirect != null && redirect.isNotEmpty) {
               context.go(redirect);
             } else {
@@ -129,7 +130,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
                           onChanged: controller.updateEmail,
-                          validator: (_) => state.emailError,
+                          errorText: state.emailError,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         // Password поле
@@ -141,7 +142,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           enabled: !isLoading,
                           textInputAction: TextInputAction.next,
                           onChanged: controller.updatePassword,
-                          validator: (_) => state.passwordError,
+                          errorText: state.passwordError,
                           suffixIcon: IconButton(
                             icon: Icon(
                               isPasswordHidden
@@ -164,7 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _handleRegister(),
                           onChanged: controller.updateConfirmPassword,
-                          validator: (_) => state.confirmPasswordError,
+                          errorText: state.confirmPasswordError,
                           suffixIcon: IconButton(
                             icon: Icon(
                               isConfirmPasswordHidden

@@ -16,8 +16,7 @@ abstract class LoginFormState with _$LoginFormState {
     @Default('') String emailUsername,
     @Default('') String password,
     @Default(true) bool isPasswordHidden,
-    String? emailError,
-    String? usernameError,
+    String? emailUsernameError,
     String? passwordError,
     @Default(false) bool isLoading,
     String? generalError,
@@ -39,8 +38,7 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
 
     state = state.copyWith(
       emailUsername: emailUsername,
-      emailError: null,
-      usernameError: null,
+      emailUsernameError: null,
       generalError: null,
     );
 
@@ -91,7 +89,7 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
 
     // Validate form
     if (!_validateForm()) {
-      logAction('LoginFormNotifier.signIn: Form validation failed');
+      logError('LoginFormNotifier.signIn: Form validation failed');
       return;
     }
 
@@ -105,8 +103,51 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
 
       logAction('LoginFormNotifier.signIn: Sign in successful');
 
-      // Reset form on success
-      state = const LoginFormState();
+      // Проверяем результат аутентификации
+      final authState = ref.read(authNotifierProvider);
+
+      // Ждем пока состояние обновится
+      await authState.when(
+        data: (authStateData) async {
+          if (authStateData.isAuthenticated) {
+            logAction('LoginFormNotifier.signIn: Sign in successful');
+            // Reset form on success
+            state = const LoginFormState();
+          } else {
+            // Обрабатываем ошибку аутентификации
+            final failure = authStateData.errorMessage;
+            String errorMessage = 'Invalid email or password';
+
+            if (failure != null) {
+              errorMessage = failure;
+            }
+
+            logError(
+                'LoginFormNotifier.signIn: Authentication failed', failure);
+
+            state = state.copyWith(
+              isLoading: false,
+              generalError: errorMessage,
+            );
+          }
+        },
+        loading: () {
+          // Состояние еще загружается, ждем
+        },
+        error: (error, _) {
+          logError('LoginFormNotifier.signIn: Sign in error', error);
+
+          String errorMessage = 'An error occurred during sign in';
+          if (error is AuthFailure) {
+            errorMessage = error.toMessage();
+          }
+
+          state = state.copyWith(
+            isLoading: false,
+            generalError: errorMessage,
+          );
+        },
+      );
     } catch (error) {
       logError('LoginFormNotifier.signIn: Sign in failed', error);
 
@@ -149,24 +190,22 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
     }
     _validatePassword();
 
-    return state.emailError == null &&
-        state.passwordError == null &&
-        state.usernameError == null;
+    return state.emailUsernameError == null && state.passwordError == null;
   }
 
   void _validateEmail() {
     logAction('LoginFormNotifier._validateEmail: Validating email');
     final error = AuthFormValidators.validateEmail(state.emailUsername);
-    if (state.emailError != error) {
-      state = state.copyWith(emailError: error);
+    if (state.emailUsernameError != error) {
+      state = state.copyWith(emailUsernameError: error);
     }
   }
 
   void _validateUsername() {
     logAction('LoginFormNotifier._validateUsername: Validating username');
     final error = AuthFormValidators.validateUsername(state.emailUsername);
-    if (state.usernameError != error) {
-      state = state.copyWith(usernameError: error);
+    if (state.emailUsernameError != error) {
+      state = state.copyWith(emailUsernameError: error);
     }
   }
 

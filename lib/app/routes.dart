@@ -74,6 +74,11 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
 
   // Если пользователь НЕ аутентифицирован
   if (!isAuthenticated) {
+    // Не перенаправляем, если уже на странице логина/регистрации
+    if (location == RouteConstants.login ||
+        location == RouteConstants.register) {
+      return null;
+    }
     // Если пытается попасть на защищенный роут - редиректим на /first
     if (!publicRoutes.contains(location)) {
       return RouteConstants.first;
@@ -249,7 +254,8 @@ List<RouteBase> _buildDevelopmentRoutes() {
 class _RouterRefreshStream extends ChangeNotifier {
   _RouterRefreshStream(this._ref) {
     AppLogger.info(
-        'RouterRefreshStream: Инициализирован, слушаем auth изменения',);
+      'RouterRefreshStream: Инициализирован, слушаем auth изменения',
+    );
     _ref.listen(authNotifierProvider, (_, __) => notifyListeners());
   }
 

@@ -79,7 +79,8 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
   /// Update confirm password field
   void updateConfirmPassword(String confirmPassword) {
     logAction(
-        'RegisterFormNotifier.updateConfirmPassword: Updating confirm password',);
+      'RegisterFormNotifier.updateConfirmPassword: Updating confirm password',
+    );
 
     state = state.copyWith(
       confirmPassword: confirmPassword,
@@ -98,14 +99,16 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
   /// Toggle password visibility
   void togglePasswordVisibility() {
     logAction(
-        'RegisterFormNotifier.togglePasswordVisibility: Toggling visibility',);
+      'RegisterFormNotifier.togglePasswordVisibility: Toggling visibility',
+    );
     state = state.copyWith(isPasswordHidden: !state.isPasswordHidden);
   }
 
   /// Toggle confirm password visibility
   void toggleConfirmPasswordVisibility() {
     logAction(
-        'RegisterFormNotifier.toggleConfirmPasswordVisibility: Toggling visibility',);
+      'RegisterFormNotifier.toggleConfirmPasswordVisibility: Toggling visibility',
+    );
     state = state.copyWith(
       isConfirmPasswordHidden: !state.isConfirmPasswordHidden,
     );
@@ -114,7 +117,8 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
   /// Toggle terms agreement
   void toggleTermsAgreement() {
     logAction(
-        'RegisterFormNotifier.toggleTermsAgreement: Toggling terms agreement',);
+      'RegisterFormNotifier.toggleTermsAgreement: Toggling terms agreement',
+    );
     state = state.copyWith(
       agreedToTerms: !state.agreedToTerms,
       generalError: null,
@@ -138,7 +142,7 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
 
     // Validate form
     if (!_validateForm()) {
-      logAction('RegisterFormNotifier.register: Form validation failed');
+      logError('RegisterFormNotifier.register: Form validation failed');
       return;
     }
 
@@ -191,7 +195,7 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
     logAction('RegisterFormNotifier._validateForm: Validating form');
     final emailError = AuthFormValidators.validateEmail(state.email);
     final passwordError = AuthFormValidators.validatePassword(state.password);
-    final confirmPasswordError = _validateConfirmPasswordValue(
+    final confirmPasswordError = AuthFormValidators.validateConfirmPassword(
       state.password,
       state.confirmPassword,
     );
@@ -222,24 +226,13 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
   }
 
   void _validateConfirmPassword() {
-    final error = _validateConfirmPasswordValue(
+    final error = AuthFormValidators.validateConfirmPassword(
       state.password,
       state.confirmPassword,
     );
     if (state.confirmPasswordError != error) {
       state = state.copyWith(confirmPasswordError: error);
     }
-  }
-
-  String? _validateConfirmPasswordValue(
-      String password, String confirmPassword,) {
-    if (confirmPassword.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (confirmPassword != password) {
-      return 'Passwords do not match';
-    }
-    return null;
   }
 }
 

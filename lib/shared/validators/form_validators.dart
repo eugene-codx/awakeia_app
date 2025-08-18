@@ -24,7 +24,20 @@ class AuthFormValidators {
       return 'Please enter your password';
     }
     if (password.length < 5) {
-      return 'Password must contain at least 6 characters';
+      return 'Password must contain at least 5 characters';
+    }
+    return null;
+  }
+
+  static String? validateConfirmPassword(
+    String password,
+    String confirmPassword,
+  ) {
+    if (confirmPassword.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (confirmPassword != password) {
+      return 'Passwords do not match';
     }
     return null;
   }
