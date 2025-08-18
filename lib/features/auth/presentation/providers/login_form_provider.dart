@@ -103,10 +103,10 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
 
       logAction('LoginFormNotifier.signIn: Sign in successful');
 
-      // Проверяем результат аутентификации
+      // Check authentication result
       final authState = ref.read(authNotifierProvider);
 
-      // Ждем пока состояние обновится
+      // Wait for state to update
       await authState.when(
         data: (authStateData) async {
           if (authStateData.isAuthenticated) {
@@ -114,7 +114,7 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
             // Reset form on success
             state = const LoginFormState();
           } else {
-            // Обрабатываем ошибку аутентификации
+            // Handle authentication error
             final failure = authStateData.errorMessage;
             String errorMessage = 'Invalid email or password';
 
@@ -132,7 +132,7 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
           }
         },
         loading: () {
-          // Состояние еще загружается, ждем
+          // State is still loading, wait
         },
         error: (error, _) {
           logError('LoginFormNotifier.signIn: Sign in error', error);

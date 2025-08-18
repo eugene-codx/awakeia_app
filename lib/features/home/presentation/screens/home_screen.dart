@@ -33,16 +33,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    // Получаем состояние из provider
+    // Get state from provider
     final isLoading = ref.watch(homeProvider.select((s) => s.isLoading));
     final selectedTabIndex =
         ref.watch(homeProvider.select((s) => s.selectedTabIndex));
 
-    // Слушаем изменения состояния аутентификации
+    // Listen to authentication state changes
     ref.listen(authNotifierProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
-          // Если пользователь стал неаутентифицированным, переходим на первый экран
+          // If user became unauthenticated, navigate to first screen
           if (authState.isUnauthenticated && mounted) {
             AppLogger.info(
               'User became unauthenticated, navigating to first screen',
@@ -53,7 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     });
 
-    // Слушаем ошибки home provider
+    // Listen to home provider errors
     ref.listen(homeProvider.select((s) => s.error), (previous, current) {
       if (current != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
 
     return Scaffold(
-      // Кастомный App Bar с обработчиками из view model
+      // Custom App Bar with handlers from view model
       appBar: HomeAppBar(
         title: l10n.appName,
         onProfileTap: () => context.goToProfile(),
@@ -81,7 +81,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onSignOutTap: () => _showSignOutDialog(context),
       ),
 
-      // Основной контент с loading overlay
+      // Main content with loading overlay
       body: LoadingOverlay(
         isLoading: isLoading,
         loadingText: l10n.loadingData,
@@ -108,7 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: const Icon(Icons.add),
       ),
 
-      // Кастомный Bottom Navigation
+      // Custom Bottom Navigation
       bottomNavigationBar: HomeBottomNavigation(
         currentIndex: selectedTabIndex,
         onTap: (index) {
@@ -119,11 +119,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Обработка нажатий на bottom navigation
+  /// Handle bottom navigation taps
   void _handleBottomNavTap(BuildContext context, int index) {
     switch (index) {
       case 0:
-        // Уже на главной
+        // Already on home
         break;
       case 1:
         context.goToHabits();
@@ -137,7 +137,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  /// Показать диалог подтверждения выхода
+  /// Show sign out confirmation dialog
   Future<void> _showSignOutDialog(BuildContext context) async {
     final shouldSignOut = await showDialog<bool>(
       context: context,

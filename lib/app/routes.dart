@@ -45,13 +45,13 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
   }
 
   // Check if auth is loading
-  // Проверяем загрузку аутентификации
+  // Check authentication loading
   final authAsync = ref.read(authNotifierProvider);
   if (authAsync.isLoading) {
     return RouteConstants.loading;
   }
 
-  // Получаем состояние аутентификации
+  // Get authentication state
   final authState = authAsync.valueOrNull;
   if (authState == null) return null;
 
@@ -62,7 +62,7 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
     unauthenticated: (_) => false,
   );
 
-  // Список публичных роутов (не требуют аутентификации)
+  // List of public routes (don't require authentication)
   final publicRoutes = {
     RouteConstants.loading, // '/'
     RouteConstants.first, // '/first'
@@ -72,22 +72,22 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
     '/demo', // development
   };
 
-  // Если пользователь НЕ аутентифицирован
+  // If user is NOT authenticated
   if (!isAuthenticated) {
-    // Не перенаправляем, если уже на странице логина/регистрации
+    // Don't redirect if already on login/register page
     if (location == RouteConstants.login ||
         location == RouteConstants.register) {
       return null;
     }
-    // Если пытается попасть на защищенный роут - редиректим на /first
+    // If trying to access protected route - redirect to /first
     if (!publicRoutes.contains(location)) {
       return RouteConstants.first;
     }
-    // Если на публичном роуте - разрешаем
+    // If on public route - allow
     return null;
   }
 
-  // Если пользователь аутентифицирован и находится на auth роутах - на главную
+  // If user is authenticated and on auth routes - go to home
   if (isAuthenticated &&
       (location == RouteConstants.login ||
           location == RouteConstants.register ||
@@ -254,7 +254,7 @@ List<RouteBase> _buildDevelopmentRoutes() {
 class _RouterRefreshStream extends ChangeNotifier {
   _RouterRefreshStream(this._ref) {
     AppLogger.info(
-      'RouterRefreshStream: Инициализирован, слушаем auth изменения',
+      'RouterRefreshStream: Initialized, listening to auth changes',
     );
     _ref.listen(authNotifierProvider, (_, __) => notifyListeners());
   }
