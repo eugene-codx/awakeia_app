@@ -101,43 +101,36 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
       final authNotifier = ref.read(authNotifierProvider.notifier);
       await authNotifier.signIn(state.emailUsername.trim(), state.password);
 
-      logAction('LoginFormNotifier.signIn: Sign in successful');
+      // Check the result after signIn completes
+      final authAsync = ref.read(authNotifierProvider);
 
-      // Check authentication result
-      final authState = ref.read(authNotifierProvider);
-
-      // Wait for state to update
-      await authState.when(
-        data: (authStateData) async {
+      authAsync.when(
+        data: (authStateData) {
           if (authStateData.isAuthenticated) {
             logAction('LoginFormNotifier.signIn: Sign in successful');
             // Reset form on success
             state = const LoginFormState();
           } else {
-            // Handle authentication error
-            final failure = authStateData.errorMessage;
-            String errorMessage = 'Invalid email or password';
-
-            if (failure != null) {
-              errorMessage = failure;
-            }
-
-            logError(
-                'LoginFormNotifier.signIn: Authentication failed', failure);
-
+            // This shouldn't happen with new logic, but keep as fallback
+            logError('LoginFormNotifier.signIn: Unexpected unauthenticated state');
             state = state.copyWith(
               isLoading: false,
-              generalError: errorMessage,
+              generalError: 'Unexpected authentication state',
             );
           }
         },
         loading: () {
-          // State is still loading, wait
+          // Still loading - this shouldn't happen since signIn should complete
+          logError('LoginFormNotifier.signIn: Auth still loading after signIn completed');
+          state = state.copyWith(
+            isLoading: false,
+            generalError: 'Authentication timeout',
+          );
         },
         error: (error, _) {
           logError('LoginFormNotifier.signIn: Sign in error', error);
 
-          String errorMessage = 'An error occurred during sign in';
+          String errorMessage = 'Invalid email or password';
           if (error is AuthFailure) {
             errorMessage = error.toMessage();
           }

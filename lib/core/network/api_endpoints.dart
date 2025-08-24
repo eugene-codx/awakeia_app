@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// API endpoints configuration
 /// Centralized place for all API endpoint definitions
 class ApiEndpoints {
@@ -5,33 +7,33 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   /// Base URL for the API
-  static const String baseUrl = 'https://codxcelerate.com';
+  static final String baseUrl = dotenv.env['API_URL'] ?? '';
 
   /// API version
-  static const String version = '/1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4b1e';
+  static final String version = dotenv.env['API_VERSION'] ?? '';
 
   /// Authentication endpoints
-  static const String me = '$baseUrl$version/auth/me';
-  static const String login = '$baseUrl$version/auth/login';
-  static const String register = '$baseUrl$version/auth/register';
-  static const String logout = '$baseUrl$version/auth/logout';
-  static const String refreshToken = '$baseUrl$version/auth/refresh';
-  static const String forgotPassword = '$baseUrl$version/auth/forgot-password';
-  static const String resetPassword = '$baseUrl$version/auth/reset-password';
-  static const String verifyEmail = '$baseUrl$version/auth/verify-email';
+  static String get me => '$baseUrl/$version/auth/me';
+  static String get login => '$baseUrl/$version/auth/login';
+  static String get register => '$baseUrl/$version/auth/register';
+  static String get logout => '$baseUrl/$version/auth/logout';
+  static String get refreshToken => '$baseUrl/$version/auth/refresh';
+  static String get forgotPassword => '$baseUrl/$version/auth/forgot-password';
+  static String get resetPassword => '$baseUrl/$version/auth/reset-password';
+  static String get verifyEmail => '$baseUrl/$version/auth/verify-email';
 
   /// User endpoints
-  static const String userProfile = '$baseUrl$version/user/profile';
-  static const String updateProfile = '$baseUrl$version/user/profile';
-  static const String changePassword = '$baseUrl$version/user/change-password';
-  static const String deleteAccount = '$baseUrl$version/user/delete';
+  static String get userProfile => '$baseUrl/$version/user/profile';
+  static String get updateProfile => '$baseUrl/$version/user/profile';
+  static String get changePassword => '$baseUrl/$version/user/change-password';
+  static String get deleteAccount => '$baseUrl/$version/user/delete';
 
   /// Habits endpoints (for future implementation)
-  static const String habits = '$baseUrl$version/habits';
-  static const String createHabit = '$baseUrl$version/habits';
-  static const String updateHabit = '$baseUrl$version/habits';
-  static const String deleteHabit = '$baseUrl$version/habits';
-  static const String habitStats = '$baseUrl$version/habits/stats';
+  static String get habits => '$baseUrl/$version/habits';
+  static String get createHabit => '$baseUrl/$version/habits';
+  static String get updateHabit => '$baseUrl/$version/habits';
+  static String get deleteHabit => '$baseUrl/$version/habits';
+  static String get habitStats => '$baseUrl/$version/habits/stats';
 
   /// Utility methods for dynamic endpoints
 
@@ -39,7 +41,8 @@ class ApiEndpoints {
   static String habitById(String id) => '$baseUrl$version/habits/$id';
 
   /// Get habit stats by ID
-  static String habitStatsById(String id) => '$baseUrl$version/habits/$id/stats';
+  static String habitStatsById(String id) =>
+      '$baseUrl$version/habits/$id/stats';
 
   /// Get habits by user ID
   static String habitsByUserId(String userId) =>
