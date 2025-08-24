@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Environment variables
+  flutter_dotenv: ^5.2.1
+
   # Localization packages
   flutter_localizations:
     sdk: flutter
@@ -79,6 +82,7 @@ flutter:
   # Assets - append images and other assets here later
   assets:
     - assets/images/
+    - .env
 
   # Fonts - append custom fonts here later
   # fonts:

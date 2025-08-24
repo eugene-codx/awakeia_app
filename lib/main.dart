@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,6 +19,9 @@ void main() async {
   AppLogger.info('Application starting...');
 
   try {
+    // Load environment variables
+    await dotenv.load(fileName: '.env');
+
     // Initialize secure storage
     await SecureStorage.instance.initialize();
     AppLogger.info('Secure storage initialized');
