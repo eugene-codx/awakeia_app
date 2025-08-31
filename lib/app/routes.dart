@@ -261,9 +261,16 @@ List<RouteBase> _buildDevelopmentRoutes() {
 class _RouterRefreshStream extends ChangeNotifier {
   _RouterRefreshStream(this._ref) {
     AppLogger.info(
-      'RouterRefreshStream: Initialized, listening to auth changes',
+      'Router.RouterRefreshStream: Initialized, listening to auth changes',
     );
-    _ref.listen(authNotifierProvider, (_, __) => notifyListeners());
+    _ref.listen(
+      authNotifierProvider,
+      (
+        _,
+        __,
+      ) =>
+          notifyListeners(),
+    );
   }
 
   final Ref _ref;
