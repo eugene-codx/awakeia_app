@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
 import '../providers/auth_providers.dart';
@@ -40,13 +40,13 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
           // Using GoRouter to navigate
           // This will replace the current route with the home screen
           // instead of pushing a new one
-          GoRouter.of(context).go('/home');
+          context.goToHome();
         } else if (authState.isUnauthenticated) {
           AppLogger.info(
             'AuthLoadingScreen._navigateBasedOnAuthState: : User not authenticated, navigating to first',
           );
           _hasNavigated = true;
-          GoRouter.of(context).go('/first');
+          context.goToFirst();
         }
       },
     );
