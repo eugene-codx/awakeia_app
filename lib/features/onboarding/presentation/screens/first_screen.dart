@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
-import '../presentation.dart';
+import '../../application/onboarding_notifier.dart';
+import '../../application/onboarding_state.dart';
+import '../widgets/onboarding_widgets.dart';
 
 /// First screen of the app (welcome/onboarding) using Clean Architecture
 class FirstScreen extends ConsumerStatefulWidget {
@@ -32,7 +33,6 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
   @override
   Widget build(BuildContext context) {
     final onboardingState = ref.watch(onboardingNotifierProvider);
-    final isLoading = ref.watch(onboardingLoadingProvider);
 
     // Listen for errors
     ref.listen(onboardingNotifierProvider, (previous, next) {
@@ -76,21 +76,16 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
                 // Main content based on state
                 onboardingState.when(
                   data: (state) => state.when(
-                    initial: () => const SizedBox.shrink(),
                     loading: () => const Center(
                       child: CircularProgressIndicator(),
                     ),
-                    authenticated: (user, onboarding) => AuthenticatedView(
-                      userName: user.displayName,
-                      onContinueToApp: () => _handleContinueToApp(context),
-                      onSignOut: () => _handleSignOut(context),
-                      isLoading: isLoading,
-                    ),
-                    unauthenticated: (onboarding) => UnauthenticatedView(
+                    onboarding: (onboarding) =>
+                        OnboardingView(entity: onboarding),
+                    firstScreen: () => UnauthenticatedView(
                       onLogin: () => context.goToLogin(),
                       onRegister: () => context.goToRegister(),
                       onGuestLogin: () => _handleGuestLogin(context),
-                      isLoading: isLoading,
+                      isLoading: false,
                     ),
                     error: (message) => ErrorView(
                       message: message,
@@ -110,31 +105,13 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
 
                 // Development mode indicator
                 if (const bool.fromEnvironment('dart.vm.product') == false)
-                  _DemoButton(isLoading: isLoading),
+                  const _DemoButton(isLoading: false),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _handleContinueToApp(BuildContext context) async {
-    // Complete onboarding if not already completed
-    final onboarding = ref.read(currentOnboardingProvider);
-    if (onboarding != null && !onboarding.isCompleted) {
-      final completeAction = ref.read(completeOnboardingActionProvider);
-      await completeAction();
-    }
-
-    if (context.mounted) {
-      context.goToHome();
-    }
-  }
-
-  Future<void> _handleSignOut(BuildContext context) async {
-    final signOutAction = ref.read(signOutActionProvider);
-    await signOutAction();
   }
 
   Future<void> _handleGuestLogin(BuildContext context) async {

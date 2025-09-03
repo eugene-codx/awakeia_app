@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../shared/shared.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../application/onboarding_notifier.dart';
+import '../../domain/entities/onboarding_entity.dart';
 
 /// App logo widget
 class AppLogo extends StatelessWidget {
@@ -57,95 +59,82 @@ class AppSubtitle extends StatelessWidget {
   }
 }
 
-/// Widget for authenticated state
-class AuthenticatedView extends ConsumerWidget {
-  const AuthenticatedView({
-    super.key,
-    required this.userName,
-    required this.onContinueToApp,
-    required this.onSignOut,
-    required this.isLoading,
-  });
-
-  final String userName;
-  final VoidCallback onContinueToApp;
-  final VoidCallback onSignOut;
-  final bool isLoading;
+/// Widget onboarding
+class OnboardingView extends ConsumerWidget {
+  const OnboardingView({super.key, required this.entity});
+  final OnboardingEntity entity;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-
-    // Get welcome message based on user
-    final welcomeMessage = userName == 'Guest User'
-        ? l10n.welcomeGuest
-        : l10n.welcomeUser(userName);
+    final notifier = ref.read(onboardingNotifierProvider.notifier);
 
     return Column(
       children: [
         // Welcome message for authenticated user
-        PrimaryCard(
-          padding: AppSpacing.paddingLG,
-          child: Column(
-            children: [
-              Text(
-                welcomeMessage,
-                style: AppTextStyles.headline5,
-                textAlign: TextAlign.center,
+        // Контент текущего шага
+        SizedBox(
+          width: double.infinity,
+          child: Center(
+            child: Text(
+              _stepText(entity.currentStep),
+              style: const TextStyle(fontSize: 24),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+
+        // Индикатор прогресса
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            entity.totalSteps,
+            (index) => Container(
+              margin: const EdgeInsets.all(4),
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: index <= entity.currentStep
+                    ? Colors.blue
+                    : Colors.grey.shade300,
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'You are already signed in',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.secondaryText,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+            ),
           ),
         ),
 
         const SizedBox(height: AppSpacing.lg),
-
-        // Continue to app button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: isLoading ? null : onContinueToApp,
-            child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.primaryText,
-                      ),
-                    ),
-                  )
-                : Text(
-                    'Continue to App',
-                    style: AppTextStyles.buttonLarge,
-                  ),
-          ),
+        // Пропустить
+        TextButton(
+          onPressed: () async {
+            await notifier.skip();
+          },
+          child: const Text('Пропустить'),
         ),
 
-        const SizedBox(height: AppSpacing.md),
-
-        // Sign out button
-        TextButton(
-          onPressed: isLoading ? null : onSignOut,
+        // Далее / Завершить
+        ElevatedButton(
+          onPressed: () async {
+            await notifier.nextStep();
+          },
           child: Text(
-            'Sign Out',
-            style: AppTextStyles.linkSecondary.copyWith(
-              color: isLoading
-                  ? AppColors.secondaryText.withValues(alpha: 0.5)
-                  : AppColors.secondaryText,
-            ),
+            entity.currentStep + 1 == entity.totalSteps ? 'Завершить' : 'Далее',
           ),
         ),
       ],
     );
+  }
+
+  String _stepText(int step) {
+    switch (step) {
+      case 0:
+        return 'Добро пожаловать! 👋\n\nЭто первый шаг онбординга.';
+      case 1:
+        return 'Здесь рассказываем о возможностях приложения 📱';
+      case 2:
+        return 'А тут подталкиваем зарегистрироваться 🚀';
+      default:
+        return 'Неизвестный шаг';
+    }
   }
 }
 

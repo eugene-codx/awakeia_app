@@ -2,6 +2,7 @@ import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/base/base_state_notifier.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../onboarding/application/onboarding_notifier.dart';
 import 'home_state.dart';
 
 class HomeNotifier extends BaseStateNotifier<HomeState> {
@@ -49,7 +50,8 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
   /// Load user data
   Future<void> _loadUserData(UserEntity user) async {
     logAction(
-        'HomeNotifier._loadUserData: Loading data for user: ${user.publicId}',);
+      'HomeNotifier._loadUserData: Loading data for user: ${user.publicId}',
+    );
 
     // Show loading indicator only if not refreshing
     if (!state.isRefreshing) {
@@ -172,6 +174,8 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
       // Call auth notifier directly instead of using action provider
       final authNotifier = ref.read(authNotifierProvider.notifier);
       await authNotifier.signOut();
+      final notifier = ref.read(onboardingNotifierProvider.notifier);
+      await notifier.reset();
 
       // State will be reset via _onUserChanged
     } catch (e, stackTrace) {
