@@ -47,9 +47,9 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
   // Check if auth is loading
   // Check authentication loading
   final authAsync = ref.read(authNotifierProvider);
-  if (authAsync.isLoading) {
-    return RouteConstants.loading;
-  }
+  // if (authAsync.isLoading) {
+  //   return RouteConstants.loading;
+  // }
 
   // If there's an auth error (like login failure), don't redirect
   if (authAsync.hasError) {
