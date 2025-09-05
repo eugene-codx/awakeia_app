@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -24,6 +26,9 @@ class DioClient {
 
   /// Get the configured Dio instance
   Dio get dio => _dio;
+
+  // common future, to handle refreshing token and retrying request
+  Future<bool>? _refreshing;
 
   /// Configure base Dio options
   void _configureDio() {
@@ -69,8 +74,8 @@ class DioClient {
         onResponse: (response, handler) {
           _handleResponse(response, handler);
         },
-        onError: (error, handler) {
-          _handleError(error, handler);
+        onError: (error, handler) async {
+          await _handleErrorAsync(error, handler);
         },
       ),
     );
@@ -93,6 +98,8 @@ class DioClient {
         }
       }
 
+      // save the original flag onError
+      options.extra['__originalRequiresAuth'] = requiresAuth;
       // Remove the extra flag to avoid sending it to server
       options.extra.remove('requiresAuth');
 
@@ -113,11 +120,18 @@ class DioClient {
   }
 
   /// Handle errors and transform them appropriately
-  void _handleError(
+  Future<void> _handleErrorAsync(
     DioException error,
     ErrorInterceptorHandler handler,
-  ) {
+  ) async {
     AppLogger.error('Network error: ${error.message}');
+
+    final statusCode = error.response?.statusCode;
+    final isRefreshCall = error.requestOptions.extra['isRefreshCall'] == true;
+    final alreadyRetried = error.requestOptions.extra['__retried'] == true;
+    final originallyRequiredAuth =
+        (error.requestOptions.extra['__originalRequiresAuth'] as bool?) ??
+            false;
 
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
@@ -126,23 +140,38 @@ class DioClient {
         AppLogger.error('Request timeout: ${error.message}');
         break;
       case DioExceptionType.badResponse:
-        final statusCode = error.response?.statusCode;
         AppLogger.error('Bad response: $statusCode');
 
-        // Handle specific status codes
-        switch (statusCode) {
-          case 401:
-            _handleUnauthorized();
-            break;
-          case 403:
-            AppLogger.error('Access forbidden');
-            break;
-          case 404:
-            AppLogger.error('Resource not found');
-            break;
-          case 500:
-            AppLogger.error('Internal server error');
-            break;
+        if (statusCode == 401 &&
+            !isRefreshCall &&
+            originallyRequiredAuth &&
+            !alreadyRetried) {
+          final refreshed = await _ensureRefreshedToken();
+          if (refreshed) {
+            try {
+              final retryResponse = await _retry(error.requestOptions);
+              handler.resolve(retryResponse);
+              return;
+            } catch (e) {
+              AppLogger.error('Retry after refresh failed: $e');
+            }
+          }
+
+          // refresh не удался — чистим токены и дергаем колбэк
+          await _handleUnauthorized();
+        } else {
+          // Handle specific status codes
+          switch (statusCode) {
+            case 403:
+              AppLogger.error('Access forbidden');
+              break;
+            case 404:
+              AppLogger.error('Resource not found');
+              break;
+            case 500:
+              AppLogger.error('Internal server error');
+              break;
+          }
         }
         break;
       case DioExceptionType.cancel:
@@ -164,16 +193,129 @@ class DioClient {
         break;
     }
 
-    handler.next(error);
+    handler.next(error); // по умолчанию пробрасываем ошибку дальше
+  }
+
+  // NEW: единая точка для refresh с дедупликацией параллельных попыток
+  Future<bool> _ensureRefreshedToken() async {
+    // Уже выполняется? — просто ждём тот же Future
+    if (_refreshing != null) {
+      AppLogger.info('Refresh already in progress — awaiting…');
+      return await _refreshing!;
+    }
+
+    final completer = Completer<bool>();
+    _refreshing = completer.future;
+
+    try {
+      final refreshToken =
+          await SecureStorage.instance.read(key: StorageKeys.refreshToken);
+
+      if (refreshToken == null || refreshToken.isEmpty) {
+        AppLogger.warning('No refresh token available');
+        completer.complete(false);
+        return false;
+      }
+
+      // Сам refresh-запрос — явно выключаем requiresAuth, и помечаем как isRefreshCall
+      final resp = await _dio.post<Map<String, dynamic>>(
+        ApiEndpoints.refreshToken,
+        data: {
+          'token': refreshToken,
+        },
+        options: Options(
+          extra: {
+            'requiresAuth': false,
+            'isRefreshCall': true,
+            // сохранять флаг не нужно
+          },
+          headers: {
+            // Убедимся, что Authorization не уедет старый
+            'Authorization': null,
+          },
+        ),
+      );
+
+      final ok = resp.statusCode == 200 && resp.data != null;
+      if (!ok) {
+        AppLogger.warning('Refresh failed with status: ${resp.statusCode}');
+        completer.complete(false);
+        return false;
+      }
+
+      final map = resp.data!;
+      // Ожидаем те же ключи, что ты уже используешь в login/register
+      final newAccess = map[StorageKeys.accessToken] as String?;
+      final newRefresh =
+          (map[StorageKeys.refreshToken] as String?) ?? refreshToken;
+
+      if (newAccess == null || newAccess.isEmpty) {
+        AppLogger.warning('Refresh response has no access token');
+        completer.complete(false);
+        return false;
+      }
+
+      await SecureStorage.instance
+          .write(key: StorageKeys.accessToken, value: newAccess);
+      await SecureStorage.instance
+          .write(key: StorageKeys.refreshToken, value: newRefresh);
+
+      AppLogger.info('Token refreshed successfully');
+      completer.complete(true);
+      return true;
+    } catch (e, st) {
+      AppLogger.error('Refresh error', e, st);
+      completer.complete(false);
+      return false;
+    } finally {
+      _refreshing =
+          null; // сбрасываем, чтобы следующие 401 могли инициировать новый refresh
+    }
+  }
+
+  // NEW: повтор исходного запроса после успешного refresh
+  Future<Response<dynamic>> _retry(RequestOptions requestOptions) async {
+    // пометим, что это ретрай, чтобы не зациклиться
+    final newExtra = Map<String, dynamic>.from(requestOptions.extra)
+      ..['__retried'] = true;
+
+    // ПРИМЕЧАНИЕ: изначальный флаг requiresAuth убирали в onRequest,
+    // но нам важно знать, был ли он — сохраним его заранее (см. ниже).
+    // Здесь просто повторяем запрос с актуальным заголовком Authorization
+    final access =
+        await SecureStorage.instance.read(key: StorageKeys.accessToken);
+
+    final opts = Options(
+      method: requestOptions.method,
+      headers: {
+        ...requestOptions.headers,
+        if (access != null) 'Authorization': 'Bearer $access',
+      },
+      responseType: requestOptions.responseType,
+      contentType: requestOptions.contentType,
+      followRedirects: requestOptions.followRedirects,
+      listFormat: requestOptions.listFormat,
+      sendTimeout: requestOptions.sendTimeout,
+      receiveTimeout: requestOptions.receiveTimeout,
+      extra: newExtra,
+    );
+
+    return _dio.request<dynamic>(
+      requestOptions.path,
+      data: requestOptions.data,
+      queryParameters: requestOptions.queryParameters,
+      options: opts,
+      cancelToken: requestOptions.cancelToken,
+      onReceiveProgress: requestOptions.onReceiveProgress,
+      onSendProgress: requestOptions.onSendProgress,
+    );
   }
 
   /// Handle unauthorized responses
-  void _handleUnauthorized() {
+  Future<void> _handleUnauthorized() async {
     AppLogger.warning('Unauthorized access - token may be expired');
     // Clear stored token
-    SecureStorage.instance.delete(key: StorageKeys.accessToken);
-    // Note: In a real app, you might want to navigate to login screen
-    // This would typically be handled by a navigation service
+    await clearAuthData();
   }
 
   /// Clear all stored authentication data
