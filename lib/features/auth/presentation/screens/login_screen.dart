@@ -94,144 +94,151 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             tooltip: l10n.back,
           ),
         ),
-        body: GradientBackground(
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: AppSpacing.screenPadding,
-              child: Column(
-                children: [
-                  const SizedBox(height: AppSpacing.xxl),
-                  Text(l10n.welcome, style: AppTextStyles.headline2),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(l10n.niceToSeeYou, style: AppTextStyles.subtitle),
-                  const SizedBox(height: AppSpacing.xxl),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        // Email field with new logic
-                        CustomTextField(
-                          controller: _emailController,
-                          hintText: l10n.emailAddress,
-                          prefixIcon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
-                          enabled: !isLoading,
-                          textInputAction: TextInputAction.next,
-                          onChanged: controller.updateEmailUsername,
-                          // New handler
-                          errorText: state.emailUsernameError,
-                        ),
-
-                        const SizedBox(height: AppSpacing.md),
-
-                        // Password field with new logic
-                        CustomTextField(
-                          controller: _passwordController,
-                          hintText: l10n.password,
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: isPasswordHidden,
-                          // From state
-                          enabled: !isLoading,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _handleLogin(),
-                          onChanged: controller.updatePassword,
-                          // New handler
-                          errorText: state.passwordError,
-                          // Error from state
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              isPasswordHidden
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: AppColors.secondaryIcon,
-                            ),
-                            onPressed: controller
-                                .togglePasswordVisibility, // New handler
+        body: LoadingOverlay(
+          isLoading: isLoading,
+          loadingText: 'Data processing...',
+          child: GradientBackground(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: AppSpacing.screenPadding,
+                child: Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.xxl),
+                    Text(l10n.welcome, style: AppTextStyles.headline2),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(l10n.niceToSeeYou, style: AppTextStyles.subtitle),
+                    const SizedBox(height: AppSpacing.xxl),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          // Email field with new logic
+                          CustomTextField(
+                            controller: _emailController,
+                            hintText: l10n.emailAddress,
+                            prefixIcon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            enabled: !isLoading,
+                            textInputAction: TextInputAction.next,
+                            onChanged: controller.updateEmailUsername,
+                            // New handler
+                            errorText: state.emailUsernameError,
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: isLoading
-                                ? null
-                                : () =>
-                                    context.showComingSoon('Forgot Password'),
-                            child: Text(
-                              l10n.forgotPassword,
-                              style: AppTextStyles.linkSecondary,
+
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Password field with new logic
+                          CustomTextField(
+                            controller: _passwordController,
+                            hintText: l10n.password,
+                            prefixIcon: Icons.lock_outline,
+                            obscureText: isPasswordHidden,
+                            // From state
+                            enabled: !isLoading,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => _handleLogin(),
+                            onChanged: controller.updatePassword,
+                            // New handler
+                            errorText: state.passwordError,
+                            // Error from state
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                isPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: AppColors.secondaryIcon,
+                              ),
+                              onPressed: controller
+                                  .togglePasswordVisibility, // New handler
                             ),
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: isLoading ? null : _handleLogin,
-                            child: isLoading
-                                ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.primaryButtonText,
+                          const SizedBox(height: AppSpacing.sm),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: isLoading
+                                  ? null
+                                  : () =>
+                                      context.showComingSoon('Forgot Password'),
+                              child: Text(
+                                l10n.forgotPassword,
+                                style: AppTextStyles.linkSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: isLoading ? null : _handleLogin,
+                              child: isLoading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          AppColors.primaryButtonText,
+                                        ),
                                       ),
+                                    )
+                                  : Text(
+                                      l10n.login,
+                                      style: AppTextStyles.buttonLarge,
                                     ),
-                                  )
-                                : Text(
-                                    l10n.login,
-                                    style: AppTextStyles.buttonLarge,
-                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    SectionDivider(title: l10n.orSignInWith),
+                    const SizedBox(height: AppSpacing.lg),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SocialLoginButton(
+                            icon: Icons.g_mobiledata,
+                            text: l10n.google,
+                            enabled: !isLoading,
+                            onPressed: () =>
+                                context.showComingSoon('Google Sign In'),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: SocialLoginButton(
+                            icon: Icons.facebook,
+                            text: l10n.facebook,
+                            enabled: !isLoading,
+                            onPressed: () =>
+                                context.showComingSoon('Facebook Sign In'),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  SectionDivider(title: l10n.orSignInWith),
-                  const SizedBox(height: AppSpacing.lg),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.g_mobiledata,
-                          text: l10n.google,
-                          enabled: !isLoading,
-                          onPressed: () =>
-                              context.showComingSoon('Google Sign In'),
+                    const SizedBox(height: AppSpacing.xl),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(l10n.noAccount,
+                            style: AppTextStyles.linkSecondary),
+                        TextButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  final redirect =
+                                      context.queryParam('redirect');
+                                  context.goToRegister(redirect: redirect);
+                                },
+                          child: Text(l10n.register, style: AppTextStyles.link),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: SocialLoginButton(
-                          icon: Icons.facebook,
-                          text: l10n.facebook,
-                          enabled: !isLoading,
-                          onPressed: () =>
-                              context.showComingSoon('Facebook Sign In'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(l10n.noAccount, style: AppTextStyles.linkSecondary),
-                      TextButton(
-                        onPressed: isLoading
-                            ? null
-                            : () {
-                                final redirect = context.queryParam('redirect');
-                                context.goToRegister(redirect: redirect);
-                              },
-                        child: Text(l10n.register, style: AppTextStyles.link),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
