@@ -62,6 +62,7 @@ class AppSubtitle extends StatelessWidget {
 /// Widget onboarding
 class OnboardingView extends ConsumerWidget {
   const OnboardingView({super.key, required this.entity});
+
   final OnboardingEntity entity;
 
   @override
@@ -177,20 +178,11 @@ class UnauthenticatedView extends ConsumerWidget {
         // Register button
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
+          child: ElevatedButton(
             onPressed: (isLoading || isLoadingAuth) ? null : onRegister,
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              side: const BorderSide(color: AppColors.mediumPurple),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDecorations.radiusLarge),
-              ),
-            ),
             child: Text(
               l10n.register,
-              style: AppTextStyles.buttonLarge.copyWith(
-                color: AppColors.mediumPurple,
-              ),
+              style: AppTextStyles.buttonLarge,
             ),
           ),
         ),

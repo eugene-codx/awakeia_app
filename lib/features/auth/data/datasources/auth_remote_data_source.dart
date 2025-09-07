@@ -18,9 +18,11 @@ abstract class AuthRemoteDataSource {
 
   /// Register new user with email and password
   /// Throws [ServerException] on failure
-  Future<UserModel> registerWithEmailAndPassword({
+  Future<void> registerWithEmailAndPassword({
     required String email,
     required String password,
+    required String username,
+    required String firstName,
   });
 
   /// Sign out current user
@@ -114,46 +116,32 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> registerWithEmailAndPassword({
+  Future<void> registerWithEmailAndPassword({
     required String email,
     required String password,
+    required String username,
+    required String firstName,
   }) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiEndpoints.register,
         data: {
-          'username': email,
+          'username': username,
           'password': password,
+          'confirm_password': password,
           'email': email,
+          'first_name': firstName,
         },
       );
-
-      if (response.statusCode == 201 && response.data != null) {
+      if (response.statusCode == 200 && response.data != null) {
         final responseData = response.data as Map<String, dynamic>;
 
         // Extract and save token if present
-        if (responseData.containsKey('token')) {
-          final token = responseData['token'] as String;
-          await SecureStorage.instance.write(
-            key: StorageKeys.accessToken,
-            value: token,
-          );
-
-          // Save additional auth info if present
-          if (responseData.containsKey('refresh_token')) {
-            await SecureStorage.instance.write(
-              key: StorageKeys.refreshToken,
-              value: responseData['refresh_token'] as String,
-            );
-          }
+        if (responseData.containsKey('message') &&
+            responseData['message'] == 'You have successfully registered!') {
+          // Registration successful but no user data returned
+          // User needs to log in separately
         }
-
-        // Return user data (might be nested under 'user' key)
-        final userData = responseData.containsKey('user')
-            ? responseData['user'] as Map<String, dynamic>
-            : responseData;
-
-        return UserModel.fromJson(userData);
       } else {
         throw const ServerException('Invalid response from server');
       }
@@ -164,11 +152,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
         switch (statusCode) {
           case 409:
-            throw const ServerException('User already exists');
-          case 422:
             final message =
-                errorData?['message'] as String? ?? 'Invalid input data';
+                errorData?['detail'] as String? ?? 'User already exists';
             throw ServerException(message);
+          case 422:
+            throw const ServerException('Invalid input data');
           case 500:
             throw const ServerException('Server error occurred');
           default:

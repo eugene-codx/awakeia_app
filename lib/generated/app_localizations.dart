@@ -188,6 +188,18 @@ abstract class AppLocalizations {
   /// **'Continue as guest'**
   String get continueAsGuest;
 
+  /// Username field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// First name field placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get firstName;
+
   /// Email field placeholder
   ///
   /// In en, this message translates to:

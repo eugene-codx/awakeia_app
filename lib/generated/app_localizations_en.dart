@@ -55,6 +55,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get continueAsGuest => 'Continue as guest';
 
   @override
+  String get username => 'Username';
+
+  @override
+  String get firstName => 'First name';
+
+  @override
   String get emailAddress => 'Email address';
 
   @override

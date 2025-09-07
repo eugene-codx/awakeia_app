@@ -77,6 +77,16 @@
     "description": "Continue as guest button"
   },
 
+  "username": "Username",
+  "@username": {
+    "description": "Username field placeholder"
+  },
+
+  "firstName": "First name",
+  "@firstName": {
+    "description": "First name field placeholder"
+  },
+
   "emailAddress": "Email address",
   "@emailAddress": {
     "description": "Email field placeholder"

@@ -118,17 +118,25 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       },
       (user) {
         AppLogger.info(
-            'AuthNotifier.signIn: Login successful: ${user.publicId}',);
+          'AuthNotifier.signIn: Login successful: ${user.publicId}',
+        );
         state = AsyncData(AuthState.authenticated(user));
       },
     );
   }
 
   /// Register with email and password
-  Future<void> register(String email, String password) async {
+  Future<void> register(
+      String email, String password, String username, String firstName) async {
     state = const AsyncLoading();
 
-    final params = RegisterParams(email: email, password: password);
+    final params = RegisterParams(
+        email: email,
+        password: password,
+        username: username,
+        firstName: firstName,
+    );
+
     final result = await registerUseCase.call(params);
 
     result.fold(
