@@ -3,8 +3,18 @@ class AuthFormValidators {
     if (email.isEmpty) {
       return 'Please enter your email';
     }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+    if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
       return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  static String? validateFirstName(String firstName) {
+    if (firstName.isEmpty) {
+      return 'Please enter your name';
+    }
+    if (firstName.length < 3 || firstName.length > 50) {
+      return 'First name must be between 3 and 50 characters';
     }
     return null;
   }

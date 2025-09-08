@@ -99,10 +99,10 @@ final isGuestUserProvider = Provider<bool>((ref) {
 });
 
 /// Stream provider for auth state changes
-final authStateChangesProvider = StreamProvider<UserEntity?>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return repository.authStateChanges;
-});
+// final authStateChangesProvider = StreamProvider<UserEntity?>((ref) {
+//   final repository = ref.watch(authRepositoryProvider);
+//   return repository.authStateChanges;
+// });
 
 /// Provider for sign out action (kept for reusability across UI)
 final signOutActionProvider = Provider((ref) {

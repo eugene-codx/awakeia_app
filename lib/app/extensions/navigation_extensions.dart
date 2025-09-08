@@ -8,7 +8,7 @@ extension NavigationExtensions on BuildContext {
   /// Navigate to login with optional redirect
   void goToLogin({String? redirect}) {
     if (redirect != null && redirect.isNotEmpty) {
-      go('/login?redirect=$redirect');
+      go('${RouteConstants.login}?redirect=$redirect');
     } else {
       go(RouteConstants.login);
     }
@@ -17,9 +17,9 @@ extension NavigationExtensions on BuildContext {
   /// Navigate to register with optional redirect
   void goToRegister({String? redirect}) {
     if (redirect != null && redirect.isNotEmpty) {
-      go('/register?redirect=$redirect');
+      go('${RouteConstants.register}?redirect=$redirect');
     } else {
-      go('/register');
+      go(RouteConstants.register);
     }
   }
 

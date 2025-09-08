@@ -18,6 +18,8 @@ abstract class AuthRepository {
   Future<Either<AuthFailure, UserEntity>> registerWithEmailAndPassword({
     required String email,
     required String password,
+    required String username,
+    required String firstName,
   });
 
   /// Sign in as guest user

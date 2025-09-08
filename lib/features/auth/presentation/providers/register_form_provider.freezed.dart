@@ -14,11 +14,15 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$RegisterFormState {
+  String get username;
+  String get firstName;
   String get email;
   String get password;
   String get confirmPassword;
   bool get isPasswordHidden;
   bool get isConfirmPasswordHidden;
+  String? get usernameError;
+  String? get firstNameError;
   String? get emailError;
   String? get passwordError;
   String? get confirmPasswordError;
@@ -39,6 +43,10 @@ mixin _$RegisterFormState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RegisterFormState &&
+            (identical(other.username, username) ||
+                other.username == username) &&
+            (identical(other.firstName, firstName) ||
+                other.firstName == firstName) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.password, password) ||
                 other.password == password) &&
@@ -49,6 +57,10 @@ mixin _$RegisterFormState {
             (identical(
                     other.isConfirmPasswordHidden, isConfirmPasswordHidden) ||
                 other.isConfirmPasswordHidden == isConfirmPasswordHidden) &&
+            (identical(other.usernameError, usernameError) ||
+                other.usernameError == usernameError) &&
+            (identical(other.firstNameError, firstNameError) ||
+                other.firstNameError == firstNameError) &&
             (identical(other.emailError, emailError) ||
                 other.emailError == emailError) &&
             (identical(other.passwordError, passwordError) ||
@@ -66,11 +78,15 @@ mixin _$RegisterFormState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      username,
+      firstName,
       email,
       password,
       confirmPassword,
       isPasswordHidden,
       isConfirmPasswordHidden,
+      usernameError,
+      firstNameError,
       emailError,
       passwordError,
       confirmPasswordError,
@@ -80,7 +96,7 @@ mixin _$RegisterFormState {
 
   @override
   String toString() {
-    return 'RegisterFormState(email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
+    return 'RegisterFormState(username: $username, firstName: $firstName, email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, usernameError: $usernameError, firstNameError: $firstNameError, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
   }
 }
 
@@ -91,11 +107,15 @@ abstract mixin class $RegisterFormStateCopyWith<$Res> {
       _$RegisterFormStateCopyWithImpl;
   @useResult
   $Res call(
-      {String email,
+      {String username,
+      String firstName,
+      String email,
       String password,
       String confirmPassword,
       bool isPasswordHidden,
       bool isConfirmPasswordHidden,
+      String? usernameError,
+      String? firstNameError,
       String? emailError,
       String? passwordError,
       String? confirmPasswordError,
@@ -117,11 +137,15 @@ class _$RegisterFormStateCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? username = null,
+    Object? firstName = null,
     Object? email = null,
     Object? password = null,
     Object? confirmPassword = null,
     Object? isPasswordHidden = null,
     Object? isConfirmPasswordHidden = null,
+    Object? usernameError = freezed,
+    Object? firstNameError = freezed,
     Object? emailError = freezed,
     Object? passwordError = freezed,
     Object? confirmPasswordError = freezed,
@@ -130,6 +154,14 @@ class _$RegisterFormStateCopyWithImpl<$Res>
     Object? agreedToTerms = null,
   }) {
     return _then(_self.copyWith(
+      username: null == username
+          ? _self.username
+          : username // ignore: cast_nullable_to_non_nullable
+              as String,
+      firstName: null == firstName
+          ? _self.firstName
+          : firstName // ignore: cast_nullable_to_non_nullable
+              as String,
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
@@ -150,6 +182,14 @@ class _$RegisterFormStateCopyWithImpl<$Res>
           ? _self.isConfirmPasswordHidden
           : isConfirmPasswordHidden // ignore: cast_nullable_to_non_nullable
               as bool,
+      usernameError: freezed == usernameError
+          ? _self.usernameError
+          : usernameError // ignore: cast_nullable_to_non_nullable
+              as String?,
+      firstNameError: freezed == firstNameError
+          ? _self.firstNameError
+          : firstNameError // ignore: cast_nullable_to_non_nullable
+              as String?,
       emailError: freezed == emailError
           ? _self.emailError
           : emailError // ignore: cast_nullable_to_non_nullable
@@ -272,11 +312,15 @@ extension RegisterFormStatePatterns on RegisterFormState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
+            String username,
+            String firstName,
             String email,
             String password,
             String confirmPassword,
             bool isPasswordHidden,
             bool isConfirmPasswordHidden,
+            String? usernameError,
+            String? firstNameError,
             String? emailError,
             String? passwordError,
             String? confirmPasswordError,
@@ -290,11 +334,15 @@ extension RegisterFormStatePatterns on RegisterFormState {
     switch (_that) {
       case _RegisterFormState() when $default != null:
         return $default(
+            _that.username,
+            _that.firstName,
             _that.email,
             _that.password,
             _that.confirmPassword,
             _that.isPasswordHidden,
             _that.isConfirmPasswordHidden,
+            _that.usernameError,
+            _that.firstNameError,
             _that.emailError,
             _that.passwordError,
             _that.confirmPasswordError,
@@ -322,11 +370,15 @@ extension RegisterFormStatePatterns on RegisterFormState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
+            String username,
+            String firstName,
             String email,
             String password,
             String confirmPassword,
             bool isPasswordHidden,
             bool isConfirmPasswordHidden,
+            String? usernameError,
+            String? firstNameError,
             String? emailError,
             String? passwordError,
             String? confirmPasswordError,
@@ -339,11 +391,15 @@ extension RegisterFormStatePatterns on RegisterFormState {
     switch (_that) {
       case _RegisterFormState():
         return $default(
+            _that.username,
+            _that.firstName,
             _that.email,
             _that.password,
             _that.confirmPassword,
             _that.isPasswordHidden,
             _that.isConfirmPasswordHidden,
+            _that.usernameError,
+            _that.firstNameError,
             _that.emailError,
             _that.passwordError,
             _that.confirmPasswordError,
@@ -370,11 +426,15 @@ extension RegisterFormStatePatterns on RegisterFormState {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
+            String username,
+            String firstName,
             String email,
             String password,
             String confirmPassword,
             bool isPasswordHidden,
             bool isConfirmPasswordHidden,
+            String? usernameError,
+            String? firstNameError,
             String? emailError,
             String? passwordError,
             String? confirmPasswordError,
@@ -387,11 +447,15 @@ extension RegisterFormStatePatterns on RegisterFormState {
     switch (_that) {
       case _RegisterFormState() when $default != null:
         return $default(
+            _that.username,
+            _that.firstName,
             _that.email,
             _that.password,
             _that.confirmPassword,
             _that.isPasswordHidden,
             _that.isConfirmPasswordHidden,
+            _that.usernameError,
+            _that.firstNameError,
             _that.emailError,
             _that.passwordError,
             _that.confirmPasswordError,
@@ -408,11 +472,15 @@ extension RegisterFormStatePatterns on RegisterFormState {
 
 class _RegisterFormState implements RegisterFormState {
   const _RegisterFormState(
-      {this.email = '',
+      {this.username = '',
+      this.firstName = '',
+      this.email = '',
       this.password = '',
       this.confirmPassword = '',
       this.isPasswordHidden = true,
       this.isConfirmPasswordHidden = true,
+      this.usernameError,
+      this.firstNameError,
       this.emailError,
       this.passwordError,
       this.confirmPasswordError,
@@ -420,6 +488,12 @@ class _RegisterFormState implements RegisterFormState {
       this.generalError,
       this.agreedToTerms = false});
 
+  @override
+  @JsonKey()
+  final String username;
+  @override
+  @JsonKey()
+  final String firstName;
   @override
   @JsonKey()
   final String email;
@@ -435,6 +509,10 @@ class _RegisterFormState implements RegisterFormState {
   @override
   @JsonKey()
   final bool isConfirmPasswordHidden;
+  @override
+  final String? usernameError;
+  @override
+  final String? firstNameError;
   @override
   final String? emailError;
   @override
@@ -463,6 +541,10 @@ class _RegisterFormState implements RegisterFormState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _RegisterFormState &&
+            (identical(other.username, username) ||
+                other.username == username) &&
+            (identical(other.firstName, firstName) ||
+                other.firstName == firstName) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.password, password) ||
                 other.password == password) &&
@@ -473,6 +555,10 @@ class _RegisterFormState implements RegisterFormState {
             (identical(
                     other.isConfirmPasswordHidden, isConfirmPasswordHidden) ||
                 other.isConfirmPasswordHidden == isConfirmPasswordHidden) &&
+            (identical(other.usernameError, usernameError) ||
+                other.usernameError == usernameError) &&
+            (identical(other.firstNameError, firstNameError) ||
+                other.firstNameError == firstNameError) &&
             (identical(other.emailError, emailError) ||
                 other.emailError == emailError) &&
             (identical(other.passwordError, passwordError) ||
@@ -490,11 +576,15 @@ class _RegisterFormState implements RegisterFormState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      username,
+      firstName,
       email,
       password,
       confirmPassword,
       isPasswordHidden,
       isConfirmPasswordHidden,
+      usernameError,
+      firstNameError,
       emailError,
       passwordError,
       confirmPasswordError,
@@ -504,7 +594,7 @@ class _RegisterFormState implements RegisterFormState {
 
   @override
   String toString() {
-    return 'RegisterFormState(email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
+    return 'RegisterFormState(username: $username, firstName: $firstName, email: $email, password: $password, confirmPassword: $confirmPassword, isPasswordHidden: $isPasswordHidden, isConfirmPasswordHidden: $isConfirmPasswordHidden, usernameError: $usernameError, firstNameError: $firstNameError, emailError: $emailError, passwordError: $passwordError, confirmPasswordError: $confirmPasswordError, isLoading: $isLoading, generalError: $generalError, agreedToTerms: $agreedToTerms)';
   }
 }
 
@@ -517,11 +607,15 @@ abstract mixin class _$RegisterFormStateCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String email,
+      {String username,
+      String firstName,
+      String email,
       String password,
       String confirmPassword,
       bool isPasswordHidden,
       bool isConfirmPasswordHidden,
+      String? usernameError,
+      String? firstNameError,
       String? emailError,
       String? passwordError,
       String? confirmPasswordError,
@@ -543,11 +637,15 @@ class __$RegisterFormStateCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? username = null,
+    Object? firstName = null,
     Object? email = null,
     Object? password = null,
     Object? confirmPassword = null,
     Object? isPasswordHidden = null,
     Object? isConfirmPasswordHidden = null,
+    Object? usernameError = freezed,
+    Object? firstNameError = freezed,
     Object? emailError = freezed,
     Object? passwordError = freezed,
     Object? confirmPasswordError = freezed,
@@ -556,6 +654,14 @@ class __$RegisterFormStateCopyWithImpl<$Res>
     Object? agreedToTerms = null,
   }) {
     return _then(_RegisterFormState(
+      username: null == username
+          ? _self.username
+          : username // ignore: cast_nullable_to_non_nullable
+              as String,
+      firstName: null == firstName
+          ? _self.firstName
+          : firstName // ignore: cast_nullable_to_non_nullable
+              as String,
       email: null == email
           ? _self.email
           : email // ignore: cast_nullable_to_non_nullable
@@ -576,6 +682,14 @@ class __$RegisterFormStateCopyWithImpl<$Res>
           ? _self.isConfirmPasswordHidden
           : isConfirmPasswordHidden // ignore: cast_nullable_to_non_nullable
               as bool,
+      usernameError: freezed == usernameError
+          ? _self.usernameError
+          : usernameError // ignore: cast_nullable_to_non_nullable
+              as String?,
+      firstNameError: freezed == firstNameError
+          ? _self.firstNameError
+          : firstNameError // ignore: cast_nullable_to_non_nullable
+              as String?,
       emailError: freezed == emailError
           ? _self.emailError
           : emailError // ignore: cast_nullable_to_non_nullable

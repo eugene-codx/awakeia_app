@@ -132,6 +132,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<AuthFailure, UserEntity>> registerWithEmailAndPassword({
     required String email,
     required String password,
+    required String username,
+    required String firstName,
   }) async {
     try {
       AppLogger.info(
@@ -139,26 +141,34 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       // Validate inputs locally first
-      if (email.isEmpty || password.isEmpty) {
+      if (email.isEmpty || password.isEmpty || username.isEmpty) {
         return const Left(AuthFailure.invalidEmailAndPasswordCombination());
       }
 
-      if (!_isValidEmail(email)) {
-        return const Left(AuthFailure.invalidEmail());
-      }
-
-      if (password.length < 6) {
-        return const Left(AuthFailure.weakPassword());
-      }
+      // Call remote data source
+      await _remoteDataSource.registerWithEmailAndPassword(
+        email: email,
+        password: password,
+        username: username,
+        firstName: firstName,
+      );
 
       // Call remote data source
-      final userModel = await _remoteDataSource.registerWithEmailAndPassword(
+      await _remoteDataSource.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      final userModel = await _remoteDataSource.getCurrentUser();
       // Cache user locally
-      await _localDataSource.cacheUser(userModel);
+      if (userModel != null) {
+        await _localDataSource.cacheUser(userModel);
+      } else {
+        AppLogger.warning(
+          'AuthRepositoryImpl.registerWithEmailAndPassword: No user data returned from remote',
+        );
+        return const Left(AuthFailure.userNotFound());
+      }
 
       // Convert to entity
       final userEntity = UserMapper.toEntity(userModel);
@@ -176,12 +186,6 @@ class AuthRepositoryImpl implements AuthRepository {
         e,
         stackTrace,
       );
-
-      // Handle specific registration errors
-      if (e.message.contains('already exists')) {
-        return const Left(AuthFailure.emailAlreadyInUse());
-      }
-
       return Left(AuthFailure.serverError(e.message));
     } on NetworkException catch (e, stackTrace) {
       AppLogger.error(
@@ -407,11 +411,6 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       return Left(AuthFailure.unexpectedError(e.toString()));
     }
-  }
-
-  // Helper method to validate email
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
   // Dispose method to clean up resources

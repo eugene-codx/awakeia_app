@@ -54,6 +54,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get continueAsGuest => 'Продолжить как гость';
 
   @override
+  String get username => 'Введите username';
+
+  @override
+  String get firstName => 'Ваше имя';
+
+  @override
   String get emailAddress => 'Email адрес';
 
   @override

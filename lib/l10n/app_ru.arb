@@ -20,6 +20,8 @@
   "register": "Регистрация",
   "continueAsGuest": "Продолжить как гость",
 
+  "username": "Введите username",
+  "firstName": "Ваше имя",
   "emailAddress": "Email адрес",
   "password": "Пароль",
   "confirmPassword": "Подтвердите пароль",

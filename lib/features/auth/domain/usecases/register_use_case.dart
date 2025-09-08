@@ -17,6 +17,8 @@ class RegisterUseCase {
     return await _repository.registerWithEmailAndPassword(
       email: params.email,
       password: params.password,
+      username: params.username,
+      firstName: params.firstName,
     );
   }
 }
@@ -26,10 +28,14 @@ class RegisterParams extends Equatable {
   const RegisterParams({
     required this.email,
     required this.password,
+    required this.username,
+    required this.firstName,
   });
   final String email;
   final String password;
+  final String username;
+  final String firstName;
 
   @override
-  List<Object?> get props => [email, password];
+  List<Object?> get props => [email, password, username, firstName];
 }

@@ -19,6 +19,8 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _usernameController = TextEditingController();
+  final _firstNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -121,6 +123,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        // Username field
+                        CustomTextField(
+                          controller: _usernameController,
+                          hintText: l10n.username,
+                          keyboardType: TextInputType.name,
+                          enabled: !isLoading,
+                          textInputAction: TextInputAction.next,
+                          onChanged: controller.updateUsername,
+                          errorText: state.usernameError,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
                         // Email field
                         CustomTextField(
                           controller: _emailController,
@@ -131,6 +144,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           textInputAction: TextInputAction.next,
                           onChanged: controller.updateEmail,
                           errorText: state.emailError,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        // First Name field
+                        CustomTextField(
+                          controller: _firstNameController,
+                          hintText: l10n.firstName,
+                          keyboardType: TextInputType.name,
+                          enabled: !isLoading,
+                          textInputAction: TextInputAction.next,
+                          onChanged: controller.updateFirstName,
+                          errorText: state.firstNameError,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         // Password field
