@@ -39,7 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref.watch(homeProvider.select((s) => s.selectedTabIndex));
 
     // Listen to authentication state changes
-    ref.listen(authNotifierProvider, (previous, next) {
+    ref.listen(authProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
           // If user became unauthenticated, navigate to first screen

@@ -98,11 +98,12 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
 
     try {
       // Call auth notifier directly instead of using action provider
-      final authNotifier = ref.read(authNotifierProvider.notifier);
-      await authNotifier.signIn(state.emailUsername.trim(), state.password);
+      final authNotifier = ref.read(authProvider.notifier);
+      await authNotifier.login(
+          email: state.emailUsername.trim(), password: state.password,);
 
       // Check the result after signIn completes
-      final authAsync = ref.read(authNotifierProvider);
+      final authAsync = ref.read(authProvider);
 
       authAsync.when(
         data: (authStateData) {
@@ -112,7 +113,8 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
             state = const LoginFormState();
           } else {
             // This shouldn't happen with new logic, but keep as fallback
-            logError('LoginFormNotifier.signIn: Unexpected unauthenticated state');
+            logError(
+                'LoginFormNotifier.signIn: Unexpected unauthenticated state',);
             state = state.copyWith(
               isLoading: false,
               generalError: 'Unexpected authentication state',
@@ -121,7 +123,8 @@ class LoginFormNotifier extends BaseStateNotifier<LoginFormState>
         },
         loading: () {
           // Still loading - this shouldn't happen since signIn should complete
-          logError('LoginFormNotifier.signIn: Auth still loading after signIn completed');
+          logError(
+              'LoginFormNotifier.signIn: Auth still loading after signIn completed',);
           state = state.copyWith(
             isLoading: false,
             generalError: 'Authentication timeout',

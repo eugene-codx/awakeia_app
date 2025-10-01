@@ -170,15 +170,14 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
 
     try {
       // Call auth notifier directly instead of using action provider
-      final authNotifier = ref.read(authNotifierProvider.notifier);
-      await authNotifier.register(
-        state.email.trim(),
-        state.password,
-        state.username.trim(),
-        state.firstName.trim(),
-      );
+      await ref.read(authProvider.notifier).register(
+            email: state.email.trim(),
+            password: state.password,
+            username: state.username.trim(),
+            firstName: state.firstName.trim(),
+          );
 
-      final authAsync = ref.read(authNotifierProvider);
+      final authAsync = ref.read(authProvider);
 
       authAsync.when(
         data: (authStateData) {
@@ -188,7 +187,8 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
             state = const RegisterFormState();
           } else {
             // This shouldn't happen with new logic, but keep as fallback
-            logError('RegisterFormNotifier.register: Unexpected unauthenticated state');
+            logError(
+                'RegisterFormNotifier.register: Unexpected unauthenticated state',);
             state = state.copyWith(
               isLoading: false,
               generalError: 'Unexpected authentication state',
@@ -197,7 +197,8 @@ class RegisterFormNotifier extends BaseStateNotifier<RegisterFormState>
         },
         loading: () {
           // Still loading - this shouldn't happen since signIn should complete
-          logError('RegisterFormNotifier.register: Auth still loading after signIn completed');
+          logError(
+              'RegisterFormNotifier.register: Auth still loading after signIn completed',);
           state = state.copyWith(
             isLoading: false,
             generalError: 'Authentication timeout',

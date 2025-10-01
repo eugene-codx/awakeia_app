@@ -49,7 +49,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final isConfirmPasswordHidden = state.isConfirmPasswordHidden;
 
     // Listen to auth state changes
-    ref.listen(authNotifierProvider, (previous, next) {
+    ref.listen(authProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
           if (authState.isAuthenticated && mounted) {

@@ -45,7 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isPasswordHidden = state.isPasswordHidden;
 
     // Listen to authentication state changes (no changes)
-    ref.listen(authNotifierProvider, (previous, next) {
+    ref.listen(authProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
           // Only navigate on successful authentication, not on authentication errors
@@ -223,8 +223,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(l10n.noAccount,
-                            style: AppTextStyles.linkSecondary,),
+                        Text(
+                          l10n.noAccount,
+                          style: AppTextStyles.linkSecondary,
+                        ),
                         TextButton(
                           onPressed: isLoading
                               ? null
