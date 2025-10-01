@@ -127,7 +127,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
 
   /// Register with email and password
   Future<void> register(
-      String email, String password, String username, String firstName) async {
+      String email, String password, String username, String firstName,) async {
     state = const AsyncLoading();
 
     final params = RegisterParams(
