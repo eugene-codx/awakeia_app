@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/extensions/navigation_extensions.dart';
 import '../../shared/shared.dart';
 
 // Custom back button widget for reuse across screens
@@ -33,7 +34,14 @@ class CustomBackButton extends StatelessWidget {
           size: 16,
         ),
       ),
-      onPressed: onPressed ?? () => context.go('/first'),
+      onPressed: onPressed ??
+          () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.goToHome();
+            }
+          },
       tooltip: tooltip,
     );
   }
@@ -81,13 +89,17 @@ class PrimaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: padding ?? AppSpacing.paddingLG,
-        decoration: AppDecorations.primaryCard,
-        child: child,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppDecorations.radiusLarge),
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          padding: padding ?? AppSpacing.paddingLG,
+          decoration: AppDecorations.primaryCard,
+          child: child,
+        ),
       ),
     );
   }
@@ -213,7 +225,7 @@ class CustomTextField extends StatelessWidget {
       enabled: enabled,
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
-      decoration: AppDecorations.primaryInput.copyWith(
+      decoration: const InputDecoration().copyWith(
         hintText: hintText,
         errorText: errorText,
         prefixIcon: prefixIcon != null

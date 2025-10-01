@@ -224,7 +224,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(l10n.noAccount,
-                            style: AppTextStyles.linkSecondary),
+                            style: AppTextStyles.linkSecondary,),
                         TextButton(
                           onPressed: isLoading
                               ? null
