@@ -7,7 +7,7 @@ import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
 import '../../application/onboarding_notifier.dart';
 import '../../application/onboarding_state.dart';
-import '../widgets/onboarding_widgets.dart' hide AppLogo;
+import '../widgets/onboarding_widgets.dart';
 
 /// First screen of the app (welcome/onboarding) using Clean Architecture
 class FirstScreen extends ConsumerStatefulWidget {
@@ -64,8 +64,7 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
               children: [
                 const Spacer(),
 
-                // App logo and title
-                const AppLogo(),
+                const AppLogo(size: AppLogoSize.large),
                 const SizedBox(height: AppSpacing.lg),
                 const AppTitle(),
                 const SizedBox(height: AppSpacing.md),
@@ -73,7 +72,6 @@ class _FirstScreenState extends ConsumerState<FirstScreen> {
 
                 const Spacer(),
 
-                // Main content based on state
                 onboardingState.when(
                   data: (state) => state.when(
                     loading: () => const Center(
