@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
-import '../providers/auth_providers.dart';
+import '../../../features.dart' hide AppLogo;
 
-/// Loading screen shown while checking authentication status
+/// Loading screen shown during authentication check
+///
+/// This screen appears while the app checks if the user is authenticated.
+/// It shows the app logo and loading indicator, then navigates based on auth state.
 class AuthLoadingScreen extends ConsumerStatefulWidget {
   const AuthLoadingScreen({super.key});
 
@@ -20,11 +23,10 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   @override
   void initState() {
     super.initState();
-    AppLogger.info(
-      'AuthLoadingScreen.initState: AuthLoadingScreen initialized',
-    );
+    AppLogger.info('AuthLoadingScreen initialized');
   }
 
+  /// Navigate based on authentication state
   void _navigateBasedOnAuthState() {
     if (_hasNavigated || !mounted) return;
 
@@ -32,22 +34,30 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
 
     authAsyncValue.whenOrNull(
       data: (authState) {
-        if (authState.isAuthenticated) {
-          AppLogger.info(
-            'AuthLoadingScreen._navigateBasedOnAuthState: User authenticated, navigating to home',
-          );
-          _hasNavigated = true;
-          // Using GoRouter to navigate
-          // This will replace the current route with the home screen
-          // instead of pushing a new one
-          context.goToHome();
-        } else if (authState.isUnauthenticated) {
-          AppLogger.info(
-            'AuthLoadingScreen._navigateBasedOnAuthState: : User not authenticated, navigating to first',
-          );
-          _hasNavigated = true;
-          context.goToFirst();
-        }
+        authState.when(
+          initial: () {
+            AppLogger.debug(
+              'AuthLoadingScreen: Initial state, staying on loading',
+            );
+          },
+          loading: () {
+            AppLogger.debug('AuthLoadingScreen: Loading, staying on loading');
+          },
+          authenticated: (_) {
+            AppLogger.info(
+              'AuthLoadingScreen: User authenticated, navigating to home',
+            );
+            _hasNavigated = true;
+            context.goToHome();
+          },
+          unauthenticated: (_) {
+            AppLogger.info(
+              'AuthLoadingScreen: User not authenticated, navigating to first',
+            );
+            _hasNavigated = true;
+            context.goToFirst();
+          },
+        );
       },
     );
   }
@@ -66,7 +76,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
       );
     });
 
-    // Also check auth state after the first frame is built to ensure we don't miss any changes
+    // Also check auth state after the first frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_hasNavigated) {
         _navigateBasedOnAuthState();
@@ -83,56 +93,30 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App logo
-              Container(
-                width: 120,
-                height: 120,
-                decoration: AppDecorations.logoContainer,
-                child: const Icon(
-                  Icons.self_improvement,
-                  size: 64,
-                  color: AppColors.primaryIcon,
-                ),
-              ),
+              // App logo using new widget
+              const AppLogo(size: AppLogoSize.large),
 
               const SizedBox(height: AppSpacing.xl),
 
-              // Show loading indicator or error
-              if (hasError) ...[
-                const Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: AppColors.error,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'Error loading app',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.error,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                ElevatedButton(
-                  onPressed: () {
-                    _hasNavigated = false;
-                    // Try again
+              // Show loading or error state
+              if (hasError)
+                ErrorDisplay(
+                  title: 'Authentication Error',
+                  message: 'Failed to check authentication status',
+                  onRetry: () {
                     ref.invalidate(authProvider);
                   },
-                  child: const Text('Retry'),
-                ),
-              ] else ...[
-                const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.primaryText,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
+                )
+              else ...[
+                // Loading indicator
+                const AppLoadingIndicator(),
+
+                const SizedBox(height: AppSpacing.md),
+
+                // Loading text
                 Text(
                   'Loading...',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.secondaryText,
-                  ),
+                  style: AppTextStyles.bodyMedium,
                 ),
               ],
             ],
@@ -140,11 +124,5 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    AppLogger.info('AuthLoadingScreen.dispose: AuthLoadingScreen disposed');
-    super.dispose();
   }
 }

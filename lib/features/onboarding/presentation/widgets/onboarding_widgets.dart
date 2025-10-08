@@ -228,7 +228,7 @@ class UnauthenticatedView extends ConsumerWidget {
                 )
               : Text(
                   l10n.continueAsGuest,
-                  style: AppTextStyles.link.copyWith(
+                  style: AppTextStyles.linkPrimary.copyWith(
                     color: (isLoading || isLoadingAuth)
                         ? AppColors.secondaryText.withValues(alpha: 0.5)
                         : AppColors.secondaryText,
