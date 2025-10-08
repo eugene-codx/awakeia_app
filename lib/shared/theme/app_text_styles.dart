@@ -138,7 +138,7 @@ class AppTextStyles {
   );
 
   // Link text styles
-  static final TextStyle link = _baseStyle.copyWith(
+  static final TextStyle linkPrimary = _baseStyle.copyWith(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: AppColors.primaryText,

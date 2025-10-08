@@ -3,10 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_decorations.dart';
-import '../theme/app_text_styles.dart';
-import '../widgets/common_widgets.dart';
+import '../shared.dart';
 
 /// Error screen shown when navigation fails or route not found
 class RouteErrorScreen extends StatelessWidget {
@@ -27,31 +24,12 @@ class RouteErrorScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Error icon
-                const Icon(
-                  Icons.error_outline,
-                  size: 80,
-                  color: AppColors.error,
-                ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // Error title
-                Text(
-                  'Oops! Something went wrong',
-                  style: AppTextStyles.headline4,
-                  textAlign: TextAlign.center,
-                ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                // Error message
-                Text(
-                  error ?? 'The page you are looking for could not be found.',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.secondaryText,
-                  ),
-                  textAlign: TextAlign.center,
+                // Error display using new widget
+                ErrorDisplay(
+                  title: 'Page Not Found',
+                  message: error ??
+                      'The page you are looking for could not be found.',
+                  icon: Icons.error_outline,
                 ),
 
                 const SizedBox(height: AppSpacing.xl),
@@ -60,29 +38,25 @@ class RouteErrorScreen extends StatelessWidget {
                 Column(
                   children: [
                     // Go home button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => context.go('/home'),
-                        child: const Text('Go to Home'),
-                      ),
+                    PrimaryButton(
+                      text: 'Go to Home',
+                      icon: Icons.home,
+                      onPressed: () => context.go('/home'),
                     ),
 
                     const SizedBox(height: AppSpacing.md),
 
                     // Go back button
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          if (context.canPop()) {
-                            context.pop();
-                          } else {
-                            context.go('/first');
-                          }
-                        },
-                        child: const Text('Go Back'),
-                      ),
+                    SecondaryButton(
+                      text: 'Go Back',
+                      icon: Icons.arrow_back,
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/first');
+                        }
+                      },
                     ),
                   ],
                 ),

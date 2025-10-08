@@ -1,4 +1,3 @@
-// ===== Login Screen =====
 // lib/features/auth/presentation/screens/login_screen.dart
 
 import 'package:flutter/material.dart';
@@ -35,20 +34,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    // Get data from new provider
+    // Get data from provider
     final controller = ref.read(loginFormProvider.notifier);
     final state = ref.watch(loginFormProvider);
     final isLoading = state.isLoading;
     final isPasswordHidden = state.isPasswordHidden;
 
-    // Listen to authentication state changes (no changes)
+    // Listen to authentication state changes
     ref.listen(authProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
-          // Only navigate on successful authentication, not on authentication errors
+          // Only navigate on successful authentication
           if (authState.isAuthenticated && mounted) {
             final redirect = context.queryParam('redirect');
             if (redirect != null && redirect.isNotEmpty) {
@@ -57,12 +63,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               context.goToHome();
             }
           }
-          // Don't redirect on unauthenticated state - let the error be shown
         },
       );
     });
 
-    // Listen to general errors from provider
+    // Listen to login errors
     ref.listen(
       loginFormProvider.select((state) => state.generalError),
       (previous, current) {
@@ -82,7 +87,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
 
     return PopScope(
-      canPop: !isLoading, // Don't allow back during loading
+      canPop: !isLoading,
       child: Scaffold(
         appBar: AppBar(
           title: Text('Login', style: AppTextStyles.appBarTitle),
@@ -94,25 +99,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             tooltip: l10n.back,
           ),
         ),
-        body: LoadingOverlay(
-          isLoading: isLoading,
-          loadingText: 'Data processing...',
-          child: GradientBackground(
-            child: SafeArea(
-              child: SingleChildScrollView(
-                padding: AppSpacing.screenPadding,
+        body: GradientBackground(
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: AppSpacing.screenPadding,
+              child: Form(
+                key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: AppSpacing.xxl),
-                    Text(l10n.welcome, style: AppTextStyles.headline2),
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(l10n.niceToSeeYou, style: AppTextStyles.subtitle),
-                    const SizedBox(height: AppSpacing.xxl),
-                    Form(
-                      key: _formKey,
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // App logo
+                    const AppLogo(size: AppLogoSize.medium),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Login form card
+                    PrimaryCard(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Email field with new logic
+                          // Email field
                           CustomTextField(
                             controller: _emailController,
                             hintText: l10n.emailAddress,
@@ -121,26 +128,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             enabled: !isLoading,
                             textInputAction: TextInputAction.next,
                             onChanged: controller.updateEmailUsername,
-                            // New handler
                             errorText: state.emailUsernameError,
                           ),
 
                           const SizedBox(height: AppSpacing.md),
 
-                          // Password field with new logic
+                          // Password field
                           CustomTextField(
                             controller: _passwordController,
                             hintText: l10n.password,
                             prefixIcon: Icons.lock_outline,
                             obscureText: isPasswordHidden,
-                            // From state
                             enabled: !isLoading,
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _handleLogin(),
                             onChanged: controller.updatePassword,
-                            // New handler
                             errorText: state.passwordError,
-                            // Error from state
                             suffixIcon: IconButton(
                               icon: Icon(
                                 isPasswordHidden
@@ -148,78 +151,75 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     : Icons.visibility,
                                 color: AppColors.secondaryIcon,
                               ),
-                              onPressed: controller
-                                  .togglePasswordVisibility, // New handler
+                              onPressed: controller.togglePasswordVisibility,
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.sm),
+
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Forgot password link
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: isLoading
                                   ? null
-                                  : () =>
-                                      context.showComingSoon('Forgot Password'),
+                                  : () => context.showComingSoon(
+                                        'Password reset',
+                                      ),
                               child: Text(
                                 l10n.forgotPassword,
-                                style: AppTextStyles.linkSecondary,
+                                style: AppTextStyles.linkPrimary,
                               ),
                             ),
                           ),
+
                           const SizedBox(height: AppSpacing.lg),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton(
-                              onPressed: isLoading ? null : _handleLogin,
-                              child: isLoading
-                                  ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          AppColors.primaryButtonText,
-                                        ),
-                                      ),
-                                    )
-                                  : Text(
-                                      l10n.login,
-                                      style: AppTextStyles.buttonLarge,
-                                    ),
-                            ),
+
+                          // Login button using new widget
+                          PrimaryButton(
+                            text: l10n.login,
+                            onPressed: isLoading ? null : _handleLogin,
+                            isLoading: isLoading,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
-                    SectionDivider(title: l10n.orSignInWith),
+
                     const SizedBox(height: AppSpacing.lg),
+
+                    // Divider
+                    const SectionDivider(title: 'OR'),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Social login buttons
                     Row(
                       children: [
                         Expanded(
                           child: SocialLoginButton(
                             icon: Icons.g_mobiledata,
-                            text: l10n.google,
+                            text: 'Google',
                             enabled: !isLoading,
                             onPressed: () =>
-                                context.showComingSoon('Google Sign In'),
+                                context.showComingSoon('Google sign in'),
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: SocialLoginButton(
                             icon: Icons.facebook,
-                            text: l10n.facebook,
+                            text: 'Facebook',
                             enabled: !isLoading,
                             onPressed: () =>
-                                context.showComingSoon('Facebook Sign In'),
+                                context.showComingSoon('Facebook sign in'),
                           ),
                         ),
                       ],
                     ),
+
                     const SizedBox(height: AppSpacing.xl),
+
+                    // Register link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -228,14 +228,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           style: AppTextStyles.linkSecondary,
                         ),
                         TextButton(
-                          onPressed: isLoading
-                              ? null
-                              : () {
-                                  final redirect =
-                                      context.queryParam('redirect');
-                                  context.goToRegister(redirect: redirect);
-                                },
-                          child: Text(l10n.register, style: AppTextStyles.link),
+                          onPressed:
+                              isLoading ? null : () => context.goToRegister(),
+                          child: Text(
+                            l10n.register,
+                            style: AppTextStyles.linkPrimary,
+                          ),
                         ),
                       ],
                     ),
@@ -252,7 +250,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleLogin() async {
     // Synchronize controller values with state
     final controller = ref.read(loginFormProvider.notifier);
-    controller.updateEmailUsername(_emailController.text);
+    controller.updateEmailUsername(_emailController.text.trim());
     controller.updatePassword(_passwordController.text);
 
     // Call sign in

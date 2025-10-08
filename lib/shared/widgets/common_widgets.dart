@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/extensions/navigation_extensions.dart';
-import '../../shared/shared.dart';
+import '../shared.dart';
 
-// Custom back button widget for reuse across screens
+// ============================================================================
+// NAVIGATION WIDGETS
+// ============================================================================
+
+/// Custom back button widget for reuse across screens
+///
+/// Features:
+/// - Custom styling with card background
+/// - Smart navigation (pop or go to home)
+/// - Optional custom onPressed callback
 class CustomBackButton extends StatelessWidget {
   const CustomBackButton({
     super.key,
@@ -47,8 +56,12 @@ class CustomBackButton extends StatelessWidget {
   }
 }
 
-// Gradient background widget
-// Use this for screens with gradient background
+// ============================================================================
+// LAYOUT WIDGETS
+// ============================================================================
+
+/// Gradient background widget
+/// Use this for screens with gradient background
 class GradientBackground extends StatelessWidget {
   const GradientBackground({
     super.key,
@@ -74,7 +87,11 @@ class GradientBackground extends StatelessWidget {
   }
 }
 
-// Primary card widget with consistent styling
+/// Primary card widget with consistent styling
+///
+/// Features:
+/// - Consistent padding and decoration
+/// - Optional tap handling with Material ripple effect
 class PrimaryCard extends StatelessWidget {
   const PrimaryCard({
     super.key,
@@ -105,84 +122,239 @@ class PrimaryCard extends StatelessWidget {
   }
 }
 
-// Stats card widget for displaying numbers and labels
-class StatsCard extends StatelessWidget {
-  const StatsCard({
+/// App logo widget with different sizes
+///
+/// Sizes:
+/// - small: 64x64
+/// - medium: 96x96
+/// - large: 120x120
+enum AppLogoSize { small, medium, large }
+
+class AppLogo extends StatelessWidget {
+  const AppLogo({
+    super.key,
+    this.size = AppLogoSize.large,
+  });
+
+  final AppLogoSize size;
+
+  double get _containerSize {
+    switch (size) {
+      case AppLogoSize.small:
+        return 64;
+      case AppLogoSize.medium:
+        return 96;
+      case AppLogoSize.large:
+        return 120;
+    }
+  }
+
+  double get _iconSize {
+    switch (size) {
+      case AppLogoSize.small:
+        return 32;
+      case AppLogoSize.medium:
+        return 48;
+      case AppLogoSize.large:
+        return 64;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _containerSize,
+      height: _containerSize,
+      decoration: AppDecorations.logoContainer,
+      child: Icon(
+        Icons.self_improvement,
+        size: _iconSize,
+        color: AppColors.primaryIcon,
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// BUTTON WIDGETS
+// ============================================================================
+
+/// Primary button with consistent styling
+///
+/// Features:
+/// - Loading state with spinner
+/// - Disabled state
+/// - Optional icon
+/// - Full width option
+class PrimaryButton extends StatelessWidget {
+  const PrimaryButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+    this.isFullWidth = true,
+    this.icon,
+  });
+
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool isFullWidth;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = ElevatedButton(
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.primaryButtonText,
+                ),
+              ),
+            )
+          : icon != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 20),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(text, style: AppTextStyles.buttonLarge),
+                  ],
+                )
+              : Text(text, style: AppTextStyles.buttonLarge),
+    );
+
+    return isFullWidth
+        ? SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: button,
+          )
+        : SizedBox(height: 56, child: button);
+  }
+}
+
+/// Secondary button (outlined) with consistent styling
+///
+/// Features:
+/// - Loading state
+/// - Disabled state
+/// - Optional icon
+/// - Full width option
+class SecondaryButton extends StatelessWidget {
+  const SecondaryButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+    this.isFullWidth = true,
+    this.icon,
+  });
+
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool isFullWidth;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = OutlinedButton(
+      onPressed: isLoading ? null : onPressed,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.lg,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
+        ),
+      ),
+      child: isLoading
+          ? const SizedBox(
+              height: 24,
+              width: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            )
+          : icon != null
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 20),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(text),
+                  ],
+                )
+              : Text(text),
+    );
+
+    return isFullWidth
+        ? SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: button,
+          )
+        : SizedBox(height: 56, child: button);
+  }
+}
+
+/// Social login button widget for Google, Facebook, Apple, etc.
+class SocialLoginButton extends StatelessWidget {
+  const SocialLoginButton({
     super.key,
     required this.icon,
-    required this.value,
-    required this.label,
-    this.iconColor = AppColors.accentIcon,
+    required this.text,
+    this.enabled = true,
+    required this.onPressed,
   });
 
   final IconData icon;
-  final String value;
-  final String label;
-  final Color iconColor;
+  final String text;
+  final bool enabled;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: AppSpacing.paddingMD,
-      decoration: AppDecorations.statsCard,
-      child: Column(
+    return OutlinedButton(
+      onPressed: enabled ? onPressed : null,
+      style: OutlinedButton.styleFrom(
+        padding: AppSpacing.verticalMD,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: iconColor,
-            size: 32,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            value,
-            style: AppTextStyles.statsNumber,
-          ),
-          Text(
-            label,
-            style: AppTextStyles.statsLabel,
-          ),
+          Icon(icon, size: 24),
+          const SizedBox(width: AppSpacing.sm),
+          Text(text),
         ],
       ),
     );
   }
 }
 
-// Welcome message widget
-class WelcomeMessage extends StatelessWidget {
-  const WelcomeMessage({
-    super.key,
-    required this.title,
-    required this.subtitle,
-  });
+// ============================================================================
+// FORM WIDGETS
+// ============================================================================
 
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: AppSpacing.paddingLG,
-      decoration: AppDecorations.welcomeContainer,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: AppTextStyles.headline4,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            subtitle,
-            style: AppTextStyles.subtitle,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Custom input field with consistent styling
+/// Custom input field with consistent styling
+///
+/// Features:
+/// - Prefix and suffix icons
+/// - Password visibility toggle
+/// - Validation support
+/// - Error text display
 class CustomTextField extends StatelessWidget {
   const CustomTextField({
     super.key,
@@ -225,7 +397,7 @@ class CustomTextField extends StatelessWidget {
       enabled: enabled,
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
-      decoration: const InputDecoration().copyWith(
+      decoration: AppDecorations.primaryInput.copyWith(
         hintText: hintText,
         errorText: errorText,
         prefixIcon: prefixIcon != null
@@ -240,44 +412,60 @@ class CustomTextField extends StatelessWidget {
   }
 }
 
-// Social login button widget
-class SocialLoginButton extends StatelessWidget {
-  const SocialLoginButton({
+/// Checkbox tile for terms, conditions, etc.
+///
+/// Features:
+/// - Checkbox with label
+/// - Tap to toggle
+/// - Disabled state
+class CheckboxTile extends StatelessWidget {
+  const CheckboxTile({
     super.key,
-    required this.icon,
-    required this.text,
+    required this.value,
+    required this.label,
+    required this.onChanged,
     this.enabled = true,
-    required this.onPressed,
   });
 
-  final IconData icon;
-  final String text;
+  final bool value;
+  final String label;
+  final ValueChanged<bool> onChanged;
   final bool enabled;
-  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: enabled ? onPressed : null,
-      style: OutlinedButton.styleFrom(
-        padding: AppSpacing.verticalMD,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
-        ),
-      ),
+    return PrimaryCard(
+      padding: AppSpacing.paddingMD,
+      onTap: enabled ? () => onChanged(!value) : null,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 24),
+          Checkbox(
+            value: value,
+            onChanged: enabled ? (_) => onChanged(!value) : null,
+            activeColor: AppColors.primaryButton,
+            checkColor: AppColors.primaryButtonText,
+          ),
           const SizedBox(width: AppSpacing.sm),
-          Text(text),
+          Expanded(
+            child: Text(
+              label,
+              style: AppTextStyles.caption,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-// Loading overlay widget
+// ============================================================================
+// FEEDBACK WIDGETS
+// ============================================================================
+
+/// Loading overlay widget
+///
+/// Covers the entire screen with a semi-transparent overlay
+/// and shows a loading indicator with optional text
 class LoadingOverlay extends StatelessWidget {
   const LoadingOverlay({
     super.key,
@@ -302,11 +490,7 @@ class LoadingOverlay extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.primaryText,
-                    ),
-                  ),
+                  const AppLoadingIndicator(),
                   if (loadingText != null) ...[
                     const SizedBox(height: AppSpacing.md),
                     Text(
@@ -323,50 +507,88 @@ class LoadingOverlay extends StatelessWidget {
   }
 }
 
-// Error message widget
-class ErrorMessage extends StatelessWidget {
-  const ErrorMessage({
+/// Standard loading indicator for the app
+class AppLoadingIndicator extends StatelessWidget {
+  const AppLoadingIndicator({
     super.key,
-    required this.message,
-    this.onRetry,
+    this.size = 40,
   });
 
-  final String message;
-  final VoidCallback? onRetry;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: AppSpacing.paddingMD,
-      decoration: AppDecorations.primaryCard,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            color: AppColors.error,
-            size: 48,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            message,
-            style: AppTextStyles.error,
-            textAlign: TextAlign.center,
-          ),
-          if (onRetry != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Try Again'),
-            ),
-          ],
-        ],
+    return SizedBox(
+      width: size,
+      height: size,
+      child: const CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(
+          AppColors.primaryText,
+        ),
       ),
     );
   }
 }
 
-// Empty state widget
+/// Error display widget
+///
+/// Shows error icon, message, and optional retry button
+class ErrorDisplay extends StatelessWidget {
+  const ErrorDisplay({
+    super.key,
+    required this.message,
+    this.title = 'Error',
+    this.icon = Icons.error_outline,
+    this.onRetry,
+  });
+
+  final String message;
+  final String title;
+  final IconData icon;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          size: 64,
+          color: AppColors.error,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          title,
+          style: AppTextStyles.headline5,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          message,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.secondaryText,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        if (onRetry != null) ...[
+          const SizedBox(height: AppSpacing.lg),
+          PrimaryButton(
+            text: 'Retry',
+            onPressed: onRetry,
+            isFullWidth: false,
+            icon: Icons.refresh,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Empty state widget
+///
+/// Shows when there's no data to display
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
@@ -407,10 +629,11 @@ class EmptyState extends StatelessWidget {
         ),
         if (buttonText != null && onButtonPressed != null) ...[
           const SizedBox(height: AppSpacing.lg),
-          ElevatedButton.icon(
+          PrimaryButton(
+            text: buttonText!,
             onPressed: onButtonPressed,
-            icon: const Icon(Icons.add),
-            label: Text(buttonText!),
+            icon: Icons.add,
+            isFullWidth: false,
           ),
         ],
       ],
@@ -418,7 +641,88 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-// Section divider with title
+// ============================================================================
+// DATA DISPLAY WIDGETS
+// ============================================================================
+
+/// Stats card widget for displaying numbers and labels
+class StatsCard extends StatelessWidget {
+  const StatsCard({
+    super.key,
+    required this.icon,
+    required this.value,
+    required this.label,
+    this.iconColor = AppColors.accentIcon,
+  });
+
+  final IconData icon;
+  final String value;
+  final String label;
+  final Color iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: AppSpacing.paddingMD,
+      decoration: AppDecorations.statsCard,
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: iconColor,
+            size: 32,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            value,
+            style: AppTextStyles.statsNumber,
+          ),
+          Text(
+            label,
+            style: AppTextStyles.statsLabel,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Welcome message widget
+class WelcomeMessage extends StatelessWidget {
+  const WelcomeMessage({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: AppSpacing.paddingLG,
+      decoration: AppDecorations.welcomeContainer,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTextStyles.headline4,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            subtitle,
+            style: AppTextStyles.subtitle,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Section divider with title
 class SectionDivider extends StatelessWidget {
   const SectionDivider({
     super.key,

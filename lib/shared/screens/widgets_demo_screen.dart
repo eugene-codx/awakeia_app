@@ -1,14 +1,11 @@
-// lib/shared/screens/widgets_demo_screen.dart
-
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_decorations.dart';
-import '../theme/app_text_styles.dart';
-import '../widgets/common_widgets.dart';
+import '../shared.dart';
 
 /// Demo screen to showcase all custom widgets
+///
 /// This screen demonstrates how to use each widget from common_widgets.dart
+/// organized by categories for easy navigation
 class WidgetsDemoScreen extends StatefulWidget {
   const WidgetsDemoScreen({super.key});
 
@@ -18,12 +15,16 @@ class WidgetsDemoScreen extends StatefulWidget {
 
 class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _agreedToTerms = false;
   bool _showError = false;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -32,6 +33,10 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _isLoading = false);
     });
+  }
+
+  void _toggleError() {
+    setState(() => _showError = !_showError);
   }
 
   @override
@@ -49,128 +54,182 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
       ),
       body: LoadingOverlay(
         isLoading: _isLoading,
-        loadingText: 'Data processing...',
+        loadingText: 'Processing...',
         child: GradientBackground(
           child: SingleChildScrollView(
             padding: AppSpacing.screenPadding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. WelcomeMessage widget demo
-                Text(
-                  '1. WelcomeMessage widget',
-                  style: AppTextStyles.headline5,
-                ),
-                const SizedBox(height: AppSpacing.sm),
+                // Introduction
+                _buildSectionHeader('🎨 Widgets Demo'),
                 const WelcomeMessage(
-                  title: 'Welcome to Widgets Demo! 🎉',
+                  title: 'Welcome to Widgets Gallery!',
                   subtitle:
-                      'Here you can explore all custom widgets available in this app.',
+                      'Explore all custom widgets available in Awakeia app.',
                 ),
+                const SizedBox(height: AppSpacing.xl),
 
+                // ============================================================
+                // NAVIGATION WIDGETS
+                // ============================================================
+                _buildCategoryHeader('1. Navigation Widgets'),
+                _buildSectionTitle('CustomBackButton'),
+                Text(
+                  'Smart back button with automatic navigation logic',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    CustomBackButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Back button pressed')),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    const Text('← Styled back button'),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xl),
+
+                // ============================================================
+                // LAYOUT WIDGETS
+                // ============================================================
+                _buildCategoryHeader('2. Layout Widgets'),
+                _buildSectionTitle('AppLogo'),
+                Text(
+                  'App logo in different sizes: small, medium, large',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Column(
+                      children: [
+                        const AppLogo(size: AppLogoSize.small),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text('Small', style: AppTextStyles.caption),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        const AppLogo(size: AppLogoSize.medium),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text('Medium', style: AppTextStyles.caption),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        const AppLogo(size: AppLogoSize.large),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text('Large', style: AppTextStyles.caption),
+                      ],
+                    ),
+                  ],
+                ),
                 const SizedBox(height: AppSpacing.lg),
 
-                // 2. PrimaryCard widget demo
+                _buildSectionTitle('PrimaryCard'),
                 Text(
-                  '2. PrimaryCard widget',
-                  style: AppTextStyles.headline5,
+                  'Card with consistent styling and optional tap handler',
+                  style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.md),
                 PrimaryCard(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Card tapped!')),
+                    );
+                  },
                   child: Column(
                     children: [
                       Text(
-                        'PrimaryCard widget',
+                        'Tappable Card',
                         style: AppTextStyles.headline6,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        'Its automatically styled with primary colors and padding.',
-                        style: AppTextStyles.bodyMedium,
+                        'Tap me to see the ripple effect',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.secondaryText,
+                        ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: AppSpacing.xl),
 
-                const SizedBox(height: AppSpacing.lg),
-
-                // 3. StatsCard widgets demo
+                // ============================================================
+                // BUTTON WIDGETS
+                // ============================================================
+                _buildCategoryHeader('3. Button Widgets'),
+                _buildSectionTitle('PrimaryButton'),
                 Text(
-                  '3. StatsCard widgets',
-                  style: AppTextStyles.headline5,
+                  'Main action button with loading state support',
+                  style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                const Row(
-                  children: [
-                    Expanded(
-                      child: StatsCard(
-                        icon: Icons.local_fire_department,
-                        value: '15',
-                        label: 'day\'s streak',
-                        iconColor: AppColors.warning,
-                      ),
-                    ),
-                    SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: StatsCard(
-                        icon: Icons.check_circle,
-                        value: '8/10',
-                        label: 'done',
-                        iconColor: AppColors.success,
-                      ),
-                    ),
-                    SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: StatsCard(
-                        icon: Icons.analytics,
-                        value: '87%',
-                        label: 'success rate',
-                        iconColor: AppColors.info,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // 4. CustomTextField widget demo
-                Text(
-                  '4. CustomTextField widget',
-                  style: AppTextStyles.headline5,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                CustomTextField(
-                  controller: _emailController,
-                  hintText: 'Enter your email',
-                  prefixIcon: Icons.email_outlined,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) =>
-                      value?.isEmpty == true ? 'Mandatory field' : null,
-                ),
-
                 const SizedBox(height: AppSpacing.md),
-
-                CustomTextField(
-                  hintText: 'Password',
-                  prefixIcon: Icons.lock_outline,
-                  obscureText: true,
-                  suffixIcon: IconButton(
-                    icon: const Icon(
-                      Icons.visibility_off,
-                      color: AppColors.secondaryIcon,
-                    ),
-                    onPressed: () {},
-                  ),
+                PrimaryButton(
+                  text: 'Normal State',
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Primary button pressed')),
+                    );
+                  },
                 ),
-
+                const SizedBox(height: AppSpacing.md),
+                PrimaryButton(
+                  text: 'With Icon',
+                  icon: Icons.check_circle,
+                  onPressed: () {},
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const PrimaryButton(
+                  text: 'Loading State',
+                  isLoading: true,
+                  onPressed: null,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const PrimaryButton(
+                  text: 'Disabled State',
+                  onPressed: null,
+                ),
                 const SizedBox(height: AppSpacing.lg),
 
-                // 5. SocialLoginButton widgets demo
+                _buildSectionTitle('SecondaryButton'),
                 Text(
-                  '5. SocialLoginButton widgets',
-                  style: AppTextStyles.headline5,
+                  'Outlined button for secondary actions',
+                  style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.md),
+                SecondaryButton(
+                  text: 'Secondary Action',
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Secondary button pressed'),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.md),
+                SecondaryButton(
+                  text: 'With Icon',
+                  icon: Icons.arrow_back,
+                  onPressed: () {},
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                _buildSectionTitle('SocialLoginButton'),
+                Text(
+                  'Buttons for social authentication',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
                     Expanded(
@@ -179,8 +238,7 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                         text: 'Google',
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Google button pressed'),),
+                            const SnackBar(content: Text('Google login')),
                           );
                         },
                       ),
@@ -190,128 +248,237 @@ class _WidgetsDemoScreenState extends State<WidgetsDemoScreen> {
                       child: SocialLoginButton(
                         icon: Icons.facebook,
                         text: 'Facebook',
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Facebook button pressed'),),
-                          );
-                        },
+                        enabled: false,
+                        onPressed: () {},
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: AppSpacing.xl),
 
+                // ============================================================
+                // FORM WIDGETS
+                // ============================================================
+                _buildCategoryHeader('4. Form Widgets'),
+                _buildSectionTitle('CustomTextField'),
+                Text(
+                  'Text input with consistent styling',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                CustomTextField(
+                  controller: _emailController,
+                  hintText: 'Email',
+                  prefixIcon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: (value) {},
+                ),
+                const SizedBox(height: AppSpacing.md),
+                CustomTextField(
+                  controller: _passwordController,
+                  hintText: 'Password',
+                  prefixIcon: Icons.lock_outline,
+                  obscureText: _obscurePassword,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: AppColors.secondaryIcon,
+                    ),
+                    onPressed: () {
+                      setState(() => _obscurePassword = !_obscurePassword);
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const CustomTextField(
+                  hintText: 'Disabled field',
+                  prefixIcon: Icons.block,
+                  enabled: false,
+                ),
                 const SizedBox(height: AppSpacing.lg),
 
-                // 6. SectionDivider widget demo
+                _buildSectionTitle('CheckboxTile'),
                 Text(
-                  '6. SectionDivider widget',
-                  style: AppTextStyles.headline5,
+                  'Checkbox with label inside a card',
+                  style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                const SectionDivider(title: 'Or choose an option'),
+                const SizedBox(height: AppSpacing.md),
+                CheckboxTile(
+                  value: _agreedToTerms,
+                  label: 'I agree to the Terms and Conditions',
+                  onChanged: (value) {
+                    setState(() => _agreedToTerms = value);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xl),
 
+                // ============================================================
+                // FEEDBACK WIDGETS
+                // ============================================================
+                _buildCategoryHeader('5. Feedback Widgets'),
+                _buildSectionTitle('AppLoadingIndicator'),
+                Text(
+                  'Standard loading spinner',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const Center(child: AppLoadingIndicator()),
                 const SizedBox(height: AppSpacing.lg),
 
-                // 7. EmptyState widget demo
+                _buildSectionTitle('ErrorDisplay'),
                 Text(
-                  '7. EmptyState widget',
-                  style: AppTextStyles.headline5,
+                  'Error message with retry button',
+                  style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.md),
+                PrimaryCard(
+                  child: ErrorDisplay(
+                    title: 'Something went wrong',
+                    message: 'Unable to load data. Please try again.',
+                    onRetry: _toggleError,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                _buildSectionTitle('EmptyState'),
+                Text(
+                  'Shown when there is no data',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
                 PrimaryCard(
                   child: EmptyState(
                     icon: Icons.inbox_outlined,
-                    title: 'Nothing here yet',
-                    subtitle:
-                        'Add your first item to get started with this feature.',
-                    buttonText: 'Add Item',
+                    title: 'No items yet',
+                    subtitle: 'Start by creating your first item',
+                    buttonText: 'Create Item',
                     onButtonPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Button EmptyState pressed'),),
+                        const SnackBar(content: Text('Create button pressed')),
                       );
                     },
                   ),
                 ),
-
                 const SizedBox(height: AppSpacing.lg),
 
-                // 8. ErrorMessage widget demo
+                _buildSectionTitle('LoadingOverlay'),
                 Text(
-                  '8. ErrorMessage widget',
-                  style: AppTextStyles.headline5,
+                  'Full screen overlay (tap the button below)',
+                  style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                if (_showError)
-                  ErrorMessage(
-                    message:
-                        'An error occurred while processing your request. Check your internet connection and try again.',
-                    onRetry: () {
-                      setState(() => _showError = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Retrying...')),
-                      );
-                    },
-                  )
-                else
-                  ElevatedButton(
-                    onPressed: () => setState(() => _showError = true),
-                    child: const Text('Show Error Message'),
-                  ),
-
-                const SizedBox(height: AppSpacing.lg),
-
-                // 9. LoadingOverlay demo button
-                Text(
-                  '9. LoadingOverlay widget',
-                  style: AppTextStyles.headline5,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'LoadingOverlay shows a loading indicator over the entire screen. Press the button below to demonstrate:',
-                  style: AppTextStyles.bodyMedium,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                ElevatedButton(
+                const SizedBox(height: AppSpacing.md),
+                PrimaryButton(
+                  text: 'Show Loading Overlay',
+                  icon: Icons.hourglass_empty,
                   onPressed: _simulateLoading,
-                  child: const Text('Show Loading Overlay'),
                 ),
+                const SizedBox(height: AppSpacing.xl),
 
+                // ============================================================
+                // DATA DISPLAY WIDGETS
+                // ============================================================
+                _buildCategoryHeader('6. Data Display Widgets'),
+                _buildSectionTitle('StatsCard'),
+                Text(
+                  'Display statistics with icon and label',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const Row(
+                  children: [
+                    Expanded(
+                      child: StatsCard(
+                        icon: Icons.local_fire_department,
+                        value: '7',
+                        label: 'Day Streak',
+                        iconColor: AppColors.warning,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: StatsCard(
+                        icon: Icons.check_circle,
+                        value: '3/5',
+                        label: 'Completed',
+                        iconColor: AppColors.success,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: AppSpacing.lg),
 
-                // 10. Text styles demo
+                _buildSectionTitle('WelcomeMessage'),
                 Text(
-                  '10. Text Styles',
-                  style: AppTextStyles.headline5,
+                  'Welcome banner with title and subtitle',
+                  style: AppTextStyles.caption,
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                PrimaryCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Headline 1', style: AppTextStyles.headline1),
-                      Text('Headline 2', style: AppTextStyles.headline2),
-                      Text('Headline 3', style: AppTextStyles.headline3),
-                      Text('Headline 4', style: AppTextStyles.headline4),
-                      Text('Headline 5', style: AppTextStyles.headline5),
-                      Text('Headline 6', style: AppTextStyles.headline6),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text('Body Large', style: AppTextStyles.bodyLarge),
-                      Text('Body Medium', style: AppTextStyles.bodyMedium),
-                      Text('Body Small', style: AppTextStyles.bodySmall),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text('Subtitle', style: AppTextStyles.subtitle),
-                      Text('Caption', style: AppTextStyles.caption),
-                      Text('Link', style: AppTextStyles.link),
-                    ],
-                  ),
+                const SizedBox(height: AppSpacing.md),
+                const WelcomeMessage(
+                  title: 'Hello, User! 👋',
+                  subtitle: 'Ready to build great habits today?',
                 ),
+                const SizedBox(height: AppSpacing.lg),
 
+                _buildSectionTitle('SectionDivider'),
+                Text(
+                  'Divider with centered text',
+                  style: AppTextStyles.caption,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const SectionDivider(title: 'OR'),
+                const SizedBox(height: AppSpacing.xl),
+
+                // Bottom spacing
                 const SizedBox(height: AppSpacing.xl),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build category headers
+  Widget _buildCategoryHeader(String title) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.sm,
+        horizontal: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primaryButton.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
+      ),
+      child: Text(
+        title,
+        style: AppTextStyles.headline5.copyWith(
+          color: AppColors.primaryText,
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build section headers
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: AppTextStyles.headline3,
+    );
+  }
+
+  // Helper method to build section titles
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: AppSpacing.md,
+        bottom: AppSpacing.sm,
+      ),
+      child: Text(
+        title,
+        style: AppTextStyles.headline6.copyWith(
+          color: AppColors.primaryText,
         ),
       ),
     );

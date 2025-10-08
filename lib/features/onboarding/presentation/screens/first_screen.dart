@@ -7,7 +7,7 @@ import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/shared.dart';
 import '../../application/onboarding_notifier.dart';
 import '../../application/onboarding_state.dart';
-import '../widgets/onboarding_widgets.dart';
+import '../widgets/onboarding_widgets.dart' hide AppLogo;
 
 /// First screen of the app (welcome/onboarding) using Clean Architecture
 class FirstScreen extends ConsumerStatefulWidget {
