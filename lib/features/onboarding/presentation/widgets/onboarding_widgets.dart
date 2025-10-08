@@ -1,31 +1,16 @@
 // lib/features/onboarding/presentation/widgets/onboarding_widgets.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../app/extensions/navigation_extensions.dart';
 import '../../../../shared/shared.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../application/onboarding_notifier.dart';
 import '../../domain/entities/onboarding_entity.dart';
 
-/// App logo widget
-class AppLogo extends StatelessWidget {
-  const AppLogo({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 120,
-      height: 120,
-      decoration: AppDecorations.primaryGradient,
-      child: const Icon(
-        Icons.self_improvement,
-        size: 60,
-        color: AppColors.primaryText,
-      ),
-    );
-  }
-}
+// Re-export AppLogo from common_widgets for backwards compatibility
+export '../../../../shared/widgets/common_widgets.dart'
+    show AppLogo, AppLogoSize;
 
 /// App title widget
 class AppTitle extends StatelessWidget {
@@ -59,7 +44,6 @@ class AppSubtitle extends StatelessWidget {
   }
 }
 
-/// Widget onboarding
 class OnboardingView extends ConsumerWidget {
   const OnboardingView({super.key, required this.entity});
 
@@ -71,7 +55,6 @@ class OnboardingView extends ConsumerWidget {
 
     return Column(
       children: [
-        // Welcome message for authenticated user
         // Контент текущего шага
         SizedBox(
           width: double.infinity,
@@ -83,6 +66,8 @@ class OnboardingView extends ConsumerWidget {
             ),
           ),
         ),
+
+        const SizedBox(height: AppSpacing.lg),
 
         // Индикатор прогресса
         Row(
@@ -103,23 +88,30 @@ class OnboardingView extends ConsumerWidget {
           ),
         ),
 
-        const SizedBox(height: AppSpacing.lg),
-        // Пропустить
+        const SizedBox(height: AppSpacing.xl),
+
+        // Кнопки навигации - используем общие виджеты
+
+        // Далее / Завершить - PrimaryButton
+        PrimaryButton(
+          text: entity.currentStep + 1 == entity.totalSteps
+              ? 'Завершить'
+              : 'Далее',
+          icon: entity.currentStep + 1 == entity.totalSteps
+              ? Icons.check
+              : Icons.arrow_forward,
+          onPressed: () async {
+            await notifier.nextStep();
+          },
+        ),
+
+        const SizedBox(height: AppSpacing.sm),
+
         TextButton(
           onPressed: () async {
             await notifier.skip();
           },
           child: const Text('Пропустить'),
-        ),
-
-        // Далее / Завершить
-        ElevatedButton(
-          onPressed: () async {
-            await notifier.nextStep();
-          },
-          child: Text(
-            entity.currentStep + 1 == entity.totalSteps ? 'Завершить' : 'Далее',
-          ),
         ),
       ],
     );
@@ -139,7 +131,7 @@ class OnboardingView extends ConsumerWidget {
   }
 }
 
-/// Widget for unauthenticated state
+/// Widget for unauthenticated state - МЕНЯЕМ ТОЛЬКО КНОПКИ
 class UnauthenticatedView extends ConsumerWidget {
   const UnauthenticatedView({
     super.key,
@@ -157,194 +149,44 @@ class UnauthenticatedView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isLoadingAuth = ref.watch(authLoadingProvider);
+    // Исправляем провайдер - берем из authProvider
+    final authState = ref.watch(authProvider);
+    final isLoadingAuth = authState.isLoading;
 
     return Column(
       children: [
-        // Sign in button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: (isLoading || isLoadingAuth) ? null : onLogin,
-            child: Text(
-              l10n.login,
-              style: AppTextStyles.buttonLarge,
-            ),
-          ),
+        // Register button - используем PrimaryButton
+        PrimaryButton(
+          text: l10n.register,
+          icon: Icons.person_add,
+          onPressed: (isLoading || isLoadingAuth) ? null : onRegister,
         ),
 
         const SizedBox(height: AppSpacing.md),
 
-        // Register button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: (isLoading || isLoadingAuth) ? null : onRegister,
-            child: Text(
-              l10n.register,
-              style: AppTextStyles.buttonLarge,
-            ),
-          ),
+        // Login button - используем SecondaryButton
+        SecondaryButton(
+          text: l10n.login,
+          icon: Icons.login,
+          onPressed: (isLoading || isLoadingAuth) ? null : onLogin,
         ),
 
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.lg),
 
-        // Divider with text
-        Row(
-          children: [
-            const Expanded(
-              child: Divider(color: AppColors.divider),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Text(
-                'OR',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.secondaryText,
-                ),
-              ),
-            ),
-            const Expanded(
-              child: Divider(color: AppColors.divider),
-            ),
-          ],
-        ),
+        // Divider - используем общий виджет
+        const SectionDivider(title: 'OR'),
 
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.lg),
 
-        // Continue as guest button
+        // Guest login button - оставляем как TextButton
         TextButton(
           onPressed: (isLoading || isLoadingAuth) ? null : onGuestLogin,
-          child: isLoading
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.secondaryText,
-                    ),
-                  ),
-                )
-              : Text(
-                  l10n.continueAsGuest,
-                  style: AppTextStyles.linkPrimary.copyWith(
-                    color: (isLoading || isLoadingAuth)
-                        ? AppColors.secondaryText.withValues(alpha: 0.5)
-                        : AppColors.secondaryText,
-                  ),
-                ),
-        ),
-
-        const SizedBox(height: AppSpacing.xxl),
-
-        // Social login section (coming soon)
-        _SocialLoginSection(isDisabled: isLoading || isLoadingAuth),
-      ],
-    );
-  }
-}
-
-/// Social login buttons section
-class _SocialLoginSection extends StatelessWidget {
-  const _SocialLoginSection({required this.isDisabled});
-
-  final bool isDisabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Column(
-      children: [
-        Text(
-          l10n.orSignInWith,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.secondaryText,
+          child: Text(
+            l10n.continueAsGuest,
+            style: AppTextStyles.linkPrimary,
           ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
-        // Social login buttons
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Google button
-            _SocialButton(
-              icon: Icons.g_mobiledata,
-              label: l10n.google,
-              onPressed: isDisabled
-                  ? null
-                  : () => context.showComingSoon(l10n.googleSignInComingSoon),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Facebook button
-            _SocialButton(
-              icon: Icons.facebook,
-              label: l10n.facebook,
-              onPressed: isDisabled
-                  ? null
-                  : () => context.showComingSoon(l10n.facebookSignInComingSoon),
-            ),
-
-            const SizedBox(width: AppSpacing.md),
-
-            // Apple button (only on iOS)
-            if (Theme.of(context).platform == TargetPlatform.iOS)
-              _SocialButton(
-                icon: Icons.apple,
-                label: 'Apple',
-                onPressed: isDisabled
-                    ? null
-                    : () => context.showComingSoon(l10n.appleSignInComingSoon),
-              ),
-          ],
         ),
       ],
-    );
-  }
-}
-
-/// Individual social login button
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.primaryButton,
-      borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: AppColors.divider,
-              width: 1,
-            ),
-            borderRadius: BorderRadius.circular(AppDecorations.radiusMedium),
-          ),
-          child: Icon(
-            icon,
-            size: 24,
-            color: onPressed == null
-                ? AppColors.secondaryIcon.withValues(alpha: 0.5)
-                : AppColors.secondaryIcon,
-          ),
-        ),
-      ),
     );
   }
 }
