@@ -157,7 +157,7 @@ class UnauthenticatedView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isLoadingAuth = ref.watch(isAuthLoadingProvider);
+    final isLoadingAuth = ref.watch(authLoadingProvider);
 
     return Column(
       children: [

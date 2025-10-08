@@ -28,7 +28,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   void _navigateBasedOnAuthState() {
     if (_hasNavigated || !mounted) return;
 
-    final authAsyncValue = ref.read(authNotifierProvider);
+    final authAsyncValue = ref.read(authProvider);
 
     authAsyncValue.whenOrNull(
       data: (authState) {
@@ -55,7 +55,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     // Listen to auth state changes and navigate accordingly
-    ref.listen(authNotifierProvider, (previous, next) {
+    ref.listen(authProvider, (previous, next) {
       next.whenOrNull(
         data: (authState) {
           AppLogger.debug(
@@ -74,7 +74,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
     });
 
     // Get state for UI
-    final authAsyncValue = ref.watch(authNotifierProvider);
+    final authAsyncValue = ref.watch(authProvider);
     final hasError = authAsyncValue.hasError;
 
     return Scaffold(
@@ -117,7 +117,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
                   onPressed: () {
                     _hasNavigated = false;
                     // Try again
-                    ref.invalidate(authNotifierProvider);
+                    ref.invalidate(authProvider);
                   },
                   child: const Text('Retry'),
                 ),

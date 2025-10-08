@@ -172,7 +172,7 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
 
     try {
       // Call auth notifier directly instead of using action provider
-      final authNotifier = ref.read(authNotifierProvider.notifier);
+      final authNotifier = ref.read(authProvider.notifier);
       await authNotifier.signOut();
       final notifier = ref.read(onboardingNotifierProvider.notifier);
       await notifier.reset();

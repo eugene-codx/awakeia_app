@@ -6,108 +6,75 @@ import '../../domain/domain.dart';
 import 'auth_notifier.dart';
 import 'auth_state.dart';
 
-// ===== Data Sources Providers =====
-
-/// Provider for auth remote data source
-final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
-  return AuthRemoteDataSourceImpl();
-});
-
-/// Provider for auth local data source
-final authLocalDataSourceProvider = Provider<AuthLocalDataSource>((ref) {
-  final secureStorage = ref.watch(secureStorageProvider);
-  return AuthLocalDataSourceImpl(secureStorage: secureStorage);
-});
-
-// ===== Repository Provider =====
-
-/// Provider for auth repository
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final remoteDataSource = ref.watch(authRemoteDataSourceProvider);
-  final localDataSource = ref.watch(authLocalDataSourceProvider);
-
-  return AuthRepositoryImpl(
-    remoteDataSource: remoteDataSource,
-    localDataSource: localDataSource,
-  );
-});
-
-// ===== Use Cases Providers =====
-
-/// Provider for login use case
-final loginUseCaseProvider = Provider<LoginUseCase>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return LoginUseCase(repository: repository);
-});
-
-/// Provider for register use case
-final registerUseCaseProvider = Provider<RegisterUseCase>((ref) {
-  final repository = ref.watch(authRepositoryProvider);
-  return RegisterUseCase(repository: repository);
-});
-
 // ===== Core Dependencies =====
 
-/// Provider for SecureStorage
+/// Provider for SecureStorage (shared across app)
 final secureStorageProvider = Provider<SecureStorage>((ref) {
   return SecureStorage.instance;
 });
 
-// ===== Main Auth Provider =====
+// ===== Repository Provider =====
 
-/// Main auth state provider using AsyncNotifier
-final authNotifierProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(() {
+/// Main auth repository provider
+/// Инкапсулирует создание всех data sources внутри
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final secureStorage = ref.watch(secureStorageProvider);
+
+  return AuthRepositoryImpl(
+    remoteDataSource: AuthRemoteDataSourceImpl(),
+    localDataSource: AuthLocalDataSourceImpl(secureStorage: secureStorage),
+  );
+});
+
+// ===== Main Auth State Provider =====
+
+/// Главный провайдер состояния авторизации
+/// Используйте этот провайдер для всех auth операций
+final authProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(() {
   return AuthNotifier();
 });
 
 // ===== Convenience Providers =====
 
-/// Provider that returns only the current user
+/// Провайдер текущего пользователя
+/// Возвращает UserEntity? или null если не авторизован
 final currentUserProvider = Provider<UserEntity?>((ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.watch(authProvider);
   return authState.whenOrNull(
     data: (state) => state.user,
   );
 });
 
-/// Provider that returns whether user is authenticated
+/// Провайдер статуса авторизации
+/// Возвращает true если пользователь авторизован
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final authState = ref.watch(authProvider);
   return authState.whenOrNull(
         data: (state) => state.isAuthenticated,
       ) ??
       false;
 });
 
-/// Provider that returns whether authentication is loading
-final isAuthLoadingProvider = Provider.autoDispose<bool>((ref) {
-  return ref.watch(authNotifierProvider.select((auth) => auth.isLoading));
+/// Провайдер loading состояния
+/// Полезно для отображения loading индикаторов
+final authLoadingProvider = Provider<bool>((ref) {
+  return ref.watch(authProvider).isLoading;
 });
 
-/// Provider that returns current authentication error message
-final authErrorProvider = Provider<String?>((ref) {
-  final authState = ref.watch(authNotifierProvider);
+/// Провайдер ошибок авторизации
+/// Возвращает последнюю ошибку или null
+final authErrorProvider = Provider<AuthFailure?>((ref) {
+  final authState = ref.watch(authProvider);
   return authState.whenOrNull(
-    data: (state) => state.errorMessage,
+    data: (state) => state.whenOrNull(
+      unauthenticated: (failure) => failure,
+    ),
   );
 });
 
-/// Provider that returns whether current user is guest
+/// Провайдер проверки гостевого пользователя
+/// Возвращает true если текущий пользователь - гость
 final isGuestUserProvider = Provider<bool>((ref) {
   final currentUser = ref.watch(currentUserProvider);
   return currentUser?.isGuest ?? false;
-});
-
-/// Stream provider for auth state changes
-// final authStateChangesProvider = StreamProvider<UserEntity?>((ref) {
-//   final repository = ref.watch(authRepositoryProvider);
-//   return repository.authStateChanges;
-// });
-
-/// Provider for sign out action (kept for reusability across UI)
-final signOutActionProvider = Provider((ref) {
-  return () async {
-    final notifier = ref.read(authNotifierProvider.notifier);
-    await notifier.signOut();
-  };
 });

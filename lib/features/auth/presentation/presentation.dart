@@ -1,8 +1,9 @@
 // Presentation layer exports for auth feature
-// This file exports all presentation layer components
+// Clean Architecture Lite - упрощенные экспорты
 
-// Providers
+// Providers - упрощенная версия
 export 'providers/auth_notifier.dart';
+export 'providers/auth_providers.dart';
 export 'providers/auth_state.dart';
 
 // Screens

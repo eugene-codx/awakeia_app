@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../core/logging/app_logger.dart';
 import '../features/auth/auth.dart';
-import '../features/auth/presentation/providers/auth_providers.dart';
 import '../features/auth/presentation/screens/auth_loading_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
@@ -46,7 +45,7 @@ String? _handleRedirect(Ref ref, GoRouterState state) {
 
   // Check if auth is loading
   // Check authentication loading
-  final authAsync = ref.read(authNotifierProvider);
+  final authAsync = ref.read(authProvider);
   // if (authAsync.isLoading) {
   //   return RouteConstants.loading;
   // }
@@ -264,7 +263,7 @@ class _RouterRefreshStream extends ChangeNotifier {
       'Router.RouterRefreshStream: Initialized, listening to auth changes',
     );
     _ref.listen(
-      authNotifierProvider,
+      authProvider,
       (
         _,
         __,

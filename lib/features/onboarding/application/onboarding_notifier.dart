@@ -86,7 +86,7 @@ class OnboardingNotifier extends AsyncNotifier<OnboardingState> {
 
     try {
       // First sign in as guest
-      final authNotifier = ref.read(authNotifierProvider.notifier);
+      final authNotifier = ref.read(authProvider.notifier);
       await authNotifier.signInAsGuest();
     } catch (e, stackTrace) {
       AppLogger.error('Failed to continue as guest', e, stackTrace);
