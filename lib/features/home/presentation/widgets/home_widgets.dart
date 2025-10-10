@@ -107,7 +107,10 @@ class HomeContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final welcomeMessage = ref.watch(welcomeMessageProvider);
+    final user = ref.watch(
+      authProvider.select((state) => state.valueOrNull?.user),
+    );
+    final welcomeMessage = 'Welcome, ${user?.displayName ?? 'Guest'}!';
 
     return GradientBackground(
       colors: AppColors.primaryGradient,
@@ -163,7 +166,11 @@ class _GuestUserPrompt extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isGuest = ref.watch(isGuestUserProvider);
+    final isGuest = ref.watch(
+      authProvider.select(
+        (state) => state.valueOrNull?.user?.isGuest ?? false,
+      ),
+    );
 
     // Show only for guest users
     if (!isGuest) {

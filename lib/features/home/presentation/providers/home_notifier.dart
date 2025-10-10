@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/logging/app_logger.dart';
 import '../../../../shared/base/base_state_notifier.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -21,7 +23,8 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
 
   /// Setup authentication listener
   void _setupAuthListener() {
-    ref.listen(currentUserProvider, (previous, next) {
+    ref.listen(authProvider.select((state) => state.valueOrNull?.user),
+        (previous, next) {
       _onUserChanged(next);
     });
   }
@@ -41,7 +44,9 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
 
   /// Load initial data
   Future<void> _loadInitialData() async {
-    final currentUser = ref.read(currentUserProvider);
+    final currentUser = ref.read(
+      authProvider.select((state) => state.valueOrNull?.user),
+    );
     if (currentUser != null) {
       await _loadUserData(currentUser);
     }
@@ -108,7 +113,9 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
 
     state = state.copyWith(isRefreshing: true, error: null);
 
-    final currentUser = ref.read(currentUserProvider);
+    final currentUser = ref.read(
+      authProvider.select((state) => state.valueOrNull?.user),
+    );
     if (currentUser != null) {
       await _loadUserData(currentUser);
     } else {
@@ -192,17 +199,6 @@ class HomeNotifier extends BaseStateNotifier<HomeState> {
     if (state.error != null) {
       logAction('HomeNotifier.clearError: Clearing error');
       state = state.copyWith(error: null);
-    }
-  }
-
-  /// Get welcome message for user
-  String getWelcomeMessage(UserEntity? user) {
-    if (user == null) return 'Welcome!';
-
-    if (user.isGuest) {
-      return 'Welcome, Guest! 👋';
-    } else {
-      return 'Welcome, ${user.displayName}! 👋';
     }
   }
 }

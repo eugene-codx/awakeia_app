@@ -34,47 +34,27 @@ final authProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(() {
   return AuthNotifier();
 });
 
-// ===== Convenience Providers =====
+// ===== Main Auth State Provider =====
 
-/// Провайдер текущего пользователя
-/// Возвращает UserEntity? или null если не авторизован
-final currentUserProvider = Provider<UserEntity?>((ref) {
-  final authState = ref.watch(authProvider);
-  return authState.whenOrNull(
-    data: (state) => state.user,
-  );
-});
-
-/// Провайдер статуса авторизации
-/// Возвращает true если пользователь авторизован
-final isAuthenticatedProvider = Provider<bool>((ref) {
-  final authState = ref.watch(authProvider);
-  return authState.whenOrNull(
-        data: (state) => state.isAuthenticated,
-      ) ??
-      false;
-});
-
-/// Провайдер loading состояния
-/// Полезно для отображения loading индикаторов
-final authLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(authProvider).isLoading;
-});
-
-/// Провайдер ошибок авторизации
-/// Возвращает последнюю ошибку или null
-final authErrorProvider = Provider<AuthFailure?>((ref) {
-  final authState = ref.watch(authProvider);
-  return authState.whenOrNull(
-    data: (state) => state.whenOrNull(
-      unauthenticated: (failure) => failure,
-    ),
-  );
-});
-
-/// Провайдер проверки гостевого пользователя
-/// Возвращает true если текущий пользователь - гость
-final isGuestUserProvider = Provider<bool>((ref) {
-  final currentUser = ref.watch(currentUserProvider);
-  return currentUser?.isGuest ?? false;
-});
+/// Главный провайдер состояния авторизации
+/// Используйте этот провайдер для всех auth операций
+///
+/// Для доступа к частям состояния используйте `.select()`:
+///
+/// ```dart
+/// // Получить пользователя
+/// final user = ref.watch(authProvider.select((s) => s.valueOrNull?.user));
+///
+/// // Проверить авторизацию
+/// final isAuth = ref.watch(authProvider.select((s) =>
+///   s.valueOrNull?.isAuthenticated ?? false
+/// ));
+///
+/// // Проверить загрузку
+/// final isLoading = ref.watch(authProvider.select((s) => s.isLoading));
+///
+/// // Получить ошибку
+/// final error = ref.watch(authProvider.select((s) =>
+///   s.valueOrNull?.errorMessage
+/// ));
+/// ```
